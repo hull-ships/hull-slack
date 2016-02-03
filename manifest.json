@@ -1,0 +1,48 @@
+{
+  "name": "Slack",
+  "description": "Send Hull events to Slack",
+  "picture": "picture.png",
+  "version": "0.0.1",
+  "settings": [
+    {
+      "name": "hook_url",
+      "title": "Webhook URL",
+      "description": "Slack Webhook Url, (see https://api.slack.com/incoming-webhooks and create one here )",
+      "default": "https://hooks.slack.com/services/xxxx/xxx/xxx",
+      "type": "string",
+      "format": "text"
+    },
+    {
+      "name": "channel",
+      "title": "Slack Channel",
+      "description": "Where to send notifications?",
+      "default": "#general",
+      "type": "string",
+      "format": "text"
+    },
+    {
+      "name": "username",
+      "title": "Bot Name",
+      "default": "Hull",
+      "type": "string",
+      "format": "text"
+    },
+    {
+      "name": "icon_url",
+      "title": "Avatar",
+      "description": "Your bot's Avatar",
+      "default": "http://www.hull.io/favicon@2x.png",
+      "type": "string",
+      "format": "image"
+    }
+  ],
+  "deployment_settings": [],
+  "resources": [],
+  "readme": "readme.md",
+  "ui": false,
+  "subscriptions": [
+    {
+      "url": "/notify"
+    }
+  ]
+}

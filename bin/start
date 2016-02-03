@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+require("babel-register");
+var config = require('../server/config');
+var start = require('../server/index');
+start(config());
