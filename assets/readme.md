@@ -4,7 +4,6 @@ This Ship notifies you on Slack when a Customer signs up, updates, enters or lea
 
 ####  To install:
 
-
 Create a Slack Incoming webhook [from your integrations page](https://my.slack.com/services/new/incoming-webhook/)
 ![Hook URL](./new_webhook.png)
 
