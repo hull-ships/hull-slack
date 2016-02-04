@@ -24,7 +24,7 @@ module.exports = {
     format:[
       {
         pattern: /_at$/,
-        format(val){ return moment(val).toISOString(); }
+        format(val){ return moment(val).format('dd, MM, Do, YYYY, HH:mm');; }
       }
     ]
   },
