@@ -5,7 +5,6 @@ import minimist from 'minimist';
 module.exports = function config(env=process.env, options=minimist(process.argv)) {
 
   var defaults = {
-    globalSecret: env.SECRET || 'CHANGE_ME',
     port: env.PORT || 8082
   };
 

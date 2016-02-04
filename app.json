@@ -4,11 +4,6 @@
   "repository": "https://github.com/hull-ships/hull-slack",
   "website": "http://www.hull.io",
   "success_url": "/readme",
-  "env": {
-    "SECRET" : {
-      "description" : "A Secret key used to authenticate on Hull API",
-      "generator" : "secret"
-    }
-  },
+  "env": {},
   "scripts": {}
 }
