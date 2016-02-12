@@ -1,37 +1,58 @@
 import _ from 'lodash';
 import Slack from 'node-slack';
-import humanize from './lib/humanize'
-import { resolve, reduce } from './lib/enrichers';
-import f from './lib/formatters';
+import transform from './lib/transform';
+import cache from './lib/cache';
+import { getUserName, formatAttachments, userUrl } from './lib/formatters';
 
-
-const parse = function(hull, user, segments){
-  user.segments = _.map(segments, (s)=>{ return s.name }).join(', ');
-  const { formatters, formatGroup } = f;
-  const groups = reduce(user, formatters);
-  const promises = resolve(groups, hull, formatGroup, formatters);
-  return Promise.all(promises);
+function log(err) {
+  console.log(err);
 }
 
-export default function(notification={}, context={}){
+const blacklist = [
+  'has_done',
+  'invited_by_id',
+  'sign_up_url',
+  'has_password',
+  'is_approved',
+  'has_confirmed_email',
+  'is_admin'
+];
+
+function flatten(arr, n) {
+  return _.map(arr, (i) => {
+    return i[n] || '';
+  }).join(', ');
+}
+
+export default function (notification = {}, context = {}) {
   const { hull, ship } = context;
   const { user, segments } = notification.message;
 
-  if(!user || !user.id || !ship || !ship.settings){ return false; }
+  if (!user || !user.id || !ship || !ship.settings) { return false; }
 
-  return parse(hull, user, segments).then((attachments)=>{
-    const url = f.userUrl(user, hull.configuration().orgUrl);
-    const name = user.name||user.email||user.contact_email||"User";
+  cache(ship.id, '/search/user_reports/bootstrap', hull).then((properties) => {
+    const url = userUrl(user, hull.configuration().orgUrl);
+    const name = getUserName(user);
+    const attachments = transform({
+      format: formatAttachments,
+      blacklist,
+      properties,
+      user
+    });
 
+    const s = flatten(segments, 'name');
+    if (s) {
+      attachments.push({
+        title: 'Segments',
+        color: '#ff6600',
+        text: s
+      });
+    }
     new Slack(ship.settings.hook_url).send({
       ..._.omit(ship.settings, 'hook_url'),
-      text: `${name} Updated: <${url}|See User>`,
+      text: `<${url}|${name}> Updated`,
       unfurl_links: true,
       attachments
     });
-  }, (err)=>{
-    console.log(err)
-  }).catch((err)=>{
-    console.log(err)
-  });
+  }, log).catch(log);
 }
