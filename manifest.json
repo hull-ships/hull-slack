@@ -1,6 +1,7 @@
 {
   "name": "Slack",
-  "description": "Send Hull events to Slack",
+  "description": "Noify a Slack Channel whenever a User enters or leaves a Segment",
+  "tags": ["outgoing"],
   "picture": "picture.png",
   "version": "0.0.1",
   "settings": [
