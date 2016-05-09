@@ -113,8 +113,9 @@ export default function ({ message={} }, { hull={}, ship={} }) {
         attachments
       }
       slack.send(data);
+      log(`${name} - ${user.id} sent to slack on ${channel}`)
     } catch(e){
-      log(e.stack)
+      log('Error', e.stack);
     }
   }
 
