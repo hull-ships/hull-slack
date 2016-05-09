@@ -1,58 +1,46 @@
 import _ from 'lodash';
-import Slack from 'node-slack';
-import transform from './lib/transform';
+import _ from 'lodash';
+// import Slack from 'node-slack';
 import cache from './lib/cache';
-import { getUserName, formatAttachments, userUrl } from './lib/formatters';
 
-function log(err) {
-  console.log(err);
-}
+export default function ({ message }, { hull, ship }) {
+  const { user, segments } = message;
 
-const blacklist = [
-  'has_done',
-  'invited_by_id',
-  'sign_up_url',
-  'has_password',
-  'is_approved',
-  'has_confirmed_email',
-  'is_admin'
-];
+  if (!hull || !user || !user.id || !ship || !ship.settings) { return false; }
 
-function flatten(arr, n) {
-  return _.map(arr, (i) => {
-    return i[n] || '';
-  }).join(', ');
-}
+  const u = {
+    user: _.pick(user, 'name', 'phone', 'address', ),
+    ..._.pick(user, _.isPlainObject),
+    segments: _.map(segments,'name')
+  }
 
-export default function (notification = {}, context = {}) {
-  const { hull, ship } = context;
-  const { user, segments } = notification.message;
-
-  if (!user || !user.id || !ship || !ship.settings) { return false; }
+  console.log(u);
 
   cache(ship.id, '/search/user_reports/bootstrap', hull).then((properties) => {
-    const url = userUrl(user, hull.configuration().orgUrl);
-    const name = getUserName(user);
-    const attachments = transform({
-      format: formatAttachments,
-      blacklist,
-      properties,
-      user
-    });
+  //   const url = userUrl(user, hull.configuration().orgUrl);
+  //   const name = getUserName(user);
+    
+  //   const attachments = transform({
+  //     format: formatAttachments,
+  //     blacklist,
+  //     properties,
+  //     user
+  //   });
 
-    const s = flatten(segments, 'name');
-    if (s) {
-      attachments.push({
-        title: 'Segments',
-        color: '#ff6600',
-        text: s
-      });
-    }
-    new Slack(ship.settings.hook_url).send({
-      ..._.omit(ship.settings, 'hook_url'),
-      text: `<${url}|${name}> Updated`,
-      unfurl_links: true,
-      attachments
-    });
+  //   const s = flatten(segments, 'name');
+  //   if (s) {
+  //     attachments.push({
+  //       title: 'Segments',
+  //       color: '#ff6600',
+  //       text: s
+  //     });
+  //   }
+  //   new Slack(ship.settings.hook_url).send({
+  //     ..._.omit(ship.settings, 'hook_url'),
+  //     text: `<${url}|${name}> Updated`,
+  //     unfurl_links: true,
+  //     attachments
+  //   });
+    console.log(properties);
   }, log).catch(log);
 }

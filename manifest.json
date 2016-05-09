@@ -4,7 +4,8 @@
   "tags": ["outgoing"],
   "picture": "picture.png",
   "version": "0.0.1",
-  "settings": [
+  "settings": [],
+  "private_settings":[ 
     {
       "name": "hook_url",
       "title": "Webhook URL",
@@ -14,11 +15,40 @@
       "format": "text"
     },
     {
+      "name": "synchronized_segments",
+      "title": "Filtered Segments",
+      "description": "Only trigger if user matches at least one these segments (Empty to send everyone)",
+      "default": [],
+      "type": "array",
+      "format": "segment"
+    },
+    {
+      "name": "send_creation",
+      "title": "Notify on Create",
+      "default": true,
+      "type": "boolean",
+      "format": "checkbox"
+    },
+    {
+      "name": "send_update",
+      "title": "Notify on Update",
+      "default": true,
+      "type": "boolean",
+      "format": "checkbox"
+    },
+    {
       "name": "channel",
       "title": "Slack Channel",
       "description": "Where to send notifications?. Default is the one specified in Slack settings",
       "type": "string",
       "format": "text"
+    },
+    {
+      "name": "send_to_named_channel",
+      "title": "Post to channel named as matching segment",
+      "default": false,
+      "type": "boolean",
+      "format": "checkbox"
     },
     {
       "name": "username",

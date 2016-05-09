@@ -22,7 +22,8 @@
     "url": "https://github.com/hull-ships/hull-slack/issues"
   },
   "scripts": {
-    "start": "./bin/start"
+    "start": "./bin/start",
+    "lint": "eslint src"
   },
   "keywords": [
     "hull",
@@ -35,10 +36,8 @@
     "slack"
   ],
   "devDependencies": {
-    "babel-eslint": "^4.1.8",
-    "eslint": "^1.10.3",
-    "eslint-config-airbnb": "^5.0.0",
-    "eslint-plugin-react": "^3.16.1",
+    "babel-eslint": "^6.0.4",
+    "eslint": "^2.9.0",
     "rimraf": "^2.5.1"
   },
   "dependencies": {
@@ -49,7 +48,7 @@
     "body-parser": "^1.14.2",
     "bson-objectid": "^1.1.4",
     "express": "^4.13.4",
-    "hull": "^0.5.4",
+    "hull": "^0.6.10",
     "lodash": "^4.2.0",
     "minimist": "^1.2.0",
     "moment": "^2.11.2",

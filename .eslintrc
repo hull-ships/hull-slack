@@ -1,6 +1,9 @@
 {
   "parser": "babel-eslint",
-  "globals": {},
+  "env": {
+    "browser": true,
+    "node": true
+  },
   "rules": {
     "eqeqeq": [2, "smart"],
     "camelcase": [2, { "properties": "never" }],
@@ -21,6 +24,5 @@
     "no-unused-vars": [2],
     "quotes": [2, "single", "avoid-escape"],
     "strict": [0]
-  },
-  "extends": "airbnb"
+  }
 }
