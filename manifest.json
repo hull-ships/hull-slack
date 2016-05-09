@@ -1,6 +1,6 @@
 {
   "name": "Slack",
-  "description": "Noify a Slack Channel whenever a User enters or leaves a Segment",
+  "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "tags": ["outgoing"],
   "picture": "picture.png",
   "version": "0.0.1",
