@@ -4,4 +4,4 @@ stats.json
 .DS_Store
 dist
 npm-debug.log
-.env*
+.env

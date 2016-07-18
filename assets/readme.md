@@ -4,15 +4,10 @@ This Ship notifies you on Slack when a Customer signs up, updates, enters or lea
 
 ####  To install:
 
-Create a Slack Incoming webhook [from your integrations page](https://my.slack.com/services/new/incoming-webhook/)
-![Hook URL](./new_webhook.png)
+- Click the "Connect to Slack" button on the Dashboard page,
 
-Copy the Webhook URL
-![Hook URL](./copy_hook.png)
+- Authorize Slack to access your account, pick the destination channel. If you want to post to multiple channels, install and authorize the Slack ship multiple times.
 
-Paste the Webhook URL in the Customize screen for your Slack Ship in the [Hull Dashboard](https://dashboard.hullapp.io)
-![Hook URL](./dashboard.png)
+- Go to the Settings tab, choose the segments Users need to belong to to be posted.
 
-_You can also change the Avatar Name and Picture, and change the Channel where messages are sent._
-
-That's It! All user Creations, Updates, Deletions, Segment enters and leave are going to be sent to your Slack Channel!
+- Check which actions you want to publish. You can publish user creations, updates, when they enter and leave a segment

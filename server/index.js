@@ -1,45 +1,27 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import path from 'path';
-import { NotifHandler } from 'hull';
-import updateUser from './update-user';
-import updateSegment from './update-segment';
+import Hull from "hull";
+import winstonLogzio from "winston-logzio";
+// import winstonSlacker from "winston-slacker";
+import Server from "./server";
 
-const handler = NotifHandler({
-  onSubscribe() {
-    console.warn('Hello new subscriber !');
-  },
-  events: {
-    'user_report:update': updateUser,
-    'users_segment:update': updateSegment
-  }
+require("dotenv").config();
+
+
+if (process.env.NODE_ENV === "development") {
+  Hull.logger.transports.console.level = "debug";
+}
+
+// Post to Slack Channel directly.
+// Hull.logger.add(winstonSlacker,  { webhook, channel, username, iconUrl, iconImoji, customFormatter });
+
+Hull.logger.add(winstonLogzio, {
+  token: process.env.LOGZIO_TOKEN
 });
 
-const readmeRedirect = function (req, res) {
-  res.redirect(`https://dashboard.hullapp.io/readme?url=https://${req.headers.host}`);
-};
-
-module.exports = function (config = {}) {
-  const app = express();
-
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
-
-  app.post('/notify', handler);
-
-  app.use(express.static(path.resolve(__dirname, '..', 'dist')));
-  app.use(express.static(path.resolve(__dirname, '..', 'assets')));
-
-  app.get('/', readmeRedirect);
-  app.get('/readme', readmeRedirect);
-
-  app.get('/manifest.json', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '..', 'manifest.json'));
-  });
-
-  app.listen(config.port);
-
-  console.log(`Started on port ${config.port}`);
-
-  return app;
-};
+Server({
+  Hull,
+  clientID: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  hostSecret: process.env.SECRET || "1234",
+  devMode: process.env.NODE_ENV === "development",
+  port: process.env.PORT || 8082
+});

@@ -1,69 +1,71 @@
 {
   "name": "Slack",
-  "description": "Noify a Slack Channel whenever a User enters or leaves a Segment",
-  "tags": ["outgoing"],
+  "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
+  "tags": ["outgoing", "oneColumn"],
+  "admin" : "/auth/",
   "picture": "picture.png",
   "version": "0.0.1",
   "settings": [],
   "private_settings":[ 
     {
-      "name": "hook_url",
-      "title": "Webhook URL",
-      "description": "Slack Webhook Url, (see https://api.slack.com/incoming-webhooks and create one here )",
-      "default": "https://hooks.slack.com/services/xxxx/xxx/xxx",
-      "type": "string",
-      "format": "text"
-    },
-    {
       "name": "synchronized_segments",
-      "title": "Filtered Segments",
-      "description": "Only trigger if user matches at least one these segments (Empty to send everyone)",
+      "title": "Segments",
+      "description": "Post to channel when users match these segments (Empty to send everyone)",
       "default": [],
       "type": "array",
       "format": "segment"
     },
     {
-      "name": "send_creation",
-      "title": "Notify on Create",
+      "name": "token",
+      "title": "Token",
+      "type": "string",
+      "format": "hidden"
+    },
+    {
+      "name": "incoming_webhook",
+      "title": "Incoming Webhook",
+      "type": "object",
+      "format": "hidden",
+      "properties": {
+        "url": { "title":"url", "type":"string" },
+        "channel": { "title":"channel", "type":"string" },
+        "channel_id": { "title":"channel_id", "type":"string" },
+        "configuration_url": { "title":"configuration_url", "type":"string" }
+      }
+    },
+    {
+      "name":"notify_header",
+      "title": "Notify When User",
+      "type": "string",
+      "format": "title"
+    },
+    {
+      "name": "send_create",
+      "title": "Is Created",
       "default": true,
       "type": "boolean",
       "format": "checkbox"
     },
     {
       "name": "send_update",
-      "title": "Notify on Update",
+      "title": "Is Updated",
       "default": true,
       "type": "boolean",
       "format": "checkbox"
     },
     {
-      "name": "channel",
-      "title": "Slack Channel",
-      "description": "Where to send notifications?. Default is the one specified in Slack settings",
-      "type": "string",
-      "format": "text"
-    },
-    {
-      "name": "send_to_named_channel",
-      "title": "Post to channel named as matching segment",
-      "default": false,
+      "name": "send_enter",
+      "title": "Enters a Segment",
+      "default": true,
       "type": "boolean",
       "format": "checkbox"
     },
     {
-      "name": "username",
-      "title": "Bot Name",
-      "description" : "Change Bot name. Default is the one specified in Slack settings",
-      "default": "Hull",
-      "type": "string",
-      "format": "text"
-    },
-    {
-      "name": "icon_url",
-      "title": "Avatar",
-      "description": "Your bot's Avatar, Default is the one specified in Slack settings",
-      "type": "string",
-      "format": "image"
+      "name": "send_left",
+      "title": "Leaves a Segment",
+      "default": true,
+      "type": "boolean",
+      "format": "checkbox"
     }
   ],
   "deployment_settings": [],
