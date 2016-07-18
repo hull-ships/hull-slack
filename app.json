@@ -4,6 +4,22 @@
   "repository": "https://github.com/hull-ships/hull-slack",
   "website": "http://www.hull.io",
   "success_url": "/readme",
-  "env": {},
+  "env": {
+    "SECRET" : {
+      "description" : "A Secret key used to sign tokens",
+      "generator" : "secret"
+    },
+    "CLIENT_ID" : {
+      "description" : "oAuth Client ID",
+      "required": true
+    },
+    "CLIENT_SECRET" : {
+      "description" : "oAuth Client Secret",
+      "required": true
+    },
+    "LOGZIO_TOKEN" : {
+      "description" : "Logz.io token"
+    }
+  },
   "scripts": {}
 }

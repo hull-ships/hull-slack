@@ -19,8 +19,8 @@ Hull.logger.add(winstonLogzio, {
 
 Server({
   Hull,
-  clientID: process.env.SLACK_CLIENT_ID,
-  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
   hostSecret: process.env.SECRET || "1234",
   devMode: process.env.NODE_ENV === "development",
   port: process.env.PORT || 8082
