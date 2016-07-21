@@ -12,10 +12,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Post to Slack Channel directly.
 // Hull.logger.add(winstonSlacker,  { webhook, channel, username, iconUrl, iconImoji, customFormatter });
-
-Hull.logger.add(winstonLogzio, {
-  token: process.env.LOGZIO_TOKEN
-});
+// 
 
 Server({
   Hull,
