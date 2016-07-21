@@ -16,9 +16,6 @@
     "CLIENT_SECRET" : {
       "description" : "oAuth Client Secret",
       "required": true
-    },
-    "LOGZIO_TOKEN" : {
-      "description" : "Logz.io token"
     }
   },
   "scripts": {}
