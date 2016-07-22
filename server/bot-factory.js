@@ -1,13 +1,12 @@
 import Botkit from "botkit";
 import _ from "lodash";
-import botkitRedis from "botkit-storage-redis";
+// import botkitRedis from "botkit-storage-redis";
 
 import { replies, rtm, welcome, join } from "./bot";
 
 module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecret, Hull, */devMode }) {
   const controller = Botkit.slackbot({
-    debug: devMode,
-    storage: botkitRedis({})
+    debug: devMode
   });
   const _bots = {};
 
