@@ -42,7 +42,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   try {
     if (pushAction) {
-      new Slack(url, { unfurl_links: true }).send(userPayload(message, hull, pushAction));
+      new Slack(url, { unfurl_links: true }).send(userPayload({...message, hull}, pushAction));
       hull.logger.info("update.post", { action: pushAction, ..._.pick(user, "name", "id") });
     } else {
       hull.logger.info("update.skip", { action: "no matched action", ..._.pick(user, "name", "id") });

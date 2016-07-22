@@ -1,10 +1,14 @@
 import Botkit from "botkit";
 import _ from "lodash";
+import botkitRedis from "botkit-storage-redis";
 
-import { replies, acknowledge, rtm, welcome } from "./bot";
+import { replies, rtm, welcome, join } from "./bot";
 
 module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecret, Hull, */devMode }) {
-  const controller = Botkit.slackbot({ debug: devMode });
+  const controller = Botkit.slackbot({
+    debug: devMode,
+    storage: botkitRedis({})
+  });
   const _bots = {};
 
   function _cacheBot(bot) {
@@ -16,18 +20,19 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
     return _bots[token];
   }
 
-  // controller.storage.teams.all((err, teams) => {
-  //   if (err) throw new Error(err);
-  //   _.map(teams, (team = {}) => {
-  //     if (team.bot) {
-  //       controller.spawn(team).startRTM((error, bot, payload) => {
-  //         if (error) return console.log("RTM failed");
-  //         _cacheBot(bot);
-  //       });
-  //     }
-  //     return true;
-  //   });
-  // });
+  controller.storage.teams.all((err, teams) => {
+    if (err) throw new Error(err);
+    console.log("Reconnecting", teams);
+    _.map(teams, (team = {}) => {
+      console.log("Reconnecting Team");
+      controller.spawn(team).startRTM((error, bot) => {
+        if (error) return console.log("RTM failed");
+        _cacheBot(bot);
+        return true;
+      });
+      return true;
+    });
+  });
 
   controller.on("create_bot", function createBot(bot, config) {
     if (_getBotByToken(bot.config.token)) return console.log("already online! do nothing.");
@@ -36,7 +41,7 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
       _cacheBot(bot);
       controller.saveTeam(config, function onTeamSaved(team, error /* , id*/) {
         if (error) return console.log("Error saving team", error);
-        bot.startPrivateConversation({ user: config.user_id }, welcome);
+        welcome(bot, config.user_id);
         return true;
       });
       return true;
@@ -46,10 +51,10 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
 
   controller.on("rtm_open", rtm.open);
   controller.on("rtm_close", rtm.close);
-  controller.on("direct_message,mention,direct_mention", acknowledge);
+  controller.on("bot_channel_joined", join);
 
-  _.map(replies, ({ message = "test", context = "direct_message", reply = () => {} })=>{
-    controller.hears(message, context, reply);
+  _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
+    controller.hears(message, context, ...middlewares, reply);
   });
 
   return {
@@ -61,7 +66,8 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const config = {
-        ..._.pick(ship.private_settings, "team_id", "user_id"),
+        ..._.pick(ship.private_settings, "user_id"),
+        id: ship.private_settings.team_id,
         hullConfig: _.pick(conf, "organization", "id", "secret"),
         token: ship.private_settings.bot.bot_access_token
       };
