@@ -22,6 +22,18 @@
       "format": "hidden"
     },
     {
+      "name": "team_id",
+      "title": "team_id",
+      "type": "string",
+      "format": "hidden"
+    },
+    {
+      "name": "user_id",
+      "title": "user_id",
+      "type": "string",
+      "format": "hidden"
+    },
+    {
       "name": "incoming_webhook",
       "title": "Incoming Webhook",
       "type": "object",
@@ -31,6 +43,16 @@
         "channel": { "title":"channel", "type":"string" },
         "channel_id": { "title":"channel_id", "type":"string" },
         "configuration_url": { "title":"configuration_url", "type":"string" }
+      }
+    },
+    {
+      "name": "bot",
+      "title": "Bot",
+      "type": "object",
+      "format": "hidden",
+      "properties": {
+        "bot_user_id": { "title":"bot_user_id", "type":"string" },
+        "bot_access_token": { "title":"bot_access_token", "type":"string" }
       }
     },
     {

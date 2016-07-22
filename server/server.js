@@ -3,9 +3,11 @@ import path from "path";
 import { renderFile } from "ejs";
 import { Strategy as SlackStrategy } from "passport-slack";
 import updateUser from "./update-user";
+import BotFactory from "./bot-factory";
+import _ from "lodash";
 
 module.exports = function Server(options = {}) {
-  const { port, hostSecret, clientID, clientSecret, Hull /* , devMode: dev */ } = options;
+  const { port, hostSecret, clientID, clientSecret, Hull, devMode } = options;
   const { NotifHandler, Routes, OAuthHandler } = Hull;
   const { Readme, Manifest } = Routes;
 
@@ -17,6 +19,8 @@ module.exports = function Server(options = {}) {
   app.use(express.static(path.resolve(__dirname, "..", "dist")));
   app.use(express.static(path.resolve(__dirname, "..", "assets")));
 
+  const { connectSlack } = BotFactory({ port, hostSecret, clientID, clientSecret, Hull, devMode });
+
   app.use("/auth", OAuthHandler({
     hostSecret,
     name: "Slack",
@@ -24,7 +28,7 @@ module.exports = function Server(options = {}) {
     options: {
       clientID,
       clientSecret,
-      scope: "incoming-webhook",
+      scope: "incoming-webhook, bot",
       skipUserProfile: true
     },
     isSetup(req, { /* hull, */ ship }) {
@@ -33,12 +37,17 @@ module.exports = function Server(options = {}) {
       return (!!token) ? Promise.resolve() : Promise.reject();
     },
     onAuthorize: (req, { hull, ship }) => {
+      console.log(req.account);
       const { accessToken, params = {} } = (req.account || {});
-      const { incoming_webhook = {} } = params;
+      const { ok, bot = {}, team_id, user_id, incoming_webhook = {} } = params;
+      if (!ok) return Promise.reject("Error");
       return hull.put(ship.id, {
         private_settings: {
           ...ship.private_settings,
           incoming_webhook,
+          bot,
+          team_id,
+          user_id,
           token: accessToken
         }
       });
@@ -58,7 +67,8 @@ module.exports = function Server(options = {}) {
   app.post("/notify", NotifHandler({
     hostSecret,
     handlers: {
-      "user:update": updateUser
+      "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship }),
+      "user:update": updateUser.bind(undefined, connectSlack)
     }
   }));
 

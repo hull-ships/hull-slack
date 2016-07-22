@@ -1,15 +1,9 @@
 import _ from "lodash";
 import Slack from "node-slack";
-import buildAttachments from "./lib/build-attachments";
-import getUserName from "./lib/get-user-name";
+import userPayload from "./lib/user-payload";
 
-function urlFor(user = {}, organization) {
-  const [namespace, domain, tld] = organization.split(".");
-  return `https://dashboard.${domain}.${tld}/${namespace}/users/${user.id}`;
-}
-
-
-export default function ({ message = {} }, { hull = {}, ship = {} }) {
+export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
+  connectSlack({ hull, ship });
   const { user = {}, segments = [], changes = {} } = message;
   const { private_settings = {} } = ship;
   const { incoming_webhook = {}, send_update, send_create, send_enter, send_left, synchronized_segments = [] } = private_settings;
@@ -28,27 +22,10 @@ export default function ({ message = {} }, { hull = {}, ship = {} }) {
     return false;
   }
 
-  const user_url = urlFor(user, hull.configuration().organization);
-  const slack = new Slack(url, { unfurl_links: true });
-  const attachments = buildAttachments(message);
-
-  function push(action = "was updated") {
-    try {
-      const name = getUserName(user);
-      const data = { text: `<${user_url}|${name}> ${action}`, attachments };
-      slack.send(data);
-      hull.logger.info("update.post", { action, ..._.pick(user, "name", "id") });
-    } catch (e) {
-      hull.logger.error("update.error", e.stack);
-    }
-  }
-
-  let pushAction = "";
+  let pushAction;
 
   if (changes.is_new) {
-    if (send_create) {
-      pushAction = "was created";
-    }
+    if (send_create) pushAction = "was created";
   } else if (send_update) {
     pushAction = "was updated";
   } else if (_.size(changes.segments)) {
@@ -63,7 +40,16 @@ export default function ({ message = {} }, { hull = {}, ship = {} }) {
     }
   }
 
-  if (pushAction) push(pushAction);
+  try {
+    if (pushAction) {
+      new Slack(url, { unfurl_links: true }).send(userPayload(message, hull, pushAction));
+      hull.logger.info("update.post", { action: pushAction, ..._.pick(user, "name", "id") });
+    } else {
+      hull.logger.info("update.skip", { action: "no matched action", ..._.pick(user, "name", "id") });
+    }
+  } catch (e) {
+    hull.logger.error("update.error", e.stack);
+  }
 
   return true;
 }

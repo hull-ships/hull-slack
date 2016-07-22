@@ -103,7 +103,7 @@ function getSegmentAttachments(changes = {}, segments, color) {
   }];
 }
 
-module.exports = function buildAttachments({ user, segments, changes }) {
+module.exports = function buildAttachments({ user = {}, segments = [], changes = {} }) {
   const color = colorFactory();
   return getUserAttachment(user, color)
   .concat(getSegmentAttachments(changes, segments, color))

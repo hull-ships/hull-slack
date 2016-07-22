@@ -246,9 +246,8 @@ const isoCountries = {
   "zimbabwe": "zw"
 };
 module.exports = function flag(name = "") {
+  if (!name) return ":house:";
   const code = isoCountries[name.toLowerCase()];
-  if (code) {
-    return `:flag-${code}:`;
-  }
-  return ":home:";
+  if (code) return `:flag-${code}:`;
+  return ":house:";
 };
