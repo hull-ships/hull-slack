@@ -16,6 +16,23 @@ function name(query) {
     per_page: 1
   };
 }
+function id(query) {
+  return {
+    query: {
+      filtered: {
+        query: { match_all: {} },
+        filter: { and: { filters: [{ terms: { id: [query] } }] } }
+      }
+    },
+    sort: {
+      created_at: "asc"
+    },
+    raw: true,
+    page: 1,
+    per_page: 1
+  };
+}
+
 function email(query) {
   return {
     query: {
@@ -35,4 +52,4 @@ function email(query) {
   };
 }
 
-module.exports = { name, email };
+module.exports = { name, email, id };

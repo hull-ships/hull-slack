@@ -1,6 +1,6 @@
 import Hull from "hull";
 import _ from "lodash";
-import buildUser from "../lib/user-payload";
+import userPayload from "../lib/user-payload";
 import fetchUser from "../lib/fetch-user";
 import messages from "../lib/messages";
 
@@ -59,13 +59,12 @@ function getSearchHash(type, message) {
   return search;
 }
 
-
-function fetch(type, bot, message, callback) {
-  const search = getSearchHash(type, message);
+function fetch(search, bot, message, callback) {
   const hull = new Hull(bot.config.hullConfig);
 
   const sad = function sad(err) {
     hull.logger.error("slack.bot.error", err.toString());
+    console.log(err.stack);
     return bot.reply(message, ":scream: Something bad happened.");
   };
   const reply = function reply(res) {
@@ -74,24 +73,17 @@ function fetch(type, bot, message, callback) {
   };
 
   return fetchUser({ hull, message, search })
-  .then(results => callback({ hull, search, results }), sad)
+  .then(results => callback(results), sad)
   .then(reply, sad);
 }
 
 function postUser(type) {
   return function post(bot, message) {
     ack(bot, message, "mag_right");
-    fetch(type, bot, message, function callback({ search, results }) {
+    const search = getSearchHash(type, message);
+    fetch(search, bot, message, function callback(results) {
       if (!results || !results.user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
-
-      if (search.groups && search.groups.length) {
-        results.user = _.pickBy(results.user, (v, k) => {
-          return ! _.isObject(v) || _.includes(search.groups, k);
-        });
-      } else if (!search.full) {
-        results.user = _.omitBy(results.user, _.isObject);
-      }
-      const res = buildUser(results, "");
+      const res = userPayload(results, "");
       const { pagination } = results;
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
@@ -125,6 +117,19 @@ function traitUser(type) {
     }
     return true;
   };
+}
+
+function interactiveMessage(bot, message) {
+  const { actions, callback_id } = message;
+  const [action] = actions;
+  const { name, value } = action;
+  if (name === "expand_group") {
+    fetch({ id: callback_id }, bot, message, function callback(results) {
+      // check message.actions and message.callback_id to see what action to take...
+      const res = userPayload(results, "", value);
+      bot.replyInteractive(message, res);
+    });
+  }
 }
 
 const replies = [{
@@ -179,6 +184,7 @@ module.exports = {
   },
   replies,
   join,
+  interactiveMessage,
   acknowledge: ack,
   welcome
 };

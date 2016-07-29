@@ -1,11 +1,13 @@
 import Botkit from "botkit";
 import _ from "lodash";
+
 // import botkitRedis from "botkit-storage-redis";
 
-import { replies, rtm, welcome, join } from "./bot";
+import { replies, rtm, welcome, join, interactiveMessage } from "./bot";
 
-module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecret, Hull, */devMode }) {
+module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
+    interactive_replies: true,
     debug: devMode
   });
   const _bots = {};
@@ -51,6 +53,8 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
   controller.on("rtm_open", rtm.open);
   controller.on("rtm_close", rtm.close);
   controller.on("bot_channel_joined", join);
+
+  controller.on("interactive_message_callback", interactiveMessage);
 
   _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
     controller.hears(message, context, ...middlewares, reply);
