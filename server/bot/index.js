@@ -32,27 +32,29 @@ function ack(bot, message, name = "robot_face") {
   }
 }
 
+function getGroups(groups = "") {
+  if (!groups) return [];
+  return _.map(groups.split(" "), g => g.replace(",", ""));
+}
+
 function getSearchHash(type, message) {
   const search = {};
   const { match = [] } = message;
-  console.log("+================================")
-  console.log(match)
-  console.log("+================================")
   if (type === "email") {
     search.email = match[3];
     if (match[5]) {
       if (match[5] === "full") {
         search.full = true;
       } else {
-        search.groups = _.map(match[5].split(" "), g => g.replace(",", ""));
+        search.groups = getGroups(match[5]);
       }
     }
   } else if (type === "id") {
     search.id = match[1];
-    search.groups = match[2].split(" ");
+    search.groups = getGroups(match[2]);
   } else {
     search.name = match[1];
-    search.groups = match[2].split(" ");
+    search.groups = getGroups(match[2]);
   }
   return search;
 }
