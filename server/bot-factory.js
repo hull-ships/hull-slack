@@ -58,6 +58,7 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
 
   return {
     controller,
+    getBot: _getBotByToken,
     connectSlack: function connectSlack({ hull, ship }) {
       if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
 

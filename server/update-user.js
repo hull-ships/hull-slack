@@ -22,7 +22,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
     return false;
   }
 
-  let pushAction;
+  let pushAction = "";
 
   if (changes.is_new) {
     if (send_create) pushAction = "was created";
@@ -30,19 +30,21 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
     pushAction = "was updated";
   } else if (_.size(changes.segments)) {
     const { entered = {}, left = {} } = changes.segments;
+    const actions = [pushAction];
     if (send_enter && _.size(entered)) {
       const names = _.map(entered, "name");
-      pushAction = ` - Entered segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`;
+      actions.push(`Entered segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
     }
     if (send_left && _.size(left)) {
       const names = _.map(left, "name");
-      pushAction = `${pushAction} - Left segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`;
+      actions.push(`Left segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
     }
+    pushAction = actions.join(", ");
   }
 
   try {
     if (pushAction) {
-      new Slack(url, { unfurl_links: true }).send(userPayload({...message, hull}, pushAction));
+      new Slack(url, { unfurl_links: true }).send(userPayload({ ...message, hull }, pushAction));
       hull.logger.info("update.post", { action: pushAction, ..._.pick(user, "name", "id") });
     } else {
       hull.logger.info("update.skip", { action: "no matched action", ..._.pick(user, "name", "id") });

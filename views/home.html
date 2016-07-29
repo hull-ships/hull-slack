@@ -2,6 +2,7 @@
 <head>
   <title>Hull <%= name %></title>
   <link rel="stylesheet" href="//dd04rofzygnm0.cloudfront.net/releases/master/865f04865d2448286626bac92c518a8f8ea8bafe/stylesheets/neue.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/2.1.0/superagent.min.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="row">
@@ -17,24 +18,61 @@
             </div>
             <div class="media-body pt-1">
               <span class='pull-right'><a href="<%=urls.home%>&reset=true" class='btn btn-rounded btn-pill btn-secondary'>Start over</a></span>
-              <h4 class="m-0 pt-05 text-muted">Connected to <%=name%></h4>
+              <h4 class="m-0 pt-05 text-muted"><%=name%> Credentials Saved</h4>
+            </div>
+          </div>
+          <div class="mb-1 media ps-4 pb-1">
+            <div class="media-left">
+              <div class="media-object pr-1 pt-1">
+                <div class="check <%=(connected)?'valid':'cross'%>"><i class="icon icon-<%=(connected)?"valid":"cross"%>"></i></div>
+              </div>
+            </div>
+            <div class="media-body pt-1">
+              <% if(!connected) { %>
+                <span class='pull-right'><a href="#" id="reconnect_button" class='btn btn-rounded btn-pill btn-secondary'>Reconnect Bot</a></span>
+              <% } %>
+              <h4 class="m-0 pt-05 text-<%=(connected)?'muted':'danger'%>"><%=name%> Bot <%=(connected)?"Online":"Offline"%></h4>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <script>window.hullAuthCompleted = function authCompleted() { window.location.href = window.location.href.replace("&reset=true",""); };</script>
+  <script>
+   /* global window, document, qs, request */
+    var reconnectButton = document.getElementById("reconnect_button");
+    reconnectButton.addEventListener("click", function onClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = "/connect?" + window.location.href.split("?")[1];
+    });
+  </script>
+  <script>
+    /* global window, document, qs, request */
+    window.hullAuthCompleted = function authCompleted() {
+      window.location.href = window.location.href.replace("&reset=true", ""); };
+  </script>
+
   <style type="text/css" media="screen">
-    .check i.icon {
-      color: rgba(75, 222, 122, 0.52);
+    .check i.icon{
       font-size: 2pc;
       position: relative;
+    }
+    .check.valid i.icon {
+      color: rgba(75, 222, 122, 0.52);
       top: -11px;
       left: 3px;
     }
+    .check.cross i.icon {
+      color: rgba(222, 75, 75, 0.52);
+    }
     .check.valid {
       border-color: rgba(75, 222, 122, 0.52);
+    }
+    .check.cross {
+      border: none;
+      top: 0;
+      left: -3px;
     }
     .check {
       border-radius: 100px;
