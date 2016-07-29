@@ -10,6 +10,7 @@ module.exports = function BotFactory({ devMode }) {
     interactive_replies: true,
     debug: devMode
   });
+
   const _bots = {};
 
   function _cacheBot(bot) {
@@ -49,13 +50,10 @@ module.exports = function BotFactory({ devMode }) {
     });
     return true;
   });
-
   controller.on("rtm_open", rtm.open);
   controller.on("rtm_close", rtm.close);
   controller.on("bot_channel_joined", join);
-
   controller.on("interactive_message_callback", interactiveMessage);
-
   _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
     controller.hears(message, context, ...middlewares, reply);
   });

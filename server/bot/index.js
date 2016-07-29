@@ -18,6 +18,16 @@ function join(bot, message) {
     channel: message.channel
   });
 }
+function reply(bot, message) {
+  const m = messages[message.text];
+  if (m) return bot.reply(message, m);
+  return bot.reply(message, message.notfound);
+}
+function cannedReply(msg) {
+  return function canned(bot, message) {
+    return bot.reply(message, messages[msg]);
+  };
+}
 
 function ack(bot, message, name = "robot_face") {
   if (bot && bot.api) {
@@ -32,11 +42,6 @@ function ack(bot, message, name = "robot_face") {
   }
 }
 
-function getGroups(groups = "") {
-  if (!groups) return [];
-  return _.map(groups.split(" "), g => g.replace(",", ""));
-}
-
 function getSearchHash(type, message) {
   const search = {};
   const { match = [] } = message;
@@ -46,15 +51,14 @@ function getSearchHash(type, message) {
       if (match[5] === "full") {
         search.full = true;
       } else {
-        search.groups = getGroups(match[5]);
+        search.groups = match[5];
       }
     }
   } else if (type === "id") {
     search.id = match[1];
-    search.groups = getGroups(match[2]);
+    search.groups = match[2];
   } else {
     search.name = match[1];
-    search.groups = getGroups(match[2]);
   }
   return search;
 }
@@ -67,14 +71,14 @@ function fetch(search, bot, message, callback) {
     console.log(err.stack);
     return bot.reply(message, ":scream: Something bad happened.");
   };
-  const reply = function reply(res) {
+  const rpl = function rpl(res) {
     hull.logger.info("slack.bot.reply");
     return bot.reply(message, res);
   };
 
   return fetchUser({ hull, message, search })
   .then(results => callback(results), sad)
-  .then(reply, sad);
+  .then(rpl, sad);
 }
 
 function postUser(type) {
@@ -82,6 +86,7 @@ function postUser(type) {
     ack(bot, message, "mag_right");
     const search = getSearchHash(type, message);
     fetch(search, bot, message, function callback(results) {
+      console.log("Fetch Result", results);
       if (!results || !results.user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
       const res = userPayload(results, "");
       const { pagination } = results;
@@ -135,11 +140,11 @@ function interactiveMessage(bot, message) {
 const replies = [{
   message: ["hello", "hi"],
   context: "direct_message,mention,direct_mention", // Default
-  reply: (bot, message) => bot.reply(message, ":wave: Hullo!")
+  reply: cannedReply("hi")
 }, {
   message: ["help"],
   context: "direct_message,mention,direct_mention", // Default
-  reply: join
+  reply
 }, {
   message: "^stop",
   reply: (bot, message) => {

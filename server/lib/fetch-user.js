@@ -7,9 +7,11 @@ module.exports = function fetchUser({ hull, search }) {
   if (id) params = queries.id(id);
   else if (email) params = queries.email(email);
   else if (name) params = queries.name(name);
+  console.log("Search", search, params);
   return hull.post("search/user_reports", params)
   .then(({ pagination = {}, data = [] }) => {
     const [user = {}] = data;
+    console.log("Search result", user);
     if (!user.id) return Promise.reject();
     return hull.as(user.id).get("/me/segments")
     .then((segments) => { return { segments, pagination, user }; });
