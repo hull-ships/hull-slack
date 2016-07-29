@@ -38,7 +38,7 @@ module.exports = function BotFactory({ /* port, hostSecret, clientID, clientSecr
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) return console.log("RTM failed", err);
       _cacheBot(bot);
-      controller.saveTeam(config, function onTeamSaved(team, error /* , id*/) {
+      controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
         if (error) return console.log("Error saving team", error);
         welcome(bot, config.user_id);
         return true;
