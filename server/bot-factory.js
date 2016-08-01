@@ -1,15 +1,13 @@
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
-import botkitRedis from "botkit-storage-redis";
 
 import { replies, welcome, join } from "./bot";
 
 module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
     interactive_replies: true,
-    debug: devMode,
-    storage: botkitRedis({})
+    debug: devMode
   });
 
   const _bots = {};
