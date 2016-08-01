@@ -2,10 +2,9 @@ function name(query) {
   return {
     query: {
       multi_match: {
-        type: "cross_fields",
         query,
-        operator: "and",
-        fields: ["first_name", "last_name"]
+        fields: ["name", "name.exact"],
+        fuzziness: "AUTO"
       }
     },
     sort: {
@@ -32,7 +31,6 @@ function id(query) {
     per_page: 1
   };
 }
-
 function email(query) {
   return {
     query: {
@@ -51,5 +49,34 @@ function email(query) {
     per_page: 1
   };
 }
-
-module.exports = { name, email, id };
+function events(user_id) {
+  return {
+    query: {
+      has_parent: {
+        type: "user_report",
+        query: { match: { id: user_id } }
+      }
+    },
+    sort: { created_at: "desc" },
+    raw: true,
+    page: 1,
+    per_page: 5
+  };
+}
+function eventId(id) {
+  return {
+    query: {
+      ids: {
+        values: [id],
+        type: "event"
+      }
+    },
+    sort: {
+      created_at: "desc"
+    },
+    raw: true,
+    page: 1,
+    per_page: 100
+  };
+}
+module.exports = { name, email, id, eventId, events };

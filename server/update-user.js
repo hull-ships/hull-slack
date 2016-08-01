@@ -22,15 +22,15 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
     return false;
   }
 
-  let pushAction = "";
+  let action = "";
 
   if (changes.is_new) {
-    if (send_create) pushAction = "was created";
+    if (send_create) action = "was created";
   } else if (send_update) {
-    pushAction = "was updated";
+    action = "was updated";
   } else if (_.size(changes.segments)) {
     const { entered = {}, left = {} } = changes.segments;
-    const actions = [pushAction];
+    const actions = [action];
     if (send_enter && _.size(entered)) {
       const names = _.map(entered, "name");
       actions.push(`Entered segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
@@ -39,13 +39,13 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
       const names = _.map(left, "name");
       actions.push(`Left segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
     }
-    pushAction = actions.join(", ");
+    action = actions.join(", ");
   }
 
   try {
-    if (pushAction) {
-      new Slack(url, { unfurl_links: true }).send(userPayload({ ...message, hull }, pushAction));
-      hull.logger.info("update.post", { action: pushAction, ..._.pick(user, "name", "id") });
+    if (action) {
+      new Slack(url, { unfurl_links: true }).send(userPayload({ ...message, hull, action }));
+      hull.logger.info("update.post", { action, ..._.pick(user, "name", "id") });
     } else {
       hull.logger.info("update.skip", { action: "no matched action", ..._.pick(user, "name", "id") });
     }

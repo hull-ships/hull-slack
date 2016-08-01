@@ -3,6 +3,7 @@ import moment from "moment";
 import humanize from "./humanize";
 import flags from "./flags";
 import getUserName from "./get-user-name";
+import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
 
@@ -15,6 +16,19 @@ function fieldsFromObject(ob) {
     value = _.endsWith(title, "_at") ? moment(value).format(MOMENT_FORMAT) : value;
     return { title: humanize(title), value, short: true };
   });
+}
+
+// function compactFieldsFromObject(ob) {
+//   if (_.isArray(ob)) {
+//     return _.map(ob, (title) => { return { value: humanize(title), short: true }; });
+//   }
+//   return _.map(format(ob), prop => {
+//     return { value: `*${prop.title}: * ${prop.value}`, short: false };
+//   });
+// }
+
+function formatObjToText(ob) {
+  return _.join(_.map(format(ob), (p) => `*${p.title}*: ${p.value}`), "\n");
 }
 
 function colorFactory() {
@@ -30,31 +44,29 @@ function colorFactory() {
 function getUserAttachment(user, color) {
   const name = getUserName(user);
   return {
-    title: `:bust_in_silhouette: ${name}`,
+    mrkdwn_in: ["text", "fields", "pretext"],
     fallback: name,
     color: color(),
     fields: [
       {
-        value: `:love_letter: ${user.email}`,
+        value: `:love_letter: ${user.email || ""}`,
         short: true
       },
       {
-        value: `:telephone_receiver: ${user.phone}`,
+        value: `:telephone_receiver: ${user.phone || ""}`,
         short: true
       },
       {
-        value: `${flags(user.address_country)} ${[user.address_country, user.address_state, user.address_city].join(", ")}`,
+        value: `${flags(user.address_country)} ${_.join(_.compact([user.address_country, user.address_state, user.address_city]), ", ")}`,
         short: false
       },
       {
-        title: "First Seen",
-        value: `:stopwatch: ${moment(user.first_seen_at).format(MOMENT_FORMAT)}`,
-        short: true
+        value: `:stopwatch: *First Seen*: ${moment(user.first_seen_at).format(MOMENT_FORMAT)}`,
+        short: false
       },
       {
-        title: "Signup",
-        value: `:stopwatch: ${moment(user.created_at).format(MOMENT_FORMAT)}`,
-        short: true
+        value: `:stopwatch: *Signup*: ${moment(user.created_at).format(MOMENT_FORMAT)}`,
+        short: false
       }
     ],
     footer: `:desktop_computer: ${user.sessions_count} :eyeglasses: ${moment(user.last_seen_at).format(MOMENT_FORMAT)}`,
@@ -64,7 +76,7 @@ function getUserAttachment(user, color) {
 
 function getChangesAttachment(changes, color) {
   return !_.size(changes.user) ? {} : {
-    title: ":chart_with_upwards_trend: Changes",
+    author_name: ":chart_with_upwards_trend: Changes",
     color: color(),
     fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
     fields: fieldsFromObject(_.mapValues(changes.user, (v) => `${v[0]} → ${v[1]}`))
@@ -75,10 +87,11 @@ function getTraitsAttachments(user, color) {
   return _.reduce(_.pickBy(user, _.isPlainObject), (atts, value, key) => {
     if (_.isObject(value)) {
       atts.push({
-        title: humanize(key),
+        mrkdwn_in: ["text", "fields", "pretext"],
+        author_name: `:globe_with_meridians: ${humanize(key)}`,
+        text: formatObjToText(value),
         color: color(),
-        fallback: key,
-        fields: fieldsFromObject(value),
+        fallback: key
       });
     }
     return atts;
@@ -88,7 +101,7 @@ function getTraitsAttachments(user, color) {
 function getSegmentAttachments(changes = {}, segments, color) {
   const segmentString = (_.map(segments, "name") || []).join(", ");
   return {
-    title: ":busts_in_silhouette: Segments",
+    author_name: ":busts_in_silhouette: Segments",
     text: segmentString,
     fallback: `Segments: ${segmentString}`,
     color: color(),
@@ -103,9 +116,38 @@ function getSegmentAttachments(changes = {}, segments, color) {
   };
 }
 
-module.exports = function buildAttachments({ user = {}, segments = [], changes = {} }) {
+function getEventsAttachements(events = [], color) {
+  if (!events.length) return {};
+  return _.map(events, e => {
+    try {
+      const { days_since_signup: ds } = e.context || {};
+      // footer:   `:clock2: ${ds} day${(Math.abs(ds) === 1) ? "" : "s"} ${(ds >= 0) ? "after" : "before"} signup | Type: ${e.type} | Source: ${e.source} on ${pp}`
+      const actions = [];
+      if (e.props.length) {
+        actions.push({ name: "expand", value: "event", text: "Show Properties", type: "button" });
+      }
+      return {
+        title: `:star: ${e.event}`,
+        ts: moment(e.created_at).format("X"),
+        footer: `:clock2: ${ds} day${(Math.abs(ds) === 1) ? "" : "s"} ${(ds >= 0) ? "after" : "before"} signup`,
+        fallback: e.event,
+        color: color(),
+        actions,
+        callback_id: e._id,
+        attachment_type: "default",
+        mrkdwn_in: ["text", "fields", "pretext"],
+      };
+    } catch (err) {
+      console.log(err);
+    }
+    return true;
+  });
+}
+
+module.exports = function buildAttachments({ user = {}, segments = [], changes = {}, events = [] }) {
   const color = colorFactory();
   return {
+    events: getEventsAttachements(events, color),
     user: getUserAttachment(user, color),
     segments: getSegmentAttachments(changes, segments, color),
     changes: getChangesAttachment(changes, color),

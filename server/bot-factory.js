@@ -1,14 +1,15 @@
+import Hull from "hull";
 import Botkit from "botkit";
 import _ from "lodash";
-
-// import botkitRedis from "botkit-storage-redis";
+import botkitRedis from "botkit-storage-redis";
 
 import { replies, rtm, welcome, join, interactiveMessage } from "./bot";
 
 module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
     interactive_replies: true,
-    debug: devMode
+    debug: false,
+    storage: botkitRedis({})
   });
 
   const _bots = {};
@@ -24,12 +25,13 @@ module.exports = function BotFactory({ devMode }) {
 
   controller.storage.teams.all((err, teams) => {
     if (err) throw new Error(err);
-    console.log("Reconnecting", teams);
     _.map(teams, (team = {}) => {
-      console.log("Reconnecting Team");
       controller.spawn(team).startRTM((error, bot) => {
         if (error) return console.log("RTM failed");
         _cacheBot(bot);
+        /* Create a Hull instance */
+        console.log("CREATING HULL BOT", bot.config.hullConfig);
+        bot.config.hull = new Hull(bot.config.hullConfig);
         return true;
       });
       return true;
@@ -41,6 +43,9 @@ module.exports = function BotFactory({ devMode }) {
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) return console.log("RTM failed", err);
       _cacheBot(bot);
+      /* Create a Hull instance */
+      console.log("CREATING HULL BOT", bot.config.hullConfig);
+      bot.config.hull = new Hull(bot.config.hullConfig);
       controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
         if (error) return console.log("Error saving team", error);
         welcome(bot, config.user_id);
