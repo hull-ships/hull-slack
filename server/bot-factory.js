@@ -2,7 +2,7 @@ import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
 
-import { replies, welcome, join } from "./bot";
+import { replies, join } from "./bot";
 
 module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
@@ -69,7 +69,13 @@ module.exports = function BotFactory({ devMode }) {
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
-      if (force) _clearCache(ship.private_settings.bot.bot_access_token);
+      if (force) {
+        const oldBot = _getBotByToken(ship.private_settings.bot.bot_access_token);
+        if (oldBot) {
+          oldBot.rtm.close();
+          _clearCache(ship.private_settings.bot.bot_access_token);
+        }
+      }
 
       const config = {
         ..._.pick(ship.private_settings, "user_id", "actions"),
