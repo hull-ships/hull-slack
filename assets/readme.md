@@ -17,3 +17,20 @@ It also adds a Bot (@hull) to your team that can answer questions and show infor
 To get in-app help, invite it to a channel or start a conversation and type `@hull help`.
 
 The bot can fetch information for a customer from his/her email, or his/her name, and display the latest events and all his/her properties.
+
+
+`@hull help`
+> Here to help!
+
+`@hull hello`
+> Hullo!
+
+`@hull stop`
+> Bye!
+
+`@hull user@example.com`
+> ...lots of info about the user
+
+`@hull info elon musk`
+> ...lots of info about the user
+

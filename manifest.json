@@ -1,12 +1,15 @@
 {
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
-  "tags": ["outgoing", "oneColumn"],
-  "admin" : "/auth/",
   "picture": "picture.png",
   "version": "0.0.1",
+  "tags": [
+    "incoming",
+    "outgoing",
+    "oneColumn"
+  ],
   "settings": [],
-  "private_settings":[ 
+  "private_settings": [
     {
       "name": "synchronized_segments",
       "title": "Segments",
@@ -39,10 +42,22 @@
       "type": "object",
       "format": "hidden",
       "properties": {
-        "url": { "title":"url", "type":"string" },
-        "channel": { "title":"channel", "type":"string" },
-        "channel_id": { "title":"channel_id", "type":"string" },
-        "configuration_url": { "title":"configuration_url", "type":"string" }
+        "url": {
+          "title": "url",
+          "type": "string"
+        },
+        "channel": {
+          "title": "channel",
+          "type": "string"
+        },
+        "channel_id": {
+          "title": "channel_id",
+          "type": "string"
+        },
+        "configuration_url": {
+          "title": "configuration_url",
+          "type": "string"
+        }
       }
     },
     {
@@ -51,12 +66,18 @@
       "type": "object",
       "format": "hidden",
       "properties": {
-        "bot_user_id": { "title":"bot_user_id", "type":"string" },
-        "bot_access_token": { "title":"bot_access_token", "type":"string" }
+        "bot_user_id": {
+          "title": "bot_user_id",
+          "type": "string"
+        },
+        "bot_access_token": {
+          "title": "bot_access_token",
+          "type": "string"
+        }
       }
     },
     {
-      "name":"notify_header",
+      "name": "notify_header",
       "title": "Notify When User",
       "type": "string",
       "format": "title"
@@ -88,11 +109,44 @@
       "default": true,
       "type": "boolean",
       "format": "checkbox"
+    },
+    {
+      "name": "button_header",
+      "title": "Button Actions",
+      "type": "string",
+      "format": "title"
+    },
+    {
+      "name": "actions",
+      "title": "Actions",
+      "description": "Add buttons to each Slack message to update User properties",
+      "default": true,
+      "type": "array",
+      "format": "table",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "title": "Button Label",
+            "type": "string"
+          },
+          "property": {
+            "title": "Property name",
+            "type": "string",
+            "format": "trait"
+          },
+          "value": {
+            "title": "Property Value",
+            "type": "string"
+          }
+        }
+      }
     }
   ],
   "deployment_settings": [],
   "resources": [],
   "readme": "readme.md",
+  "admin": "/auth/",
   "ui": false,
   "subscriptions": [
     {

@@ -6,7 +6,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   connectSlack({ hull, ship });
   const { user = {}, segments = [], changes = {} } = message;
   const { private_settings = {} } = ship;
-  const { incoming_webhook = {}, send_update, send_create, send_enter, send_left, synchronized_segments = [] } = private_settings;
+  const { actions = [], incoming_webhook = {}, send_update, send_create, send_enter, send_left, synchronized_segments = [] } = private_settings;
 
   hull.logger.info("update.process");
 
@@ -30,21 +30,21 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
     action = "was updated";
   } else if (_.size(changes.segments)) {
     const { entered = {}, left = {} } = changes.segments;
-    const actions = [action];
+    const acts = [action];
     if (send_enter && _.size(entered)) {
       const names = _.map(entered, "name");
-      actions.push(`Entered segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
+      acts.push(`Entered segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
     }
     if (send_left && _.size(left)) {
       const names = _.map(left, "name");
-      actions.push(`Left segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
+      acts.push(`Left segment${names.length > 1 ? "s" : ""} ${names.join(", ")}`);
     }
-    action = actions.join(", ");
+    action = acts.join(", ");
   }
 
   try {
     if (action) {
-      new Slack(url, { unfurl_links: true }).send(userPayload({ ...message, hull, action }));
+      new Slack(url, { unfurl_links: true }).send(userPayload({ ...message, hull, actions, action }));
       hull.logger.info("update.post", { action, ..._.pick(user, "name", "id") });
     } else {
       hull.logger.info("update.skip", { action: "no matched action", ..._.pick(user, "name", "id") });

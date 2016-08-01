@@ -1,16 +1,13 @@
 import Hull from "hull";
-import _ from "lodash";
 import userPayload from "../lib/user-payload";
 import getSearchHash from "../lib/get-search-hash";
 import fetchUser from "../hull/fetch-user";
-import fetchEvent from "../hull/fetch-event";
 import messages from "./messages";
-import formatEventProperties from "../lib/format-event-properties";
+import ack from "./ack";
 
 function _replaceBotName(bot, m = "") {
   return m.replace(/@hull/g, `@${bot.identity.name}`);
 }
-
 
 /* Special Conversations*/
 function welcome(bot, user_id) {
@@ -29,20 +26,8 @@ function join(bot, message) {
 }
 
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
-function ack(bot, message, name = "robot_face") {
-  if (bot && bot.api) {
-    bot.api.reactions.add({
-      timestamp: message.ts,
-      channel: message.channel,
-      name
-    }, err => {
-      if (err) console.log(err);
-      return true;
-    });
-  }
-}
+
 function sad(hull, bot, message, err) {
-  console.log('Error', err)
   hull.logger.error("slack.bot.error", err.toString());
   console.log(err.stack);
   return bot.reply(message, ":scream: Something bad happened.");
@@ -52,48 +37,19 @@ function rpl(hull, bot, message, res) {
   return bot.reply(message, res);
 }
 
-/* ACTIONS */
 
-// function traitUser(type) {
-//   return function trait(bot, message) {
-//     ack(bot, message, "gear");
-
-//     if (!message.match[4]) return bot.reply(message, "You need to specify a set of properties");
-
-//     try {
-//       const payload = JSON.parse(message.match[4]);
-//       if (!_.isObject(payload)) throw new Error("Invalid JSON payload");
-//       // const qs = querystring.parse()
-//       fetchUser(type, bot, message, function callback({ hull, /* search,*/ results }) {
-//         if (!results || !results.user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
-//         hull.as(results.user.id).traits(payload);
-//         return bot.reply(message, {
-//           text: `Updated ${results.user.email}`,
-//           attachments: [{
-//             pretext: "Allow a few seconds for data to update",
-//             text: `\`\`\`\n${JSON.stringify(payload)}\`\`\``,
-//             mrkdwn_in: ["text", "pretext"]
-//           }]
-//         });
-//       });
-//     } catch (e) {
-//       console.log(e);
-//       return bot.reply(message, "The JSON you sent is not valid");
-//     }
-//     return true;
-//   };
-// }
-
+/* MAIN USER ACTION */
 function postUser(type) {
   return function post(bot, message) {
     ack(bot, message, "mag_right");
     const search = getSearchHash(type, message);
-    const hull = new Hull(bot.config.hullConfig);
+    const { actions, hullConfig } = bot.config;
+    const hull = new Hull(hullConfig);
 
     fetchUser({ hull, search })
     .then(({ user, events, segments, pagination }) => {
       if (!user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
-      const res = userPayload({ hull, user, events, segments, pagination });
+      const res = userPayload({ hull, user, events, segments, actions, pagination });
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
     }, sad.bind(undefined, hull, bot, message))
@@ -106,37 +62,6 @@ function postUser(type) {
 
 
 /* BUTTONS */
-function interactiveMessage(bot, message) {
-  const { actions, callback_id, original_message } = message;
-  const [action] = actions;
-  const { name, value } = action;
-  const hull = new Hull(bot.config.hullConfig);
-
-  if (name === "expand") {
-    if (value === "event") {
-      const index = _.findIndex(original_message.attachments, a => a.callback_id === callback_id);
-      const attachement = { ...original_message.attachments[index] };
-      const attachments = [...original_message.attachments];
-      attachments[index] = attachement;
-      return fetchEvent({ hull, search: { id: callback_id } })
-      .then(({ events }) => {
-        const [event = {}] = events;
-        const { props } = event;
-        attachement.fields = formatEventProperties(props);
-        attachement.actions = [];
-        bot.replyInteractive(message, { ...original_message, attachments });
-      }).
-      catch(err => console.log(err));
-    }
-
-    if (value === "traits" || value === "events") {
-      return fetchUser({ hull, search: { id: callback_id } })
-      .then((results) => bot.replyInteractive(message, userPayload({ ...results, hull, group: value })));
-    }
-  }
-  return true;
-}
-
 const replies = [{
   message: ["hello", "hi"],
   context: "direct_message,mention,direct_mention", // Default
@@ -183,13 +108,7 @@ const replies = [{
 
 
 module.exports = {
-  rtm: {
-    close: (/* bot */) => console.log("** The RTM api just closed"),
-    open: (/* bot */) => console.log("** The RTM api just connected!")
-  },
   replies,
   join,
-  interactiveMessage,
-  acknowledge: ack,
   welcome
 };

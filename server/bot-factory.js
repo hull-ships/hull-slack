@@ -1,14 +1,14 @@
-import Hull from "hull";
 import Botkit from "botkit";
 import _ from "lodash";
+import interactiveMessage from "./bot/interactive-message";
 import botkitRedis from "botkit-storage-redis";
 
-import { replies, rtm, welcome, join, interactiveMessage } from "./bot";
+import { replies, welcome, join } from "./bot";
 
 module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
     interactive_replies: true,
-    debug: false,
+    debug: devMode,
     storage: botkitRedis({})
   });
 
@@ -17,6 +17,9 @@ module.exports = function BotFactory({ devMode }) {
   function _cacheBot(bot) {
     _bots[bot.config.token] = bot;
     return bot;
+  }
+  function _clearCache(token) {
+    delete _bots[token];
   }
 
   function _getBotByToken(token) {
@@ -29,9 +32,6 @@ module.exports = function BotFactory({ devMode }) {
       controller.spawn(team).startRTM((error, bot) => {
         if (error) return console.log("RTM failed");
         _cacheBot(bot);
-        /* Create a Hull instance */
-        console.log("CREATING HULL BOT", bot.config.hullConfig);
-        bot.config.hull = new Hull(bot.config.hullConfig);
         return true;
       });
       return true;
@@ -44,20 +44,19 @@ module.exports = function BotFactory({ devMode }) {
       if (err) return console.log("RTM failed", err);
       _cacheBot(bot);
       /* Create a Hull instance */
-      console.log("CREATING HULL BOT", bot.config.hullConfig);
-      bot.config.hull = new Hull(bot.config.hullConfig);
       controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
         if (error) return console.log("Error saving team", error);
-        welcome(bot, config.user_id);
         return true;
       });
       return true;
     });
     return true;
   });
-  controller.on("rtm_open", rtm.open);
-  controller.on("rtm_close", rtm.close);
-  controller.on("bot_channel_joined", join);
+
+  // controller.on("rtm_open", bot => console.log("** The RTM api just connected!"));
+  // controller.on("rtm_close", bot => console.log("** The RTM api just closed"));
+
+  controller.on("bot_channel_join", join);
   controller.on("interactive_message_callback", interactiveMessage);
   _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
     controller.hears(message, context, ...middlewares, reply);
@@ -66,14 +65,16 @@ module.exports = function BotFactory({ devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship }) {
-      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
+    connectSlack: function connectSlack({ hull, ship, force = false }) {
+      if (!force && (!ship || !hull || !ship.private_settings || !ship.private_settings.bot)) return false;
 
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
+      if (force) _clearCache(ship.private_settings.bot.bot_access_token);
+
       const config = {
-        ..._.pick(ship.private_settings, "user_id"),
+        ..._.pick(ship.private_settings, "user_id", "actions"),
         id: ship.private_settings.team_id,
         hullConfig: _.pick(conf, "organization", "id", "secret"),
         token: ship.private_settings.bot.bot_access_token

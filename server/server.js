@@ -34,7 +34,7 @@ module.exports = function Server(options = {}) {
       isSetup(req, { /* hull, */ ship }) {
         if (!!req.query.reset) return Promise.reject();
         const { token, bot = {} } = ship.private_settings || {};
-        const { bot_access_token } = bot;
+        const { bot_access_token } = bot || {};
         return (!!token && !!bot_access_token) ? Promise.resolve({
           credentials: true,
           connected: getBot(bot_access_token)
@@ -87,7 +87,7 @@ module.exports = function Server(options = {}) {
     app.post("/notify", NotifHandler({
       hostSecret,
       handlers: {
-        "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship }),
+        "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship, force: true }),
         "user:update": updateUser.bind(undefined, connectSlack)
       }
     }));

@@ -77,9 +77,10 @@ function getUserAttachment(user, color) {
 function getChangesAttachment(changes, color) {
   return !_.size(changes.user) ? {} : {
     author_name: ":chart_with_upwards_trend: Changes",
+    mrkdwn_in: ["text", "fields", "pretext"],
     color: color(),
     fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
-    fields: fieldsFromObject(_.mapValues(changes.user, (v) => `${v[0]} → ${v[1]}`))
+    text: formatObjToText((_.mapValues(changes.user, (v) => `${v[0]} → ${v[1]}`)))
   };
 }
 
