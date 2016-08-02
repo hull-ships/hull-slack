@@ -9,6 +9,10 @@
       "description" : "A Secret key used to sign tokens",
       "generator" : "secret"
     },
+    "LOG_LEVEL" : {
+      "description" : "Logging level (emerg, alert, crit, error, warning, notice, info, debug)",
+      "value": "info"
+    },
     "CLIENT_ID" : {
       "description" : "oAuth Client ID",
       "required": true
