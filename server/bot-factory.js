@@ -38,9 +38,14 @@ module.exports = function BotFactory({ devMode }) {
 
   controller.on("create_bot", function createBot(bot, config) {
     if (_getBotByToken(bot.config.token)) return console.log("already online! do nothing.");
+    // Cache the bot so we can prevent Race conditions
+    _cacheBot(bot);
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
-      if (err) return console.log("RTM failed", err);
-      _cacheBot(bot);
+      if (err) {
+        _clearCache(bot.config.token);
+        return console.log("RTM failed", err);
+      }
+      // _cacheBot(bot);
       /* Create a Hull instance */
       controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
         if (error) return console.log("Error saving team", error);
@@ -50,9 +55,6 @@ module.exports = function BotFactory({ devMode }) {
     });
     return true;
   });
-
-  // controller.on("rtm_open", bot => console.log("** The RTM api just connected!"));
-  // controller.on("rtm_close", bot => console.log("** The RTM api just closed"));
 
   controller.on("bot_channel_join", join);
   controller.on("interactive_message_callback", interactiveMessage);
