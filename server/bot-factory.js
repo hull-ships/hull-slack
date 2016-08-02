@@ -1,3 +1,4 @@
+import Hull from "hull";
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
@@ -24,31 +25,35 @@ module.exports = function BotFactory({ devMode }) {
     return _bots[token];
   }
 
-  controller.storage.teams.all((err, teams) => {
-    if (err) throw new Error(err);
-    _.map(teams, (team = {}) => {
-      controller.spawn(team).startRTM((error, bot) => {
-        if (error) return console.log("RTM failed");
-        _cacheBot(bot);
-        return true;
-      });
-      return true;
-    });
-  });
+  // controller.storage.teams.all((err, teams) => {
+  //   if (err) throw new Error(err);
+  //   _.map(teams, (team = {}) => {
+  //     controller.spawn(team).startRTM((error, bot) => {
+  //       if (error) return console.log("RTM failed");
+  //       _cacheBot(bot);
+  //       return true;
+  //     });
+  //     return true;
+  //   });
+  // });
 
   controller.on("create_bot", function createBot(bot, config) {
-    if (_getBotByToken(bot.config.token)) return console.log("already online! do nothing.");
+    const hull = new Hull(config.hullConfig);
+
+    if (_getBotByToken(bot.config.token)) return hull.logger.info("bot.skip");
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
+    hull.logger.info("bot.register");
+
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
         _clearCache(bot.config.token);
-        return console.log("RTM failed", err);
+        return hull.logger.error("bot.register.error", err.toString());
       }
-      // _cacheBot(bot);
+
       /* Create a Hull instance */
       controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
-        if (error) return console.log("Error saving team", error);
+        if (error) return hull.logger.error("bot.team.save.error", error.toString());
         return true;
       });
       return true;
