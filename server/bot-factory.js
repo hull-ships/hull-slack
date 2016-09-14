@@ -14,7 +14,7 @@ module.exports = function BotFactory({ devMode }) {
   const _bots = {};
 
   function _cacheBot(bot) {
-    _bots[bot.config.bot_token] = bot;
+    _bots[bot.config.token] = bot;
     return bot;
   }
   function _clearCache(token) {
