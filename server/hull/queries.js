@@ -73,7 +73,6 @@ function filteredEvents(user_id, event) {
     }
   }];
   if (event) must.push({ term: { event } });
-  console.log(must)
   return {
     filter: { bool: { must } },
     sort: { created_at: "desc" },

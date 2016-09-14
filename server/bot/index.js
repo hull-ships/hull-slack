@@ -37,8 +37,7 @@ function join(bot, message) {
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
 
 function sad(hull, bot, message, err) {
-  hull.logger.error("slack.bot.error", err.toString());
-  console.log(err.stack);
+  hull.logger.error("slack.bot.error", err.message);
   return bot.reply(message, ":scream: Something bad happened.");
 }
 function rpl(hull, bot, message, res) {

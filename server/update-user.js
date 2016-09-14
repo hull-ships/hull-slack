@@ -23,7 +23,6 @@ function inviteBot(bot, token, channel) {
 function createChannels(bot, token, teamChannels = {}, missingChannels = []) {
   return _.map(missingChannels, name => {
     if (teamChannels[name]) return teamChannels[name];
-    console.log("Didn't find", teamChannels[name], name);
     return bot.api.channels.create({ token, name }).then(res => res.channel.id);
   });
 }
@@ -82,7 +81,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   const { url } = incoming_webhook;
 
-  if (!hull || !user.id || !url || !token) { return hull.logger.debug("Something is missing"); }
+  if (!hull || !user.id || !url || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
 
   const messages = [];
 
@@ -96,9 +95,14 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   messages.push(...changeActions.messages, ...eventActions.messages);
 
+  hull.logger.debug("slack.messages", { messages: messages.join(' - ') });
+
   const channelNames = _.uniq(_.map(_.concat(entered, left, triggered), c => c.replace('#', '').toLowerCase().replace(/\s+/g, '_').substring(0, 21)));
 
+  hull.logger.debug("slack.channels.post", { channels: channelNames.join(' ') });
+
   if (channelNames.length === 0) return false;
+
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n') });
   const tellUser = sayInPrivate.bind(this, bot, user_id);
 
@@ -107,7 +111,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
     const teamChannels = _.reduce(channels, (m, chan) => { m[chan.name] = chan.id; return m; }, {});
     const botChannels = _.filter(channels, 'is_member');
     const joinChannels = _.pull(channelNames, c => _.find(botChannels, { name: c }));
-
+    hull.logger.debug('slack.channels.list', { teamChannels, botChannels, joinChannels });
     Promise.all(createChannels(bot, token, teamChannels, joinChannels))
     .then(
       channelIds => Promise.all(_.map(channelIds, channel => inviteBot(bot, token, channel)))
