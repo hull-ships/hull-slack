@@ -1,6 +1,6 @@
 function name(query) {
   return {
-    query: {
+    filter: {
       multi_match: {
         query,
         fields: ["name", "name.exact"],
@@ -17,7 +17,7 @@ function name(query) {
 }
 function id(query) {
   return {
-    query: {
+    filter: {
       filtered: {
         query: { match_all: {} },
         filter: { and: { filters: [{ terms: { id: [query] } }] } }
@@ -33,7 +33,7 @@ function id(query) {
 }
 function email(query) {
   return {
-    query: {
+    filter: {
       multi_match: {
         type: "phrase_prefix",
         query,
@@ -51,7 +51,7 @@ function email(query) {
 }
 function events(user_id) {
   return {
-    query: {
+    filter: {
       has_parent: {
         type: "user_report",
         query: { match: { id: user_id } }
@@ -60,14 +60,33 @@ function events(user_id) {
     sort: { created_at: "desc" },
     raw: true,
     page: 1,
-    per_page: 5
+    per_page: 25
   };
 }
-function eventId(id) {
+function filteredEvents(user_id, event) {
+  const must = [{
+    has_parent: {
+      type: "user_report",
+      query: {
+        match: { id: user_id }
+      }
+    }
+  }];
+  if (event) must.push({ term: { event } });
+  console.log(must)
   return {
-    query: {
+    filter: { bool: { must } },
+    sort: { created_at: "desc" },
+    raw: true,
+    page: 1,
+    per_page: 10
+  };
+}
+function eventId(i) {
+  return {
+    filter: {
       ids: {
-        values: [id],
+        values: [i],
         type: "event"
       }
     },
@@ -79,4 +98,4 @@ function eventId(id) {
     per_page: 100
   };
 }
-module.exports = { name, email, id, eventId, events };
+module.exports = { name, email, id, eventId, events, filteredEvents };

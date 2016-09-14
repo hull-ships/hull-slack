@@ -4,6 +4,7 @@ import getSearchHash from "../lib/get-search-hash";
 import fetchUser from "../hull/fetch-user";
 import messages from "./messages";
 import ack from "./ack";
+import _ from "lodash";
 
 function _replaceBotName(bot, m = "") {
   return m.replace(/@hull/g, `@${bot.identity.name}`);
@@ -14,6 +15,14 @@ function welcome(bot, user_id) {
   bot.startPrivateConversation({ user: user_id }, (error, convo) => {
     if (error) return console.log(error);
     convo.say(messages.welcome);
+    return true;
+  });
+}
+
+function sayInPrivate(bot, user_id, msg = []) {
+  bot.startPrivateConversation({ user: user_id }, (error, convo) => {
+    if (error) return console.log(error);
+    _.map(msg, convo.say);
     return true;
   });
 }
@@ -39,17 +48,19 @@ function rpl(hull, bot, message, res) {
 
 
 /* MAIN USER ACTION */
-function postUser(type) {
+function postUser(type, options = {}) {
   return function post(bot, message) {
     ack(bot, message, "mag_right");
     const search = getSearchHash(type, message);
     const { actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    fetchUser({ hull, search })
-    .then(({ user, events, segments, pagination }) => {
-      if (!user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
-      const res = userPayload({ hull, user, events, segments, actions, pagination });
+    fetchUser({ hull, search, options })
+    .then(({ user, events, segments, pagination, message = "" }) => {
+      if (!user) return `¯\\_(ツ)_/¯ ${message}`;
+      const pl = { hull, user, events, segments, actions, pagination };
+      if (search.rest && options.action) pl.group = options.action.value;
+      const res = userPayload(pl);
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
     }, sad.bind(undefined, hull, bot, message))
@@ -90,6 +101,10 @@ const replies = [{
   context: "direct_message,mention,direct_mention",
   reply: postUser("email")
 }, {
+  message: ["^(events)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("email", { action: { name: "expand", value: "events" } })
+}, {
   message: "^(info|search) id:(.+)",
   context: "direct_message,mention,direct_mention",
   reply: postUser("id")
@@ -110,5 +125,6 @@ const replies = [{
 module.exports = {
   replies,
   join,
+  sayInPrivate,
   welcome
 };

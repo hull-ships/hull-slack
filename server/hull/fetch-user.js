@@ -5,7 +5,7 @@ import queries from "./queries";
  * return { user, events, segments, pagination }
 */
 
-module.exports = function fetchUser({ hull, search }) {
+module.exports = function fetchUser({ hull, search, options = {} }) {
   const { email, name, id } = search;
   let params = {};
 
@@ -13,24 +13,33 @@ module.exports = function fetchUser({ hull, search }) {
   else if (email) params = queries.email(email);
   else if (name) params = queries.name(name);
 
+  const eventSearch = options.action && options.action.value === "events";
 
-  console.log("SEARCHING", params);
+  hull.logger.debug("hull.slack.search", JSON.stringify(params));
 
   return hull.post("search/user_reports", params)
 
-  .then(({ pagination = {}, data = [] }) => {
+  .then((args) => {
+    const { pagination = {}, data = [] } = args;
     const [user] = data;
-    if (!user || !user.id) return Promise.resolve({});
-    const eventParams = queries.events(user.id);
+    if (!user || !user.id) return Promise.reject({ message: "User not found!" });
 
-    return Promise.all([
-      hull.as(user.id).get("/me/segments"),
-      hull.post("search/events", eventParams)
-    ])
-
+    const q = [hull.as(user.id).get("/me/segments")];
+    if (eventSearch) {
+      const eventParams = (search.rest) ? queries.filteredEvents(user.id, search.rest) : queries.events(user.id);
+      q.push(hull.post("search/events", eventParams));
+    }
+    return Promise.all(q)
     .then(([segments, events = {}]) => {
+      if (eventSearch && !events.data.length) return { message: `\n Couldn't find "${search.rest}" events for ${user.name} - Search is case-sensitive` };
+
+      if (!user) return { message: `Couldn't find anyone!` };
+
       const groupedUser = hull.utils.groupTraits(_.omitBy(user, v => (v === null || v === "" || v === undefined)));
+      console.log(groupedUser);
       return { user: groupedUser, events: events.data, segments, pagination };
-    }, (err) => console.log(err));
-  }, (err) => console.log(err));
+    }, (err) => { return { message: `An error occured ${err.message}!` }; }
+    , (err) => { return { message: `An error occured ${err.message}!` }; }
+    );
+  });
 };

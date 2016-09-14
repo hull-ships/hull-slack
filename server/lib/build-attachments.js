@@ -7,16 +7,16 @@ import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
 
-function fieldsFromObject(ob) {
-  if (_.isArray(ob)) {
-    return _.map(ob, (title) => { return { title: humanize(title), short: true }; });
-  }
-  return _.map(ob, (v, title) => {
-    let value = _.isBoolean(v) ? humanize(v.toString()) : v;
-    value = _.endsWith(title, "_at") ? moment(value).format(MOMENT_FORMAT) : value;
-    return { title: humanize(title), value, short: true };
-  });
-}
+// function fieldsFromObject(ob) {
+//   if (_.isArray(ob)) {
+//     return _.map(ob, (title) => { return { title: humanize(title), short: true }; });
+//   }
+//   return _.map(ob, (v, title) => {
+//     let value = _.isBoolean(v) ? humanize(v.toString()) : v;
+//     value = _.endsWith(title, "_at") ? moment(value).format(MOMENT_FORMAT) : value;
+//     return { title: humanize(title), value, short: true };
+//   });
+// }
 
 // function compactFieldsFromObject(ob) {
 //   if (_.isArray(ob)) {
@@ -28,7 +28,7 @@ function fieldsFromObject(ob) {
 // }
 
 function formatObjToText(ob) {
-  return _.join(_.map(format(ob), (p) => `*${p.title}*: ${p.value}`), "\n");
+  return _.join(_.map(format(_.omit(ob, 'id')), (p) => `*${p.title}*: ${p.value}`), "\n");
 }
 
 function colorFactory() {
@@ -41,10 +41,11 @@ function colorFactory() {
   };
 }
 
-function getUserAttachment(user, color) {
+function getUserAttachment(user, color, pretext) {
   const name = getUserName(user);
   return {
     mrkdwn_in: ["text", "fields", "pretext"],
+    pretext,
     fallback: name,
     color: color(),
     fields: [
@@ -145,11 +146,11 @@ function getEventsAttachements(events = [], color) {
   });
 }
 
-module.exports = function buildAttachments({ user = {}, segments = [], changes = {}, events = [] }) {
+module.exports = function buildAttachments({ user = {}, segments = [], changes = {}, events = [], pretext = "" }) {
   const color = colorFactory();
   return {
     events: getEventsAttachements(events, color),
-    user: getUserAttachment(user, color),
+    user: getUserAttachment(user, color, pretext),
     segments: getSegmentAttachments(changes, segments, color),
     changes: getChangesAttachment(changes, color),
     traits: getTraitsAttachments(user, color)

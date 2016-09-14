@@ -10,6 +10,7 @@ module.exports = function interactiveMessage(bot, message) {
   const [action] = actions;
   const { name, value } = action;
   const hull = new Hull(bot.config.hullConfig);
+  console.log("Interactive Message from", name, value, callback_id, original_message, bot.config.hullConfig);
   if (name === "trait") {
     try {
       hull.as(callback_id).traits(JSON.parse(value));
@@ -30,8 +31,8 @@ module.exports = function interactiveMessage(bot, message) {
         attachement.fields = formatEventProperties(props);
         attachement.actions = [];
         bot.replyInteractive(message, { ...original_message, attachments });
-      }).
-      catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
     }
 
     if (value === "traits" || value === "events") {

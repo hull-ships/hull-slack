@@ -11,14 +11,6 @@
   "settings": [],
   "private_settings": [
     {
-      "name": "synchronized_segments",
-      "title": "Segments",
-      "description": "Post to channel when users match these segments (Empty to send everyone)",
-      "default": [],
-      "type": "array",
-      "format": "segment"
-    },
-    {
       "name": "token",
       "title": "Token",
       "type": "string",
@@ -78,48 +70,80 @@
     },
     {
       "name": "notify_header",
-      "title": "Notify When User",
+      "title": "Notifications",
       "type": "string",
       "format": "title"
     },
     {
-      "name": "send_create",
-      "title": "Is Created",
-      "default": true,
-      "type": "boolean",
-      "format": "checkbox"
+      "name": "notify_segments",
+      "title": "Notify on Segment update",
+      "type": "array",
+      "format": "table",
+      "items": {
+        "type": "object",
+        "required": [
+          "channel",
+          "segment"
+        ],
+        "properties": {
+          "segment": {
+            "title": "Segment",
+            "type": "string",
+            "format": "segment"
+          },
+          "channel": {
+            "title": "Channel Name",
+            "type": "string",
+            "format": "string"
+          },
+          "enter": {
+            "title": "Notify on enter",
+            "type": "boolean",
+            "format": "checkbox"
+          },
+          "leave": {
+            "title": "Notify on leave",
+            "type": "boolean",
+            "format": "checkbox"
+          }
+        }
+      }
     },
     {
-      "name": "send_update",
-      "title": "Is Updated",
-      "default": true,
-      "type": "boolean",
-      "format": "checkbox"
-    },
-    {
-      "name": "send_enter",
-      "title": "Enters a Segment",
-      "default": true,
-      "type": "boolean",
-      "format": "checkbox"
-    },
-    {
-      "name": "send_left",
-      "title": "Leaves a Segment",
-      "default": true,
-      "type": "boolean",
-      "format": "checkbox"
+      "name": "notify_events",
+      "title": "Notify on Event triggered",
+      "type": "array",
+      "format": "table",
+      "items": {
+        "type": "object",
+        "required": [
+          "channel",
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "title": "Event Name",
+            "type": "string",
+            "format": "event"
+          },
+          "channel": {
+            "title": "Channel Name",
+            "type": "string",
+            "format": "string"
+          }
+        }
+      }
     },
     {
       "name": "button_header",
-      "title": "Button Actions",
+      "title": "Actions",
       "type": "string",
       "format": "title"
     },
     {
       "name": "actions",
       "title": "Actions",
-      "description": "Add buttons to each Slack message to update User properties",
+      "description": "Add Action Buttons for updating User properties",
       "default": true,
       "type": "array",
       "format": "table",

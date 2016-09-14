@@ -48,7 +48,7 @@ function getActions(user, traits, events, actions, group = "") {
         name: "expand",
         style: (group === "traits") ? "primary" : "default",
         value: "traits",
-        text: "Show user properties",
+        text: "Show properties",
         type: "button"
       }
     ]
@@ -62,16 +62,13 @@ module.exports = function userPayload({
   segments = {},
   changes = [],
   actions = [],
-  action = "",
+  message = "",
   group = "",
 }) {
   const user_url = urlFor(user, hull.configuration().organization);
-  const atts = buildAttachments({ user, segments, changes, events }) || {};
+  const atts = buildAttachments({ user, segments, changes, events, pretext: message }) || {};
   const name = getUserName(user);
-  // atts.user = {
-  //   ...atts.user,
-  //   ...actions
-  // };
+
   let attachments = [
     atts.user,
     atts.segments,
@@ -84,10 +81,9 @@ module.exports = function userPayload({
   if (group === "traits") {
     attachments.push(...atts.traits);
   }
-  console.log(actions)
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
   return {
-    text: `*<${user_url}|${name}>* ${action}`,
+    text: `*<${user_url}|${name}>*`,
     attachments
   };
 };
