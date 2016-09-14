@@ -125,7 +125,7 @@ function getEventsAttachements(events = [], color) {
       const { days_since_signup: ds } = e.context || {};
       // footer:   `:clock2: ${ds} day${(Math.abs(ds) === 1) ? "" : "s"} ${(ds >= 0) ? "after" : "before"} signup | Type: ${e.type} | Source: ${e.source} on ${pp}`
       const actions = [];
-      if (e.props.length) {
+      if (e.props && e.props.length) {
         actions.push({ name: "expand", value: "event", text: "Show Properties", type: "button" });
       }
       return {
