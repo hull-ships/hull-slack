@@ -55,8 +55,7 @@ function getEvents(events, notify_events) {
   const triggered = [];
   if (notify_events.length) {
     const event_names = _.map(events, "event");
-    const event_hash = _.compact(_.uniq(_.map(notify_events, (notify) => {
-      const { event, channel } = notify;
+    const event_hash = _.compact(_.uniq(_.map(notify_events, ({ event, channel }) => {
       if (_.includes(event_names, event)) {
         triggered.push(channel);
         return event;
@@ -75,13 +74,11 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
 
   const { private_settings = {} } = ship;
-  const { token = "", user_id = "", actions = [], incoming_webhook = {}, notify_events = [], notify_segments = [] } = private_settings;
+  const { token = "", user_id = "", actions = [], notify_events = [], notify_segments = [] } = private_settings;
 
   hull.logger.debug("update.process");
 
-  const { url } = incoming_webhook;
-
-  if (!hull || !user.id || !url || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
+  if (!hull || !user.id || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
 
   const messages = [];
 
@@ -92,6 +89,8 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   // Event Triggers
   const eventActions = getEvents(events, notify_events);
   const { triggered } = eventActions;
+
+  hull.logger.debug("slack.event", { triggered });
 
   messages.push(...changeActions.messages, ...eventActions.messages);
 
