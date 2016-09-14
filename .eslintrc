@@ -1,6 +1,13 @@
 {
   "parser": "babel-eslint",
-  "globals": {},
+  "globals": {
+    "Hull": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
   "env": {
     "es6": true
   },
@@ -8,7 +15,7 @@
     "comma-dangle": [0],
     "max-len": [0],
     "camelcase": [0],
-    "quotes": [2, "double"],
+    "quotes": [0],
     "prefer-arrow-callback": [0],
     "new-cap": [0],
     "no-underscore-dangle": [0],

@@ -6,3 +6,4 @@ dist
 npm-debug.log
 .env
 /lib
+/.env.dev
