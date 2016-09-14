@@ -28,7 +28,7 @@ module.exports = function Server(options = {}) {
       options: {
         clientID,
         clientSecret,
-        scope: "incoming-webhook, bot, channels:write",
+        scope: "bot, channels:write",
         skipUserProfile: true
       },
       isSetup(req, { /* hull, */ ship }) {
