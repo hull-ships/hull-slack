@@ -36,7 +36,6 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
       if (!user) return { message: `Couldn't find anyone!` };
 
       const groupedUser = hull.utils.groupTraits(_.omitBy(user, v => (v === null || v === "" || v === undefined)));
-      console.log(groupedUser);
       return { user: groupedUser, events: events.data, segments, pagination };
     }, (err) => { return { message: `An error occured ${err.message}!` }; }
     , (err) => { return { message: `An error occured ${err.message}!` }; }

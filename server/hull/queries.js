@@ -60,7 +60,7 @@ function events(user_id) {
     sort: { created_at: "desc" },
     raw: true,
     page: 1,
-    per_page: 25
+    per_page: 15
   };
 }
 function filteredEvents(user_id, event) {

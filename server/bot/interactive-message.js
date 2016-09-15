@@ -10,13 +10,14 @@ module.exports = function interactiveMessage(bot, message) {
   const [action] = actions;
   const { name, value } = action;
   const hull = new Hull(bot.config.hullConfig);
-  console.log("Interactive Message from", name, value, callback_id, original_message, bot.config.hullConfig);
+  hull.logger.info("slack.interactiveMessage.post", { name, value, callback_id });
+
   if (name === "trait") {
     try {
       hull.as(callback_id).traits(JSON.parse(value));
       bot.reply(message, "User Updated :thumbsup:");
     } catch (e) {
-      console.log(e);
+      hull.logger.error("slack.interactiveMessage.update.error", { message: e.message });
     }
   } else if (name === "expand") {
     if (value === "event") {
@@ -36,7 +37,7 @@ module.exports = function interactiveMessage(bot, message) {
     }
 
     if (value === "traits" || value === "events") {
-      return fetchUser({ hull, search: { id: callback_id } })
+      return fetchUser({ hull, search: { id: callback_id }, options: { action: { value } } })
       .then((results) => bot.replyInteractive(message, userPayload({ ...results, hull, group: value })));
     }
   }
