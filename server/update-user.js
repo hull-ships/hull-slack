@@ -3,7 +3,7 @@ import userPayload from "./lib/user-payload";
 import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getCleanChannelNames from "./lib/get-clean-channel-names";
-// import { sayInPrivate } from "./bot";
+import { sayInPrivate } from "./bot";
 
 function flattenForText(array = []) {
   return _.map(array, e => `"${e}"`).join(', ');
@@ -59,13 +59,15 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
 
   const { private_settings = {} } = ship;
-  const { token = "", /*user_id = "",*/ actions = [], notify_events = [], notify_segments = [] } = private_settings;
+  const { token = "", user_id = "", actions = [], notify_events = [], notify_segments = [] } = private_settings;
 
 
   if (!hull || !user.id || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
 
   const notifyChannelNames = getCleanChannelNames(_.concat(_.map(notify_segments, 'channel'), _.map(notify_events, 'channel')));
-  if (!notifyChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No channels to notify" });
+
+  // Early return if no channel names configured
+  if (!notifyChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No channels configured" });
 
   const messages = [];
 
@@ -80,47 +82,26 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   hull.logger.debug("slack.notification.events", eventActions);
 
 
+  // Build message array
   messages.push(...changeActions.messages, ...eventActions.messages);
   hull.logger.debug("slack.notification.messages", messages);
 
   const currentNotificationChannelNames = getCleanChannelNames(_.concat(entered, left, triggered));
+  // Early return if no marching cnannel
   hull.logger.debug("slack.notification.channels", currentNotificationChannelNames);
+  if (!currentNotificationChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No matching channels" });
 
-  if (currentNotificationChannelNames.length === 0) return false;
-
+  // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n') });
-  function postToChannel(channel) { return bot.say({ ...payload, channel }); }
 
-  // const tellUser = sayInPrivate.bind(this, bot, user_id);
 
+  const tellUser = sayInPrivate.bind(this, bot, user_id);
 
   return setupChannels({ hull, bot, token, notifyChannelNames })
   .then(teamChannels => {
     hull.logger.debug("slack.channels.setup", teamChannels);
-    const currentNotificationChannelIds = getChannelIds(teamChannels, currentNotificationChannelNames);
-    _.map(currentNotificationChannelIds, postToChannel);
-  }, err => console.log(err))
-
-  .catch(err => console.log(err));
+    function postToChannel(channel) { return bot.say({ ...payload, channel }); }
+    _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
+  }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`))
+  .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`));
 }
-
-  // hull.logger.error("slack.bot.notify.error", { message: err });
-  // tellUser([
-  //   `Couldn't post update to #${err.channel.name}`,
-  //   "It seems I'm not invited.",
-  //   `Invite me by typing \`/invite @hull ${err.channel.name}\``
-  // ]);
-//     Promise.all(createChannels(bot, token, teamChannels, joinChannels))
-//     .then(
-//       channelIds => {
-//         return Promise.all(_.map(channelNames, name => inviteBot(bot, token, _.find(botChannels, { name }))));
-//       }, err => hull.logger.error("slack.bot.channels.error", { message: err.message })
-//     )
-//     .then(
-//       channelIds => _.map(channelIds, channel => bot.say({ ...payload, channel }))
-//       , err => {
-//       }
-//     );
-//   });
-//   return true;
-// }
