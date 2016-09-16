@@ -64,6 +64,8 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   if (!hull || !user.id || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
 
+  const notifyChannelNames = getCleanChannelNames(_.concat(_.map(notify_segments, 'channel'), _.map(notify_events, 'channel')));
+  if (!notifyChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No channels to notify" });
 
   const messages = [];
 
@@ -91,7 +93,6 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   // const tellUser = sayInPrivate.bind(this, bot, user_id);
 
-  const notifyChannelNames = getCleanChannelNames(_.concat(_.map(notify_segments, 'channel'), _.map(notify_events, 'channel')));
 
   return setupChannels({ hull, bot, token, notifyChannelNames })
   .then(teamChannels => {
