@@ -40,7 +40,7 @@ module.exports = function BotFactory({ devMode }) {
   controller.on("create_bot", function createBot(bot, config) {
     const hull = new Hull(config.hullConfig);
 
-    if (_getBotByToken(bot.config.bot_token)) return hull.logger.debug("bot.skip");
+    if (_getBotByToken(bot.config.token)) return hull.logger.debug("slack.bot.create.skip");
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
     hull.logger.info("bot.register");
@@ -97,6 +97,8 @@ module.exports = function BotFactory({ devMode }) {
       };
 
       const bot = controller.spawn(config);
+      hull.logger.info('slack.bot.create');
+
       controller.trigger("create_bot", [bot, config]);
       return bot;
     }
