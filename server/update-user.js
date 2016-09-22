@@ -2,7 +2,8 @@ import _ from "lodash";
 import userPayload from "./lib/user-payload";
 import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
-import getCleanChannelNames from "./lib/get-clean-channel-names";
+import getNotifyChannels from "./lib/get-notify-channels";
+import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import { sayInPrivate } from "./bot";
 
 function flattenForText(array = []) {
@@ -29,6 +30,7 @@ function getChanges(changes, notify_segments) {
   }
   return { entered, left, messages };
 }
+
 function getEvents(events, notify_events) {
   const messages = [];
   const triggered = [];
@@ -53,43 +55,46 @@ function getChannelIds(teamChannels, channelNames) {
 }
 
 export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
-  hull.logger.info("slack.notification.start");
+  hull.logger.info("notification.start");
 
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
+
+  hull.logger.info(changes);
 
   const { private_settings = {} } = ship;
   const { token = "", user_id = "", actions = [], notify_events = [], notify_segments = [] } = private_settings;
 
 
-  if (!hull || !user.id || !token) { return hull.logger.info("slack.credentials", { message: "Missing credentials" }); }
+  if (!hull || !user.id || !token) { return hull.logger.info("credentials", { message: "Missing credentials" }); }
 
-  const notifyChannelNames = getCleanChannelNames(_.concat(_.map(notify_segments, 'channel'), _.map(notify_events, 'channel')));
+  const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
   // Early return if no channel names configured
-  if (!notifyChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No channels configured" });
+  if (!channels.length) return hull.logger.info("notification.skip", { message: "No channels configured" });
 
   const messages = [];
 
   // Change Triggers
   const changeActions = getChanges(changes, notify_segments);
   const { entered, left } = changeActions;
-  hull.logger.debug("slack.notification.changes", changeActions);
+  hull.logger.debug("notification.changes", changeActions);
 
   // Event Triggers
   const eventActions = getEvents(events, notify_events);
   const { triggered } = eventActions;
-  hull.logger.debug("slack.notification.events", eventActions);
+  hull.logger.debug("notification.events", eventActions);
 
 
   // Build message array
   messages.push(...changeActions.messages, ...eventActions.messages);
-  hull.logger.debug("slack.notification.messages", messages);
+  hull.logger.debug("notification.messages", messages);
 
-  const currentNotificationChannelNames = getCleanChannelNames(_.concat(entered, left, triggered));
+  const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
+
   // Early return if no marching cnannel
-  hull.logger.debug("slack.notification.channels", currentNotificationChannelNames);
-  if (!currentNotificationChannelNames.length) return hull.logger.info("slack.notification.skip", { message: "No matching channels" });
+  hull.logger.debug("notification.channels", currentNotificationChannelNames);
+  if (!currentNotificationChannelNames.length) return hull.logger.info("notification.skip", { message: "No matching channels" });
 
   // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n') });
@@ -97,9 +102,9 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   const tellUser = sayInPrivate.bind(this, bot, user_id);
 
-  return setupChannels({ hull, bot, token, notifyChannelNames })
+  return setupChannels({ hull, bot, token, channels })
   .then(teamChannels => {
-    hull.logger.debug("slack.channels.setup", teamChannels);
+    hull.logger.debug("channels.setup", teamChannels);
     function postToChannel(channel) { return bot.say({ ...payload, channel }); }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
   }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`))

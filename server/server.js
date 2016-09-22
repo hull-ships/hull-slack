@@ -32,7 +32,7 @@ module.exports = function Server(options = {}) {
         skipUserProfile: true
       },
       isSetup(req, { /* hull, */ ship }) {
-        if (!!req.query.reset) return Promise.reject();
+        if (req.query.reset) return Promise.reject();
         const { token, bot = {} } = ship.private_settings || {};
         const { bot_access_token } = bot || {};
         return (!!token && !!bot_access_token) ? Promise.resolve({

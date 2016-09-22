@@ -3,7 +3,11 @@ import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
 import { replies, join } from "./bot";
-import getChannels from "./lib/get-channels";
+import getTeamChannels from "./lib/get-team-channels";
+import getNotifyChannels from "./lib/get-notify-channels";
+import getUniqueChannelNames from "./lib/get-unique-channel-names";
+
+import setupChannels from "./lib/setup-channels";
 
 module.exports = function BotFactory({ devMode }) {
   const controller = Botkit.slackbot({
@@ -40,21 +44,27 @@ module.exports = function BotFactory({ devMode }) {
   controller.on("create_bot", function createBot(bot, config) {
     const hull = new Hull(config.hullConfig);
 
-    if (_getBotByToken(bot.config.token)) return hull.logger.debug("slack.bot.create.skip");
+    const { channels, user_token, token } = bot.config;
+
+    if (_getBotByToken(token)) return hull.logger.debug("bot.create.skip");
+
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
     hull.logger.info("bot.register");
 
+
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
-        _clearCache(bot.config.bot_token);
-        return hull.logger.error("bot.register.error", err.toString());
+        _clearCache(token);
+        return hull.logger.error("bot.register.error", { message: err.message });
       }
 
       /* Create a Hull instance */
       controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
-        if (error) return hull.logger.error("bot.team.save.error", error.toString());
-        return true;
+        if (error) {
+          return hull.logger.error("bot.team.save.error", { message: error.message });
+        }
+        return setupChannels({ hull, bot, token: user_token, channels });
       });
       return true;
     });
@@ -62,8 +72,8 @@ module.exports = function BotFactory({ devMode }) {
   });
 
   controller.on("bot_channel_join", join);
-  controller.on("bot_channel_join", bot => getChannels(bot, true));
-  controller.on("bot_channel_leave", bot => getChannels(bot, true));
+  controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
+  controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
   controller.on("interactive_message_callback", interactiveMessage);
   _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
     controller.hears(message, context, ...middlewares, reply);
@@ -73,25 +83,32 @@ module.exports = function BotFactory({ devMode }) {
     controller,
     getBot: _getBotByToken,
     connectSlack: function connectSlack({ hull, ship, force = false }) {
-      if (!force && (!ship || !hull || !ship.private_settings || !ship.private_settings.bot)) return false;
+      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
 
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
-      const oldBot = _getBotByToken(ship.private_settings.bot.bot_access_token);
+      const token = ship.private_settings.bot.bot_access_token;
+      const user_token = ship.private_settings.token;
+
+      const oldBot = _getBotByToken(token);
       if (oldBot && oldBot.rtm) {
         if (force) {
           oldBot.rtm.close();
-          _clearCache(ship.private_settings.bot.bot_access_token);
+          _clearCache(token);
         } else {
           return oldBot;
         }
       }
 
+      const channels = getUniqueChannelNames(getNotifyChannels(ship));
+
       const config = {
         ..._.pick(ship.private_settings, "user_id", "actions"),
-        id: ship.private_settings.team_id,
-        token: ship.private_settings.bot.bot_access_token,
+        channels,
+        user_token,
+        token, // BOT TOKEN
+        id: ship.private_settings.team_id, // TEAM ID
         hullConfig: _.pick(conf, "organization", "id", "secret"),
         bot_id: ship.private_settings.bot.bot_user_id,
       };

@@ -1,70 +1,57 @@
 import _ from "lodash";
-import getTeamChannels from "./get-channels";
+import getTeamChannels from "./get-team-channels";
 
-function inviteBot(bot, token, channel) {
+function inviteBot(bot, token, channels) {
   const user = bot.config.bot_id;
-  return bot.api.channels.invite({ token, channel, user })
-  .then((botRes) => {
-    console.log("Invite Bot", botRes);
-    return channel;
-  }, err => {
-    console.log("Invite Bot error", err);
-    return channel;
-  });
+  return Promise.all(_.map(channels, channel => {
+    return new Promise((resolve, reject) => {
+      bot.api.channels.invite({ token, channel: channel.id, user }, function inviteDone(err) {
+        if (err) return reject(err);
+        return resolve(channel);
+      });
+    });
+  }));
 }
+
 function createChannels(bot, token, channelsToJoin = []) {
-  return _.map(channelsToJoin, channel => {
-    const { name } = channel;
-    return bot.api.channels.create({ token, name })
-    .then(() => channel.id);
-  });
+  return Promise.all(_.map(channelsToJoin, name => {
+    return new Promise((resolve, reject) => {
+      bot.api.channels.create({ token, name }, function channelCreated(err, channel = {}) {
+        if (err) return reject(err);
+        return resolve(channel.id);
+      });
+    });
+  }));
 }
 
 function getNotifyChannels(teamChannels, notifyChannelsNames) {
   return _.filter(teamChannels, channel => _.includes(notifyChannelsNames, channel.name));
 }
 
-function getBotChannels(teamChannels) {
-  return _.filter(teamChannels, { is_member: true });
+function getChannelsToJoin(teamChannels, channels) {
+  return _.filter(teamChannels, channel => (_.includes(channels, channel.name) && channel.is_member === false));
 }
 
-function getChannelsToJoin(teamChannels, notifyChannels) {
-  return _.filter(teamChannels, channel => (_.includes(notifyChannels, channel.name) && channel.is_member === false));
+function getChannelsToCreate(teamChannels, channels) {
+  return _.filter(channels, channel => !_.includes(_.map(teamChannels, 'name'), channel));
 }
 
 
-export default function ({ hull, bot, notifyChannelNames, token }) {
+export default function ({ hull, bot, token, channels }) {
   return getTeamChannels(bot)
   .then(teamChannels => {
-    const notifyChannels = getNotifyChannels(teamChannels, notifyChannelNames);
-    const channelsToJoin = getChannelsToJoin(teamChannels, notifyChannelNames);
+    const notifyChannels = getNotifyChannels(teamChannels, channels);
+    const channelsToJoin = getChannelsToJoin(teamChannels, channels);
+    const channelsToCreate = getChannelsToCreate(teamChannels, channels);
 
-    hull.logger.debug("slack.getTeamChannels.setup", { notifyChannels, channelsToJoin });
+    hull.logger.info("getTeamChannels.setup", { channels, teamChannels, notifyChannels, channelsToJoin });
 
-    function _inviteBot() {
-      return Promise
-      .all(_.map(notifyChannels, channel => inviteBot(bot, token, channel.id)))
-      .catch(err => hull.logger.error("slack.bot.invite.error", { message: err.message }));
-    }
+    createChannels(bot, token, channelsToCreate)
+    .catch(err => hull.logger.error("createChannels.error", { message: err.message }))
 
-    return Promise
-    .all(createChannels(bot, token, channelsToJoin))
+    .then(() => inviteBot(bot, token, channelsToJoin))
+    .catch(err => hull.logger.error("bot.invite.error", { message: err.message }))
 
-    .then(
-      () => _inviteBot
-      , err => {
-        hull.logger.error("slack.createChannels.error", { message: err.message });
-        return _inviteBot();
-      }
-    )
-
-    .then(
-      () => teamChannels
-      , err => {
-        hull.logger.error("slack.inviteBot.error", { message: err.message });
-        console.log(err);
-        return teamChannels;
-      }
-    );
-  }, err => hull.logger.error("slack.getTeamChannels.error", { message: err.message }));
+    .then(() => teamChannels);
+  }, err => hull.logger.error("getTeamChannels.error", { message: err.message }));
 }

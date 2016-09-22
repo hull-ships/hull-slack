@@ -37,11 +37,11 @@ function join(bot, message) {
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
 
 function sad(hull, bot, message, err) {
-  hull.logger.error("slack.bot.error", err.message);
+  hull.logger.error("bot.error", err.message);
   return bot.reply(message, ":scream: Something bad happened.");
 }
 function rpl(hull, bot, message, res) {
-  hull.logger.info("slack.bot.reply");
+  hull.logger.info("bot.reply");
   return bot.reply(message, res);
 }
 
