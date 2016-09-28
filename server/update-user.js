@@ -99,7 +99,6 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n') });
 
-
   const tellUser = sayInPrivate.bind(this, bot, user_id);
 
   return setupChannels({ hull, bot, token, channels })

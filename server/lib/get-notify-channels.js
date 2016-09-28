@@ -7,5 +7,5 @@ export default function getSlackChannels(ship = {}) {
   const { notify_events = [], notify_segments = [] } = private_settings;
   if (!notify_events && !notify_segments) return [];
 
-  return _.concat(notify_segments, notify_events);
+  return _.map(_.concat(notify_segments, notify_events), "channel");
 }

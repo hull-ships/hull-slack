@@ -46,7 +46,7 @@ export default function ({ hull, bot, token, channels }) {
 
     hull.logger.info("getTeamChannels.setup", { channels, teamChannels, notifyChannels, channelsToJoin });
 
-    createChannels(bot, token, channelsToCreate)
+    return createChannels(bot, token, channelsToCreate)
     .catch(err => hull.logger.error("getTeamChannels.create.error", { message: err.message }))
 
     .then(() => inviteBot(bot, token, channelsToJoin))
