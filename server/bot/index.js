@@ -105,7 +105,7 @@ const replies = [{
     return rpl(hull, bot, message, messages.notfound);
   }
 }, {
-  message: "^stop",
+  message: "^kill$",
   reply: (bot, message) => {
     ack(bot, message, "cry");
     bot.reply(message, ":wave: Bby");
