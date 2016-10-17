@@ -73,6 +73,22 @@ function postUser(type, options = {}) {
 
 /* BUTTONS */
 const replies = [{
+  message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("email")
+}, {
+  message: ["^(events)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("email", { action: { name: "expand", value: "events" } })
+}, {
+  message: "^(info|search) id:(.+)",
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("id")
+}, {
+  message: ["^info \"(.+)\"\\s?(.*)$", "^info (.+)$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("name")
+}, {
   message: ["hello", "hi"],
   context: "direct_message,mention,direct_mention", // Default
   reply: (bot, message) => {
@@ -95,22 +111,6 @@ const replies = [{
     bot.reply(message, ":wave: Bby");
     bot.rtm.close();
   }
-}, {
-  message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email")
-}, {
-  message: ["^(events)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { action: { name: "expand", value: "events" } })
-}, {
-  message: "^(info|search) id:(.+)",
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("id")
-}, {
-  message: ["^info \"(.+)\"\\s?(.*)$", "^info (.+)$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("name")
 }
 //   message: [
 //     "^set\\s+<(mailto):(.+?)\\|(.+)>\\s+(.+)$"
