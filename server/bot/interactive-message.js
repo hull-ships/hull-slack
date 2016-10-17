@@ -14,7 +14,7 @@ module.exports = function interactiveMessage(bot, message) {
 
   if (name === "trait") {
     try {
-      hull.as(callback_id).traits(JSON.parse(value));
+      hull.as(callback_id).traits(JSON.parse(value), { sync: true });
       bot.reply(message, "User Updated :thumbsup:");
     } catch (e) {
       hull.logger.error("interactiveMessage.update.error", { message: e.message });
