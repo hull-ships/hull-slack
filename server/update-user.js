@@ -60,8 +60,6 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
 
-  hull.logger.info(changes);
-
   const { private_settings = {} } = ship;
   const { token = "", user_id = "", actions = [], notify_events = [], notify_segments = [] } = private_settings;
 
