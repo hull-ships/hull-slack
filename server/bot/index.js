@@ -1,10 +1,10 @@
 import Hull from "hull";
+import _ from "lodash";
 import userPayload from "../lib/user-payload";
 import getSearchHash from "../lib/get-search-hash";
 import fetchUser from "../hull/fetch-user";
 import messages from "./messages";
 import ack from "./ack";
-import _ from "lodash";
 
 function _replaceBotName(bot, m = "") {
   return m.replace(/@hull/g, `@${bot.identity.name}`);
@@ -51,15 +51,17 @@ function postUser(type, options = {}) {
   return function post(bot, message) {
     ack(bot, message, "mag_right");
     const search = getSearchHash(type, message);
-    const { actions, hullConfig } = bot.config;
+    const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
     fetchUser({ hull, search, options })
-    .then(({ user, events, segments, pagination, message = "" }) => {
-      if (!user) return `¯\\_(ツ)_/¯ ${message}`;
-      const pl = { hull, user, events, segments, actions, pagination };
-      if (search.rest && options.action) pl.group = options.action.value;
+    .then(({ user, events, segments, pagination, msg = "" }) => {
+      if (!user) return `¯\\_(ツ)_/¯ ${msg}`;
+      const pl = { hull, user, events, segments, actions, pagination, whitelist, full: (options.full || search.rest === "full") };
+      // if (search.rest && options.action) pl.group = options.action.value;
+      if (search.rest && options.action) pl.group = search.rest;
       const res = userPayload(pl);
+      console.log('slack.user.post', JSON.stringify(res, null, 2));
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
     }, sad.bind(undefined, hull, bot, message))
@@ -73,9 +75,17 @@ function postUser(type, options = {}) {
 
 /* BUTTONS */
 const replies = [{
-  message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  message: ["^full\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
   context: "direct_message,mention,direct_mention",
-  reply: postUser("email")
+  reply: postUser("email", { full: true })
+}, {
+  message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("email", { full: false })
+}, {
+  message: ["^\\s?<(mailto):(.+?)\\|(.+)>\\s+(.*)$"],
+  context: "direct_message,mention,direct_mention",
+  reply: postUser("email", { action: 'traits', full: true })
 }, {
   message: ["^(events)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
   context: "direct_message,mention,direct_mention",

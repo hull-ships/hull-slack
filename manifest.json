@@ -68,6 +68,16 @@
         }
       }
     },
+
+
+    {
+      "name": "whitelist",
+      "title": "Displayed Attributes (none displays everything)",
+      "type": "array",
+      "default": [],
+      "format": "trait"
+    },
+
     {
       "name": "notify_header",
       "title": "Notifications",
@@ -76,18 +86,16 @@
     },
     {
       "name": "notify_segments",
-      "title": "Notify on Segment update",
+      "title": "Notify when User enters or leaves segment",
       "type": "array",
       "format": "table",
+      "default": [{ "segment": "", "channel": "" }],
       "items": {
         "type": "object",
-        "required": [
-          "channel",
-          "segment"
-        ],
+        "required": [ "channel", "segment"],
         "properties": {
           "segment": {
-            "title": "Segment",
+            "title": "Segment Name",
             "type": "string",
             "format": "segment"
           },
@@ -111,15 +119,13 @@
     },
     {
       "name": "notify_events",
-      "title": "Notify on Event triggered",
+      "title": "Notify when user performs Event",
       "type": "array",
       "format": "table",
+      "default": [{ "event": "", "channel": "" }],
       "items": {
         "type": "object",
-        "required": [
-          "channel",
-          "event"
-        ],
+        "required": ["channel", "event"],
         "properties": {
           "event": {
             "title": "Event Name",
@@ -142,9 +148,8 @@
     },
     {
       "name": "actions",
-      "title": "Actions",
-      "description": "Add Action Buttons for updating User properties",
-      "default": true,
+      "title": "Add Action Buttons to update User attributes on click",
+      "default": [{ "label": "", "property": "", "value": "" }],
       "type": "array",
       "format": "table",
       "items": {
