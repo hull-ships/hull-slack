@@ -10,10 +10,9 @@ import setupChannels from "./lib/setup-channels";
 
 module.exports = function BotFactory({ Hull, devMode }) {
   const controller = Botkit.slackbot({
-    logger: Hull.logger,
     stats_optout: true,
     interactive_replies: true,
-    debug: false
+    debug: devMode
   });
 
   const _bots = {};

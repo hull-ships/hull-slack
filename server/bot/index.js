@@ -48,26 +48,35 @@ function rpl(hull, bot, message, res) {
 
 /* MAIN USER ACTION */
 function postUser(type, options = {}) {
-  return function post(bot, message) {
-    ack(bot, message, "mag_right");
-    const search = getSearchHash(type, message);
+  return function post(bot, msg) {
+    ack(bot, msg, "mag_right");
+    const search = getSearchHash(type, msg);
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
+    hull.logger.info('hull.slack.hear', { search, options });
+
     fetchUser({ hull, search, options })
-    .then(({ user, events, segments, pagination, msg = "" }) => {
-      if (!user) return `¯\\_(ツ)_/¯ ${msg}`;
-      const pl = { hull, user, events, segments, actions, pagination, whitelist, full: (options.full || search.rest === "full") };
-      // if (search.rest && options.action) pl.group = options.action.value;
-      if (search.rest && options.action) pl.group = search.rest;
+    .then(({ user, events, segments, pagination, message = "" }) => {
+      hull.logger.info('hull.slack.fetchUser.fail', { message });
+      if (!user) return `¯\\_(ツ)_/¯ ${message}`;
+
+      const { action, full = (search.rest === "full") } = options;
+      const pl = { hull, user, events, segments, actions, pagination, whitelist, full };
+      if (search.rest) {
+        if (action) {
+          if (action.name === "expand") pl.group = options.action.value;
+        }
+      }
+      // if (search.rest && options.action) pl.group = search.rest;
       const res = userPayload(pl);
-      console.log('slack.user.post', JSON.stringify(res, null, 2));
+      hull.logger.debug('slack.user.post', res);
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
-    }, sad.bind(undefined, hull, bot, message))
+    }, sad.bind(undefined, hull, bot, msg))
     .then(
-      rpl.bind(undefined, hull, bot, message),
-      sad.bind(undefined, hull, bot, message)
+      rpl.bind(undefined, hull, bot, msg),
+      sad.bind(undefined, hull, bot, msg)
     );
   };
 }
@@ -75,27 +84,23 @@ function postUser(type, options = {}) {
 
 /* BUTTONS */
 const replies = [{
-  message: ["^full\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { full: true })
-}, {
   message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
   context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { full: false })
+  reply: postUser("email")
 }, {
-  message: ["^\\s?<(mailto):(.+?)\\|(.+)>\\s+(.*)$"],
+  message: ["^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$"],
   context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { action: 'traits', full: true })
+  reply: postUser("email", { action: { name: "expand", value: "traits" } })
 }, {
-  message: ["^(events)?\\s?<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
   context: "direct_message,mention,direct_mention",
   reply: postUser("email", { action: { name: "expand", value: "events" } })
 }, {
-  message: "^(info|search) id:(.+)",
+  message: "^(info|search)\\sid:(.+)",
   context: "direct_message,mention,direct_mention",
   reply: postUser("id")
 }, {
-  message: ["^info \"(.+)\"\\s?(.*)$", "^info (.+)$"],
+  message: ["^info\\s\"(.+)\"\\s?(.*)$", "^info (.+)$"],
   context: "direct_message,mention,direct_mention",
   reply: postUser("name")
 }, {

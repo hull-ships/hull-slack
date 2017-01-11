@@ -55,7 +55,7 @@ function getChannelIds(teamChannels, channelNames) {
 }
 
 export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
-  hull.logger.info("notification.start");
+  hull.logger.info("hull.slack.notification.start");
 
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
@@ -71,12 +71,12 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   } = private_settings;
 
 
-  if (!hull || !user.id || !token) { return hull.logger.info("credentials", { message: "Missing credentials" }); }
+  if (!hull || !user.id || !token) { return hull.logger.info("hull.slack.notification.skip", { message: "Missing credentials" }); }
 
   const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
   // Early return if no channel names configured
-  if (!channels.length) return hull.logger.info("notification.skip", { message: "No channels configured" });
+  if (!channels.length) return hull.logger.info("hull.slack.notification.skip", { message: "No channels configured" });
 
   const messages = [];
 
@@ -99,7 +99,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   // Early return if no marching cnannel
   hull.logger.debug("notification.channels", currentNotificationChannelNames);
-  if (!currentNotificationChannelNames.length) return hull.logger.info("notification.skip", { message: "No matching channels" });
+  if (!currentNotificationChannelNames.length) return hull.logger.info("hull.slack.notification.skip", { message: "No matching channels" });
 
   // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n'), whitelist });
@@ -108,7 +108,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   return setupChannels({ hull, bot, token, channels })
   .then((teamChannels) => {
-    hull.logger.debug("channels.setup", teamChannels);
+    hull.logger.debug("hull.slack.channels.setup", teamChannels);
     function postToChannel(channel) { return bot.say({ ...payload, channel }); }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
   }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`))

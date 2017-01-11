@@ -9,7 +9,7 @@ module.exports = function interactiveMessage(bot, message) {
   const { actions, callback_id, original_message } = message;
   const [action] = actions;
   const { name, value } = action;
-  console.log(bot)
+
   const hull = new Hull(bot.config.hullConfig);
   hull.logger.info("interactiveMessage.post", { name, value, callback_id });
 

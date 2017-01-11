@@ -15,7 +15,7 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
 
   const eventSearch = options.action && options.action.value === "events";
 
-  hull.logger.debug("hull.slack.search", JSON.stringify(params));
+  hull.logger.debug("hull.slack.search", params);
 
   return hull.post("search/user_reports", params)
 
@@ -27,6 +27,7 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
     const q = [hull.as(user.id).get("/me/segments")];
     if (eventSearch) {
       const eventParams = (search.rest) ? queries.filteredEvents(user.id, search.rest) : queries.events(user.id);
+      hull.logger.debug("hull.slack.searchEvent", eventParams);
       q.push(hull.post("search/events", eventParams));
     }
     return Promise.all(q)

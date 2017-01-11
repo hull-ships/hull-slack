@@ -75,7 +75,7 @@ module.exports = function userPayload({
 
   if (group === "events" && events.length) {
     attachments = attachments.concat(atts.events);
-  } else if (group !== "" && group !== "traits" && group !== "full" && full) {
+  } else if (group && group !== "traits" && group !== "full" && full) {
     const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
     attachments.push(...t);
   } else if (group === "traits" || _.size(whitelist)) {

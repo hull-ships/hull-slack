@@ -44,7 +44,7 @@ export default function ({ hull, bot, app_token, channels }) {
     const channelsToJoin = getChannelsToJoin(teamChannels, channels);
     const channelsToCreate = getChannelsToCreate(teamChannels, channels);
 
-    hull.logger.info("getTeamChannels.setup", { channels, teamChannels, notifyChannels, channelsToJoin });
+    hull.logger.info("hull.slack.teamchannels", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
 
     return createChannels(bot, app_token, channelsToCreate)
     .catch(err => hull.logger.error("getTeamChannels.create.error", { message: err.message }))
