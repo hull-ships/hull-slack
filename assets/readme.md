@@ -24,21 +24,26 @@ to do so, just type:  `/invite @hull` from the channel.
 
 #### Conversations
 
-`@hull help`
+- `@hull user@example.com`
+
+> get data for the user with this email. You can filter what's displayed from the Ship's settings tab in your dashboard_
+
+- `@hull user@example.com full` 
+
+> get full data for the user with this email. Shows the entire profile_
+
+- `@hull user@example.com <intercom>` 
+
+> get `intercom` data for the user with this email. Replace with the service you want to display
+
+- `@hull events user@example.com` 
+
+> get latest events for the user with this email_
+
+
+- `@hull help`
+
 > Here to help!
-
-`@hull hello`
-> Hullo!
-
-`@hull stop`
-> Bye!
-
-`@hull user@example.com`
-> ...lots of info about the user
-
-`@hull info elon musk` - Tolerates typos
-> ...lots of info about the user
-
 
 #### Buttons
 
