@@ -9,12 +9,13 @@ module.exports = function interactiveMessage(bot, message) {
   const { actions, callback_id, original_message } = message;
   const [action] = actions;
   const { name, value } = action;
+  console.log(bot)
   const hull = new Hull(bot.config.hullConfig);
   hull.logger.info("interactiveMessage.post", { name, value, callback_id });
 
   if (name === "trait") {
     try {
-      hull.as(callback_id).traits(JSON.parse(value));
+      hull.as(callback_id).traits(JSON.parse(value), { sync: true });
       bot.reply(message, "User Updated :thumbsup:");
     } catch (e) {
       hull.logger.error("interactiveMessage.update.error", { message: e.message });
@@ -25,6 +26,7 @@ module.exports = function interactiveMessage(bot, message) {
       const attachement = { ...original_message.attachments[index] };
       const attachments = [...original_message.attachments];
       attachments[index] = attachement;
+
       return fetchEvent({ hull, search: { id: callback_id } })
       .then(({ events }) => {
         const [event = {}] = events;
@@ -38,7 +40,13 @@ module.exports = function interactiveMessage(bot, message) {
 
     if (value === "traits" || value === "events") {
       return fetchUser({ hull, search: { id: callback_id }, options: { action: { value } } })
-      .then((results) => bot.replyInteractive(message, userPayload({ ...results, hull, group: value })));
+      .then(results => bot.replyInteractive(message, userPayload({
+        ...results,
+        hull,
+        group: value,
+        whitelist: [],
+        full: true
+      })));
     }
   }
   return true;

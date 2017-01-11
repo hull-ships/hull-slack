@@ -1,6 +1,6 @@
 function name(query) {
   return {
-    filter: {
+    query: {
       multi_match: {
         query,
         fields: ["name", "name.exact"],
@@ -33,12 +33,12 @@ function id(query) {
 }
 function email(query) {
   return {
-    filter: {
+    query: {
       multi_match: {
         type: "phrase_prefix",
         query,
         operator: "and",
-        fields: ["email", "email.exact^2"]
+        fields: ["email.exact^2"]
       }
     },
     sort: {

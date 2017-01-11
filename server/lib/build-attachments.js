@@ -7,28 +7,8 @@ import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
 
-// function fieldsFromObject(ob) {
-//   if (_.isArray(ob)) {
-//     return _.map(ob, (title) => { return { title: humanize(title), short: true }; });
-//   }
-//   return _.map(ob, (v, title) => {
-//     let value = _.isBoolean(v) ? humanize(v.toString()) : v;
-//     value = _.endsWith(title, "_at") ? moment(value).format(MOMENT_FORMAT) : value;
-//     return { title: humanize(title), value, short: true };
-//   });
-// }
-
-// function compactFieldsFromObject(ob) {
-//   if (_.isArray(ob)) {
-//     return _.map(ob, (title) => { return { value: humanize(title), short: true }; });
-//   }
-//   return _.map(format(ob), prop => {
-//     return { value: `*${prop.title}: * ${prop.value}`, short: false };
-//   });
-// }
-
 function formatObjToText(ob) {
-  return _.join(_.map(format(_.omit(ob, 'id')), (p) => `*${p.title}*: ${p.value}`), "\n");
+  return _.join(_.map(format(_.omit(ob, 'id')), p => `*${p.title}*: ${p.value}`), "\n");
 }
 
 function colorFactory() {
@@ -81,7 +61,7 @@ function getChangesAttachment(changes, color) {
     mrkdwn_in: ["text", "fields", "pretext"],
     color: color(),
     fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
-    text: formatObjToText((_.mapValues(changes.user, (v) => `${v[0]} → ${v[1]}`)))
+    text: formatObjToText((_.mapValues(changes.user, v => `${v[0]} → ${v[1]}`)))
   };
 }
 
@@ -98,6 +78,14 @@ function getTraitsAttachments(user, color) {
     }
     return atts;
   }, []);
+}
+
+function getWhitelistedUser({ user = {}, whitelist = [], hull }) {
+  return hull.utils.groupTraits(_.reduce(whitelist, (uu, value) => {
+    const t = value.indexOf('/') > -1 ? value.replace('/', '.').replace(/^traits_/, '') : value;
+    uu[value] = _.get(user, t);
+    return uu;
+  }, {}));
 }
 
 function getSegmentAttachments(changes = {}, segments, color) {
@@ -120,10 +108,9 @@ function getSegmentAttachments(changes = {}, segments, color) {
 
 function getEventsAttachements(events = [], color) {
   if (!events.length) return {};
-  return _.map(events, e => {
+  return _.map(events, (e) => {
     try {
       const { days_since_signup: ds } = e.context || {};
-      // footer:   `:clock2: ${ds} day${(Math.abs(ds) === 1) ? "" : "s"} ${(ds >= 0) ? "after" : "before"} signup | Type: ${e.type} | Source: ${e.source} on ${pp}`
       const actions = [];
       if (e.props && e.props.length) {
         actions.push({ name: "expand", value: "event", text: "Show Properties", type: "button" });
@@ -146,12 +133,19 @@ function getEventsAttachements(events = [], color) {
   });
 }
 
-module.exports = function buildAttachments({ user = {}, segments = [], changes = {}, events = [], pretext = "" }) {
+module.exports = function buildAttachments({ hull, user = {}, segments = [], changes = {}, events = [], pretext = "", whitelist = [], full = false }) {
   const color = colorFactory();
+  if (!full && _.size(whitelist)) {
+    return {
+      user: getUserAttachment(user, color, pretext),
+      segments: getSegmentAttachments(changes, segments, color),
+      traits: getTraitsAttachments(getWhitelistedUser({ user, whitelist, hull }), color)
+    };
+  }
   return {
-    events: getEventsAttachements(events, color),
     user: getUserAttachment(user, color, pretext),
     segments: getSegmentAttachments(changes, segments, color),
+    events: getEventsAttachements(events, color),
     changes: getChangesAttachment(changes, color),
     traits: getTraitsAttachments(user, color)
   };

@@ -1,4 +1,3 @@
-import Hull from "hull";
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
@@ -9,10 +8,12 @@ import getUniqueChannelNames from "./lib/get-unique-channel-names";
 
 import setupChannels from "./lib/setup-channels";
 
-module.exports = function BotFactory({ devMode }) {
+module.exports = function BotFactory({ Hull, devMode }) {
   const controller = Botkit.slackbot({
+    logger: Hull.logger,
+    stats_optout: true,
     interactive_replies: true,
-    debug: devMode
+    debug: false
   });
 
   const _bots = {};
@@ -41,10 +42,9 @@ module.exports = function BotFactory({ devMode }) {
   //   });
   // });
 
-  controller.on("create_bot", function createBot(bot, config) {
-    const hull = new Hull(config.hullConfig);
-
-    const { channels, user_token, token } = bot.config;
+  controller.on("create_bot", function botSpawned(bot, config) {
+    const { id, bot_id, app_token, user_id, token, channels, hullConfig } = config;
+    const hull = new Hull(hullConfig);
 
     if (_getBotByToken(token)) return hull.logger.debug("bot.create.skip");
 
@@ -55,17 +55,27 @@ module.exports = function BotFactory({ devMode }) {
 
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
+        // Clear cache if we failed registering RTM
         _clearCache(token);
         return hull.logger.error("bot.register.error", { message: err.message });
       }
 
-      /* Create a Hull instance */
-      controller.saveTeam(config, function onTeamSaved(error /* , id*/) {
-        if (error) {
-          return hull.logger.error("bot.team.save.error", { message: error.message });
+      const team = {
+        ...config,
+        createdBy: user_id,
+        bot: {
+          token,
+          app_token,
+          user_id: bot_id,
+          createdBy: user_id,
         }
-        return setupChannels({ hull, bot, token: user_token, channels });
+      };
+      controller.saveTeam(team, (error) => {
+        if (error) return hull.logger.error("bot.team.save.error", { message: error.message });
+        hull.logger.log("bot.team.save.success", { ...config.team });
+        return setupChannels({ hull, bot, token: app_token, channels });
       });
+      /* Create a Hull instance */
       return true;
     });
     return true;
@@ -75,7 +85,7 @@ module.exports = function BotFactory({ devMode }) {
   controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
   controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
   controller.on("interactive_message_callback", interactiveMessage);
-  _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} })=>{
+  _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} }) => {
     controller.hears(message, context, ...middlewares, reply);
   });
 
@@ -89,8 +99,9 @@ module.exports = function BotFactory({ devMode }) {
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const token = ship.private_settings.bot.bot_access_token;
-      const user_token = ship.private_settings.token;
+      const app_token = ship.private_settings.token;
 
+      const channels = getUniqueChannelNames(getNotifyChannels(ship));
       const oldBot = _getBotByToken(token);
       if (oldBot && oldBot.rtm) {
         if (force) {
@@ -101,21 +112,19 @@ module.exports = function BotFactory({ devMode }) {
         }
       }
 
-      const channels = getUniqueChannelNames(getNotifyChannels(ship));
-
       const config = {
-        ..._.pick(ship.private_settings, "user_id", "actions"),
-        channels,
-        user_token,
-        token, // BOT TOKEN
+        ..._.pick(ship.private_settings, "user_id", "actions", "whitelist"),
         id: ship.private_settings.team_id, // TEAM ID
-        hullConfig: _.pick(conf, "organization", "id", "secret"),
         bot_id: ship.private_settings.bot.bot_user_id,
+        channels,
+        app_token,
+        token, // BOT TOKEN
+        // send_via_rtm: true,
+        hullConfig: _.pick(conf, "organization", "id", "secret")
       };
 
       const bot = controller.spawn(config);
       hull.logger.info('slack.bot.create');
-
       controller.trigger("create_bot", [bot, config]);
       return bot;
     }

@@ -20,40 +20,36 @@ function cast(v) {
   return v;
 }
 
-function getActions(user, traits, events, actions, group = "") {
-  // let actions = _.map(traits, t => {//   const current = group === t.fallback; //   return {//     name: "expand", //     style: current ? "primary" : "default", //     value: t.fallback, //     text: t.title, //     type: "button"//   }; // });
-
-  return {
-    title: `Actions for ${user.name || user.email}`,
-    fallback: "Can't show message actions",
-    attachment_type: "default",
-    mrkdwn_in: ["text", "fields", "pretext"],
-    callback_id: user.id,
-    actions: [
-      ..._.map(actions, a => {
-        return {
-          name: "trait",
-          value: JSON.stringify({ [a.property.replace(/^traits_/, "")]: cast(a.value) }),
-          text: a.label,
-          type: "button"
-        };
-      }),
-      {
-        name: "expand",
-        style: (group === "events") ? "primary" : "default",
-        value: "events",
-        text: "Show latest events",
+const getActions = (user, traits, events, actions, group = "") => ({
+  title: `Actions for ${user.name || user.email}`,
+  fallback: "Can't show message actions",
+  attachment_type: "default",
+  mrkdwn_in: ["text", "fields", "pretext"],
+  callback_id: user.id,
+  actions: [
+    ..._.map(_.filter(actions, a => (a.label !== "" && a.property !== "" && a.value !== ""), (a) => {
+      return {
+        name: "trait",
+        value: JSON.stringify({ [a.property.replace(/^traits_/, "")]: cast(a.value) }),
+        text: a.label,
         type: "button"
-      }, {
-        name: "expand",
-        style: (group === "traits") ? "primary" : "default",
-        value: "traits",
-        text: "Show properties",
-        type: "button"
-      }
-    ]
-  };
-}
+      };
+    })),
+    {
+      name: "expand",
+      style: (group === "events") ? "primary" : "default",
+      value: "events",
+      text: "Show latest events",
+      type: "button"
+    }, {
+      name: "expand",
+      style: (group === "traits") ? "primary" : "default",
+      value: "traits",
+      text: "Show all attributes",
+      type: "button"
+    }
+  ]
+});
 
 module.exports = function userPayload({
   hull,
@@ -62,11 +58,13 @@ module.exports = function userPayload({
   segments = {},
   changes = [],
   actions = [],
+  full = false,
+  whitelist = [],
   message = "",
   group = "",
 }) {
   const user_url = urlFor(user, hull.configuration().organization);
-  const atts = buildAttachments({ user, segments, changes, events, pretext: message }) || {};
+  const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist, full });
   const name = getUserName(user);
 
   let attachments = [
@@ -77,11 +75,15 @@ module.exports = function userPayload({
 
   if (group === "events" && events.length) {
     attachments = attachments.concat(atts.events);
-  }
-  if (group === "traits") {
+  } else if (group !== "" && group !== "traits" && group !== "full" && full) {
+    const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
+    attachments.push(...t);
+  } else if (group === "traits" || _.size(whitelist)) {
     attachments.push(...atts.traits);
   }
+
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+
   return {
     text: `*<${user_url}|${name}>*`,
     attachments

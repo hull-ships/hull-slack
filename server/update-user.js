@@ -60,10 +60,15 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
 
-  hull.logger.info(changes);
-
   const { private_settings = {} } = ship;
-  const { token = "", user_id = "", actions = [], notify_events = [], notify_segments = [] } = private_settings;
+  const {
+    token = "",
+    user_id = "",
+    actions = [],
+    notify_events = [],
+    notify_segments = [],
+    whitelist = []
+  } = private_settings;
 
 
   if (!hull || !user.id || !token) { return hull.logger.info("credentials", { message: "Missing credentials" }); }
@@ -97,12 +102,12 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   if (!currentNotificationChannelNames.length) return hull.logger.info("notification.skip", { message: "No matching channels" });
 
   // Build entire Notification payload
-  const payload = userPayload({ ...message, hull, actions, message: messages.join('\n') });
+  const payload = userPayload({ ...message, hull, actions, message: messages.join('\n'), whitelist });
 
   const tellUser = sayInPrivate.bind(this, bot, user_id);
 
   return setupChannels({ hull, bot, token, channels })
-  .then(teamChannels => {
+  .then((teamChannels) => {
     hull.logger.debug("channels.setup", teamChannels);
     function postToChannel(channel) { return bot.say({ ...payload, channel }); }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
