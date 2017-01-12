@@ -37,11 +37,12 @@ function join(bot, message) {
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
 
 function sad(hull, bot, message, err) {
-  hull.logger.error("bot.error", err.message);
-  return bot.reply(message, ":scream: Something bad happened.");
+  hull.logger.error("bot.error", { error: err });
+  return bot.reply(message, `:scream: Something bad happened (${err.message})`);
 }
 function rpl(hull, bot, message, res) {
   hull.logger.info("bot.reply");
+  hull.logger.debug("bot.reply", { message });
   return bot.reply(message, res);
 }
 
@@ -54,7 +55,8 @@ function postUser(type, options = {}) {
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    hull.logger.info('bot.hear', { search, options });
+    hull.logger.info('bot.hear', { type, search, options });
+    hull.logger.debug('bot.hear', { msg });
 
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
