@@ -21,36 +21,51 @@ function colorFactory() {
   };
 }
 
+const FORMATTER = [
+  {
+    key: "email",
+    value: email => `:love_letter: ${email}`,
+    short: true
+  },
+  {
+    key: "phone",
+    value: phone => `:telephone_receiver: ${phone}`,
+    short: true
+  },
+  {
+    key: "address_country",
+    value: (address = {}, user) => `${flags(user.address_country)} ${_.join(_.compact([user.address_country, user.address_state, user.address_city]), ", ")}`,
+    short: false
+  },
+  {
+    key: "first_seen_at",
+    value: first_seen_at => `:stopwatch: *First Seen*: ${moment(first_seen_at).format(MOMENT_FORMAT)}`,
+    short: false
+  },
+  {
+    key: "created_at",
+    value: created_at => `:stopwatch: *Signup*: ${moment(created_at).format(MOMENT_FORMAT)}`,
+    short: false
+  }
+];
+
 function getUserAttachment(user, color, pretext) {
   const name = getUserName(user);
+  const fields = _.reduce(FORMATTER, (ff, formatter) => {
+    const value = _.get(user, formatter.key);
+    if (value === null || value === undefined) return ff;
+    ff.push({ value: formatter.value(value, user), short: formatter.short });
+    return ff;
+  }, []);
+  let footer = `:eyeglasses: ${moment(user.last_seen_at).format(MOMENT_FORMAT)}`;
+  if (user.sessions_count) footer = `${footer} :desktop_computer: ${user.sessions_count}`;
   return {
     mrkdwn_in: ["text", "fields", "pretext"],
     pretext,
     fallback: name,
     color: color(),
-    fields: [
-      {
-        value: `:love_letter: ${user.email || ""}`,
-        short: true
-      },
-      {
-        value: `:telephone_receiver: ${user.phone || ""}`,
-        short: true
-      },
-      {
-        value: `${flags(user.address_country)} ${_.join(_.compact([user.address_country, user.address_state, user.address_city]), ", ")}`,
-        short: false
-      },
-      {
-        value: `:stopwatch: *First Seen*: ${moment(user.first_seen_at).format(MOMENT_FORMAT)}`,
-        short: false
-      },
-      {
-        value: `:stopwatch: *Signup*: ${moment(user.created_at).format(MOMENT_FORMAT)}`,
-        short: false
-      }
-    ],
-    footer: `:desktop_computer: ${user.sessions_count} :eyeglasses: ${moment(user.last_seen_at).format(MOMENT_FORMAT)}`,
+    fields,
+    footer,
     thumb_url: user.picture
   };
 }
@@ -133,20 +148,14 @@ function getEventsAttachements(events = [], color) {
   });
 }
 
-module.exports = function buildAttachments({ hull, user = {}, segments = [], changes = {}, events = [], pretext = "", whitelist = [], full = false }) {
+module.exports = function buildAttachments({ hull, user = {}, segments = [], changes = {}, events = [], pretext = "", whitelist = [] }) {
   const color = colorFactory();
-  if (!full && _.size(whitelist)) {
-    return {
-      user: getUserAttachment(user, color, pretext),
-      segments: getSegmentAttachments(changes, segments, color),
-      traits: getTraitsAttachments(getWhitelistedUser({ user, whitelist, hull }), color)
-    };
-  }
+  const traitsSource = (_.size(whitelist) ? getWhitelistedUser({ user, whitelist, hull }) : user);
   return {
-    user: getUserAttachment(user, color, pretext),
+    user: getUserAttachment(traitsSource, color, pretext),
     segments: getSegmentAttachments(changes, segments, color),
     events: getEventsAttachements(events, color),
     changes: getChangesAttachment(changes, color),
-    traits: getTraitsAttachments(user, color)
+    traits: getTraitsAttachments(traitsSource, color)
   };
 };

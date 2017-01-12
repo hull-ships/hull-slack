@@ -69,14 +69,15 @@ function postUser(type, options = {}) {
 
       hull.logger.info('user.fetch.success', { ...msgdata, search, type });
 
-      const { action, full = (search.rest === "full") } = options;
-      const pl = { hull, user, events, segments, actions, pagination, whitelist, full };
-      if (search.rest) {
-        if (action) {
-          if (action.name === "expand") pl.group = options.action.value;
-        }
+      const { action = {} } = options;
+      const pl = { hull, user, events, segments, actions, pagination, whitelist };
+
+      if (action.name === "expand") {
+        // if there is a search, set group name to search,
+        // else set to action value;
+        pl.group = (search.rest === "full" ? "traits" : (search.rest || action.value));
       }
-      // if (search.rest && options.action) pl.group = search.rest;
+
       const res = userPayload(pl);
       hull.logger.debug('user.post', res);
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
@@ -96,11 +97,14 @@ const replies = [{
   context: "direct_message,mention,direct_mention",
   reply: postUser("email")
 }, {
-  message: ["^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$"],
+  message: [
+    "^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
+    "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
+  ],
   context: "direct_message,mention,direct_mention",
   reply: postUser("email", { action: { name: "expand", value: "traits" } })
 }, {
-  message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s?(.*)$"],
+  message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s*$"],
   context: "direct_message,mention,direct_mention",
   reply: postUser("email", { action: { name: "expand", value: "events" } })
 }, {

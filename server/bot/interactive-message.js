@@ -45,8 +45,7 @@ module.exports = function interactiveMessage(bot, message) {
         ...results,
         hull,
         group: value,
-        whitelist: [],
-        full: true
+        whitelist: []
       })));
     }
   }

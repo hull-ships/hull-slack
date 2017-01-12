@@ -58,31 +58,40 @@ module.exports = function userPayload({
   segments = {},
   changes = [],
   actions = [],
-  full = false,
   whitelist = [],
   message = "",
   group = "",
 }) {
   const user_url = urlFor(user, hull.configuration().organization);
-  const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist, full });
+  const w = (group ? [] : whitelist);
+  const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist: w });
   const name = getUserName(user);
 
-  let attachments = [
-    atts.user,
-    atts.segments,
-    atts.changes
-  ];
+  // common items;
+  const attachments = _.values(_.pick(atts, "segments", "changes"));
 
+  // "@hull events user@example.com"
   if (group === "events" && events.length) {
-    attachments = attachments.concat(atts.events);
-  } else if (group && group !== "traits" && group !== "full" && full) {
+    attachments.push(...atts.events);
+  } else if (group && group !== "traits") {
+    // "@hull user@example.com intercom" -> return only Intercom group;
     const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
     attachments.push(...t);
-  } else if (group === "traits" || _.size(whitelist)) {
+  } else {
+    // "@hull user@example.com full|traits"
     attachments.push(...atts.traits);
+    // No whitelist: Default payload for User attachement;
+    if (!w.length) attachments.unshift(atts.user);
   }
 
+  // Add Actions
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+
+  console.log("------------------")
+  console.log("------------------")
+  console.log(w, group, whitelist);
+  console.log(atts.traits);
+  console.log("------------------")
 
   return {
     text: `*<${user_url}|${name}>*`,
