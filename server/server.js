@@ -92,7 +92,7 @@ module.exports = function Server(options = {}) {
       }
     }));
 
-    Hull.logger.info("started", { port });
+    Hull.logger.info("app.start", { port });
     return app;
   });
 };

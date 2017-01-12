@@ -42,21 +42,21 @@ module.exports = function BotFactory({ Hull, devMode }) {
   // });
 
   controller.on("create_bot", function botSpawned(bot, config) {
-    const { id, bot_id, app_token, user_id, token, channels, hullConfig } = config;
+    const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
     const hull = new Hull(hullConfig);
 
-    if (_getBotByToken(token)) return hull.logger.debug("bot.create.skip");
+    if (_getBotByToken(token)) return hull.logger.debug("bot.register.skip");
 
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
-    hull.logger.info("bot.register");
+    hull.logger.info("bot.register.success");
 
 
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
         // Clear cache if we failed registering RTM
         _clearCache(token);
-        return hull.logger.error("bot.register.error", { message: err.message });
+        return hull.logger.error("bot.register.fail", { message: err.message });
       }
 
       const team = {
@@ -122,8 +122,8 @@ module.exports = function BotFactory({ Hull, devMode }) {
         hullConfig: _.pick(conf, "organization", "id", "secret")
       };
 
+      hull.logger.info('bot.spawn.start');
       const bot = controller.spawn(config);
-      hull.logger.info('slack.bot.create');
       controller.trigger("create_bot", [bot, config]);
       return bot;
     }

@@ -55,7 +55,7 @@ function getChannelIds(teamChannels, channelNames) {
 }
 
 export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
-  hull.logger.info("notification.start");
+  hull.logger.info("user.notification.start");
 
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
@@ -71,35 +71,35 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   } = private_settings;
 
 
-  if (!hull || !user.id || !token) { return hull.logger.info("notification.skip", { message: "Missing credentials" }); }
+  if (!hull || !user.id || !token) { return hull.logger.info("user.notification.skip", { message: "Missing credentials" }); }
 
   const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
   // Early return if no channel names configured
-  if (!channels.length) return hull.logger.info("notification.skip", { message: "No channels configured" });
+  if (!channels.length) return hull.logger.info("user.notification.skip", { message: "No channels configured" });
 
   const messages = [];
 
   // Change Triggers
   const changeActions = getChanges(changes, notify_segments);
   const { entered, left } = changeActions;
-  hull.logger.debug("notification.changes", changeActions);
+  hull.logger.debug("user.notification.changes", changeActions);
 
   // Event Triggers
   const eventActions = getEvents(events, notify_events);
   const { triggered } = eventActions;
-  hull.logger.debug("notification.events", eventActions);
+  hull.logger.debug("user.notification.events", eventActions);
 
 
   // Build message array
   messages.push(...changeActions.messages, ...eventActions.messages);
-  hull.logger.debug("notification.messages", messages);
+  hull.logger.debug("user.notification.messages", messages);
 
   const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
 
   // Early return if no marching cnannel
-  hull.logger.debug("notification.channels", currentNotificationChannelNames);
-  if (!currentNotificationChannelNames.length) return hull.logger.info("notification.skip", { message: "No matching channels" });
+  hull.logger.debug("user.notification.channels", currentNotificationChannelNames);
+  if (!currentNotificationChannelNames.length) return hull.logger.info("user.notification.skip", { message: "No matching channels" });
 
   // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n'), whitelist });
@@ -108,8 +108,10 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   return setupChannels({ hull, bot, token, channels })
   .then((teamChannels) => {
-    hull.logger.debug("channels.setup", teamChannels);
-    function postToChannel(channel) { return bot.say({ ...payload, channel }); }
+    function postToChannel(channel) {
+      hull.logger.info("bot.post", { channel });
+      return bot.say({ ...payload, channel });
+    }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
   }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`))
   .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`));

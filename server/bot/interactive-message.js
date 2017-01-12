@@ -11,20 +11,21 @@ module.exports = function interactiveMessage(bot, message) {
   const { name, value } = action;
 
   const hull = new Hull(bot.config.hullConfig);
-  hull.logger.info("interactiveMessage.post", { name, value, callback_id });
+  hull.logger.info("bot.interactiveMessage.post", { name, value, callback_id });
 
   if (name === "trait") {
     try {
       hull.as(callback_id).traits(JSON.parse(value), { sync: true });
       bot.reply(message, "User Updated :thumbsup:");
     } catch (e) {
-      hull.logger.error("interactiveMessage.update.error", { message: e.message });
+      hull.logger.error("bot.interactiveMessage.update.error", { message: e.message });
     }
   } else if (name === "expand") {
     if (value === "event") {
       const index = _.findIndex(original_message.attachments, a => a.callback_id === callback_id);
       const attachement = { ...original_message.attachments[index] };
       const attachments = [...original_message.attachments];
+
       attachments[index] = attachement;
 
       return fetchEvent({ hull, search: { id: callback_id } })

@@ -15,7 +15,7 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
 
   const eventSearch = options.action && options.action.value === "events";
 
-  hull.logger.debug("search", params);
+  hull.logger.debug("user.search", params);
 
   return hull.post("search/user_reports", params)
 
@@ -27,7 +27,7 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
     const q = [hull.as(user.id).get("/me/segments")];
     if (eventSearch) {
       const eventParams = (search.rest) ? queries.filteredEvents(user.id, search.rest) : queries.events(user.id);
-      hull.logger.debug("searchEvent", eventParams);
+      hull.logger.debug("event.search", eventParams);
       q.push(hull.post("search/events", eventParams));
     }
     return Promise.all(q)

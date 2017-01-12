@@ -54,12 +54,16 @@ function postUser(type, options = {}) {
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    hull.logger.info('hear', { search, options });
+    hull.logger.info('bot.hear', { search, options });
 
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
-      hull.logger.info('fetchUser.fail', { message });
-      if (!user) return `¯\\_(ツ)_/¯ ${message}`;
+      if (!user) {
+        hull.logger.info('user.fetch.fail', { message });
+        return `¯\\_(ツ)_/¯ ${message}`;
+      }
+
+      hull.logger.info('user.fetch.success', { message });
 
       const { action, full = (search.rest === "full") } = options;
       const pl = { hull, user, events, segments, actions, pagination, whitelist, full };
@@ -70,7 +74,7 @@ function postUser(type, options = {}) {
       }
       // if (search.rest && options.action) pl.group = search.rest;
       const res = userPayload(pl);
-      hull.logger.debug('slack.user.post', res);
+      hull.logger.debug('user.post', res);
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
     }, sad.bind(undefined, hull, bot, msg))
