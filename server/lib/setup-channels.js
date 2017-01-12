@@ -44,14 +44,14 @@ export default function ({ hull, bot, app_token, channels }) {
     const channelsToJoin = getChannelsToJoin(teamChannels, channels);
     const channelsToCreate = getChannelsToCreate(teamChannels, channels);
 
-    hull.logger.info("hull.slack.setupChannels", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
+    hull.logger.info("setupChannel.start", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
 
     return createChannels(bot, app_token, channelsToCreate)
-    .catch(err => hull.logger.error("hull.slack.setupChannels.create.error", { message: err.message }))
+    .catch(err => hull.logger.error("setupChannels.create.error", { message: err.message }))
 
     .then(() => inviteBot(bot, app_token, channelsToJoin))
-    .catch(err => hull.logger.error("hull.slack.setupChannels.invite.error", { message: err.message }))
+    .catch(err => hull.logger.error("setupChannels.invite.error", { message: err.message }))
 
     .then(() => teamChannels);
-  }, err => hull.logger.error("hull.slack.setupChannels.error", { message: err.message }));
+  }, err => hull.logger.error("setupChannels.error", { message: err.message }));
 }

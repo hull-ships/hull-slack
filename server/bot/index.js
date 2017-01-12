@@ -54,11 +54,11 @@ function postUser(type, options = {}) {
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    hull.logger.info('hull.slack.hear', { search, options });
+    hull.logger.info('hear', { search, options });
 
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
-      hull.logger.info('hull.slack.fetchUser.fail', { message });
+      hull.logger.info('fetchUser.fail', { message });
       if (!user) return `¯\\_(ツ)_/¯ ${message}`;
 
       const { action, full = (search.rest === "full") } = options;

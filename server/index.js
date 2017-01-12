@@ -12,6 +12,9 @@ if (process.env.LOGSTASH_HOST && process.env.LOGSTASH_PORT) {
     port: process.env.LOGSTASH_PORT || 1515,
     host: process.env.LOGSTASH_HOST
   });
+  Hull.logger.info('logger.start', { transport: 'logstash' });
+} else {
+  Hull.logger.info('logger.start', { transport: 'console' });
 }
 
 
