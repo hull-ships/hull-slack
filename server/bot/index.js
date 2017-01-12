@@ -41,11 +41,14 @@ function sad(hull, bot, message, err) {
   return bot.reply(message, `:scream: Something bad happened (${err.message})`);
 }
 function rpl(hull, bot, message, res) {
-  hull.logger.info("bot.reply");
-  hull.logger.debug("bot.reply", { message });
+  hull.logger.info("bot.reply", { ...getMessageLogData(message) });
+  hull.logger.debug("bot.reply", { res });
   return bot.reply(message, res);
 }
 
+function getMessageLogData(message = {}){
+  return _.pick(msg, "team", "user", "channel", "event");
+}
 
 /* MAIN USER ACTION */
 function postUser(type, options = {}) {
@@ -55,7 +58,8 @@ function postUser(type, options = {}) {
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    hull.logger.info('bot.hear', { type, search, options, ..._.pick(msg, "team", "user", "channel", "event") });
+    const msgdata = getMessageLogData(msg);
+    hull.logger.info('bot.hear', { type, search, options, ...msgdata });
 
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
@@ -64,7 +68,7 @@ function postUser(type, options = {}) {
         return `¯\\_(ツ)_/¯ ${message}`;
       }
 
-      hull.logger.info('user.fetch.success', { ..._.pick(user, "id", "email", "name"), search, type });
+      hull.logger.info('user.fetch.success', { ...msgdata, search, type });
 
       const { action, full = (search.rest === "full") } = options;
       const pl = { hull, user, events, segments, actions, pagination, whitelist, full };
