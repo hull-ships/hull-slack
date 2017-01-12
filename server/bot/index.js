@@ -60,11 +60,11 @@ function postUser(type, options = {}) {
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
       if (!user) {
-        hull.logger.info('user.fetch.fail', { message });
+        hull.logger.info('user.fetch.fail', { message, search, type });
         return `¯\\_(ツ)_/¯ ${message}`;
       }
 
-      hull.logger.info('user.fetch.success', { message });
+      hull.logger.info('user.fetch.success', { ..._.pick(user, "id", "email", "name"), search, type });
 
       const { action, full = (search.rest === "full") } = options;
       const pl = { hull, user, events, segments, actions, pagination, whitelist, full };
