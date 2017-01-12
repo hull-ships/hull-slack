@@ -44,9 +44,8 @@ function sad(hull, bot, message, err) {
   hull.logger.error("bot.error", { error: err });
   return bot.reply(message, `:scream: Something bad happened (${err.message})`);
 }
-function rpl(hull, bot, message, res) {
-  hull.logger.info("bot.reply", { ...getMessageLogData(message) });
-  hull.logger.debug("bot.reply", { res });
+function rpl(hull, bot, message, res = {}) {
+  hull.logger.info("bot.reply", { ...getMessageLogData(message), text: res.text });
   return bot.reply(message, res);
 }
 
