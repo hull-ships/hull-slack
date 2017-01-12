@@ -55,8 +55,7 @@ function postUser(type, options = {}) {
     const { whitelist, actions, hullConfig } = bot.config;
     const hull = new Hull(hullConfig);
 
-    hull.logger.info('bot.hear', { type, search, options });
-    hull.logger.debug('bot.hear', { msg });
+    hull.logger.info('bot.hear', { type, search, options, ..._.pick(msg, "team", "user", "channel", "event") });
 
     fetchUser({ hull, search, options })
     .then(({ user, events, segments, pagination, message = "" }) => {
