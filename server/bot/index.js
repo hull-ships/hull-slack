@@ -34,6 +34,10 @@ function join(bot, message) {
   });
 }
 
+function getMessageLogData(message = {}) {
+  return _.pick(message, "team", "user", "channel", "event");
+}
+
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
 
 function sad(hull, bot, message, err) {
@@ -44,10 +48,6 @@ function rpl(hull, bot, message, res) {
   hull.logger.info("bot.reply", { ...getMessageLogData(message) });
   hull.logger.debug("bot.reply", { res });
   return bot.reply(message, res);
-}
-
-function getMessageLogData(message = {}){
-  return _.pick(msg, "team", "user", "channel", "event");
 }
 
 /* MAIN USER ACTION */
