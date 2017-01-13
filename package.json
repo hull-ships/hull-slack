@@ -75,7 +75,6 @@
     "passport": "^0.3.2",
     "passport-slack": "0.0.7",
     "rimraf": "^2.5.4",
-    "winston-logstash": "^0.3.0",
-    "winston-logzio": "^1.0.3"
+    "winston-logstash": "^0.3.0"
   }
 }
