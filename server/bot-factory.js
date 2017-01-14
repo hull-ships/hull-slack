@@ -45,18 +45,18 @@ module.exports = function BotFactory({ Hull, devMode }) {
     const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
     const hull = new Hull(hullConfig);
 
-    if (_getBotByToken(token)) return hull.logger.debug("bot.register.skip");
+    if (_getBotByToken(token)) return hull.logger.debug("register.skip");
 
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
-    hull.logger.info("bot.register.success");
+    hull.logger.info("register.success");
 
 
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
         // Clear cache if we failed registering RTM
         _clearCache(token);
-        return hull.logger.error("bot.register.fail", { message: err.message });
+        return hull.logger.error("register.fail", { message: err.message });
       }
 
       const team = {
@@ -70,8 +70,8 @@ module.exports = function BotFactory({ Hull, devMode }) {
         }
       };
       controller.saveTeam(team, (error) => {
-        if (error) return hull.logger.error("bot.team.save.error", { message: error.message });
-        hull.logger.log("bot.team.save.success", { ...config.team });
+        if (error) return hull.logger.error("register.teamSave.error", { message: error.message });
+        hull.logger.log("register.teamSave.success", { ...config.team });
         return setupChannels({ hull, bot, token: app_token, channels });
       });
       /* Create a Hull instance */

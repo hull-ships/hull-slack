@@ -5,13 +5,14 @@ import getSearchHash from "../lib/get-search-hash";
 import fetchUser from "../hull/fetch-user";
 import messages from "./messages";
 import ack from "./ack";
+import getMessageLogData from "../lib/get-log-data";
 
 function _replaceBotName(bot, m = "") {
   return m.replace(/@hull/g, `@${bot.identity.name}`);
 }
 
 /* Special Conversations*/
-function welcome(bot, user_id) {
+export function welcome(bot, user_id) {
   bot.startPrivateConversation({ user: user_id }, (error, convo) => {
     if (error) return console.log(error);
     convo.say(messages.welcome);
@@ -19,7 +20,7 @@ function welcome(bot, user_id) {
   });
 }
 
-function sayInPrivate(bot, user_id, msg = []) {
+export function sayInPrivate(bot, user_id, msg = []) {
   bot.startPrivateConversation({ user: user_id }, (error, convo) => {
     if (error) return console.log(error);
     _.map(msg, convo.say);
@@ -27,15 +28,11 @@ function sayInPrivate(bot, user_id, msg = []) {
   });
 }
 
-function join(bot, message) {
+export function join(bot, message) {
   bot.say({
     text: messages.join,
     channel: message.channel
   });
-}
-
-function getMessageLogData(message = {}) {
-  return _.pick(message, "team", "user", "channel", "event");
 }
 
 /* STANDARD BOT REPLIES, WRAPPED WITH LOGGING */
@@ -90,67 +87,59 @@ function postUser(type, options = {}) {
   };
 }
 
-
 /* BUTTONS */
-const replies = [{
-  message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email")
-}, {
-  message: [
-    "^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
-    "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
-  ],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { action: { name: "expand", value: "traits" } })
-}, {
-  message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s*$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("email", { action: { name: "expand", value: "events" } })
-}, {
-  message: "^(info|search)\\sid:(.+)",
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("id")
-}, {
-  message: ["^info\\s\"(.+)\"\\s?(.*)$", "^info (.+)$"],
-  context: "direct_message,mention,direct_mention",
-  reply: postUser("name")
-}, {
-  message: ["hello", "hi"],
-  context: "direct_message,mention,direct_mention", // Default
-  reply: (bot, message) => {
-    const hull = new Hull(bot.config.hullConfig);
-    return rpl(hull, bot, message, messages.hi);
+export const replies = [
+  {
+    message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
+    context: "direct_message,mention,direct_mention",
+    reply: postUser("email")
+  }, {
+    message: [
+      "^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
+      "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
+    ],
+    context: "direct_message,mention,direct_mention",
+    reply: postUser("email", { action: { name: "expand", value: "traits" } })
+  }, {
+    message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s*$"],
+    context: "direct_message,mention,direct_mention",
+    reply: postUser("email", { action: { name: "expand", value: "events" } })
+  }, {
+    message: "^(info|search)\\sid:(.+)",
+    context: "direct_message,mention,direct_mention",
+    reply: postUser("id")
+  }, {
+    message: ["^info\\s\"(.+)\"\\s?(.*)$", "^info (.+)$"],
+    context: "direct_message,mention,direct_mention",
+    reply: postUser("name")
+  }, {
+    message: ["hello", "hi"],
+    context: "direct_message,mention,direct_mention", // Default
+    reply: (bot, message) => {
+      const hull = new Hull(bot.config.hullConfig);
+      return rpl(hull, bot, message, messages.hi);
+    }
+  }, {
+    message: "help",
+    context: "direct_message,mention,direct_mention", // Default
+    reply: (bot, message) => {
+      const m = messages[message.text];
+      const hull = new Hull(bot.config.hullConfig);
+      if (m) return rpl(hull, bot, message, _replaceBotName(bot, m));
+      return rpl(hull, bot, message, messages.notfound);
+    }
+  }, {
+    message: "^kill$",
+    reply: (bot, message) => {
+      ack(bot, message, "cry");
+      bot.reply(message, ":wave: Bby");
+      bot.rtm.close();
+    }
   }
-}, {
-  message: "help",
-  context: "direct_message,mention,direct_mention", // Default
-  reply: (bot, message) => {
-    const m = messages[message.text];
-    const hull = new Hull(bot.config.hullConfig);
-    if (m) return rpl(hull, bot, message, _replaceBotName(bot, m));
-    return rpl(hull, bot, message, messages.notfound);
-  }
-}, {
-  message: "^kill$",
-  reply: (bot, message) => {
-    ack(bot, message, "cry");
-    bot.reply(message, ":wave: Bby");
-    bot.rtm.close();
-  }
-}
-//   message: [
-//     "^set\\s+<(mailto):(.+?)\\|(.+)>\\s+(.+)$"
-//   ],
-//   context: "direct_message,mention,direct_mention",
-//   reply: traitUser("email")
-// }, {
+  //   message: [
+  //     "^set\\s+<(mailto):(.+?)\\|(.+)>\\s+(.+)$"
+  //   ],
+  //   context: "direct_message,mention,direct_mention",
+  //   reply: traitUser("email")
+  // }, {
 ];
-
-
-module.exports = {
-  replies,
-  join,
-  sayInPrivate,
-  welcome
-};

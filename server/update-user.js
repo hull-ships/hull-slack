@@ -4,6 +4,7 @@ import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import getMessageLogData from "../lib/get-log-data";
 import { sayInPrivate } from "./bot";
 
 function flattenForText(array = []) {
@@ -55,10 +56,9 @@ function getChannelIds(teamChannels, channelNames) {
 }
 
 export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
-  hull.logger.info("user.notification.start");
-
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
+  hull.logger.info("user.notification.start", { userId: user.id });
 
   const { private_settings = {} } = ship;
   const {
@@ -76,7 +76,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
   // Early return if no channel names configured
-  if (!channels.length) return hull.logger.info("user.notification.skip", { message: "No channels configured" });
+  if (!channels.length) return hull.logger.info("user.notification.skip", { userId: user.id, message: "No channels matching to post user" });
 
   const messages = [];
 
@@ -109,7 +109,7 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
   return setupChannels({ hull, bot, token, channels })
   .then((teamChannels) => {
     function postToChannel(channel) {
-      hull.logger.info("bot.post", { channel });
+      hull.logger.info("bot.post", { text: payload.text, channel });
       return bot.say({ ...payload, channel });
     }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
