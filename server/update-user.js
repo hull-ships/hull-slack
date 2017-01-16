@@ -57,7 +57,6 @@ function getChannelIds(teamChannels, channelNames) {
 export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
   const bot = connectSlack({ hull, ship });
   const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
-  hull.logger.info("user.notification.start", { userId: user.id });
 
   const { private_settings = {} } = ship;
   const {
@@ -98,20 +97,23 @@ export default function (connectSlack, { message = {} }, { hull = {}, ship = {} 
 
   // Early return if no marching cnannel
   hull.logger.debug("user.notification.channels", currentNotificationChannelNames);
-  if (!currentNotificationChannelNames.length) return hull.logger.info("user.notification.skip", { message: "No matching channels" });
+  if (!currentNotificationChannelNames.length) return hull.logger.info("user.notification.skip", { userId: user.id, message: "No matching channels" });
 
   // Build entire Notification payload
   const payload = userPayload({ ...message, hull, actions, message: messages.join('\n'), whitelist });
 
-  const tellUser = sayInPrivate.bind(this, bot, user_id);
+  function tellUser(msg, error) {
+    hull.logger.info("user.notification.error", { userId: user.id, error, message: msg });
+    sayInPrivate(bot, user_id, msg);
+  }
 
   return setupChannels({ hull, bot, token, channels })
   .then((teamChannels) => {
     function postToChannel(channel) {
-      hull.logger.info("bot.post", { text: payload.text, channel });
+      hull.logger.info("user.notification.post", { text: payload.text, channel });
       return bot.say({ ...payload, channel });
     }
     _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
-  }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`))
-  .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`));
+  }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
+  .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
 }
