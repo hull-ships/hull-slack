@@ -4,7 +4,6 @@ import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
-import getMessageLogData from "../lib/get-log-data";
 import { sayInPrivate } from "./bot";
 
 function flattenForText(array = []) {

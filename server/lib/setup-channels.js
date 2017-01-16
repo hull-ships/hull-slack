@@ -44,14 +44,14 @@ export default function ({ hull, bot, app_token, channels }) {
     const channelsToJoin = getChannelsToJoin(teamChannels, channels);
     const channelsToCreate = getChannelsToCreate(teamChannels, channels);
 
-    hull.logger.info("channel.setup.start", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
+    hull.logger.info("channelSetup.start", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
 
     return createChannels(bot, app_token, channelsToCreate)
-    .catch(err => hull.logger.error("channel.setup.create.error", { message: err.message }))
+    .catch(err => hull.logger.error("channelSetup.create.error", { error: err }))
 
     .then(() => inviteBot(bot, app_token, channelsToJoin))
-    .catch(err => hull.logger.error("channel.setup.invite.error", { message: err.message }))
+    .catch(err => hull.logger.error("channelSetup.invite.error", { error: err }))
 
     .then(() => teamChannels);
-  }, err => hull.logger.error("channel.setup.error", { message: err.message }));
+  }, err => hull.logger.error("channelSetup.error", { error: err }));
 }
