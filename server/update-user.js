@@ -7,7 +7,7 @@ import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import { sayInPrivate } from "./bot";
 
 function flattenForText(array = []) {
-  return _.map(array, e => `"${e}"`).join(', ');
+  return _.map(array, e => `"${e}"`).join(", ");
 }
 function getChanges(changes, notify_segments) {
   // Changes of Segments
@@ -54,66 +54,70 @@ function getChannelIds(teamChannels, channelNames) {
   return _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
 }
 
-export default function (connectSlack, { message = {} }, { hull = {}, ship = {} }) {
-  const bot = connectSlack({ hull, ship });
-  const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
+export default function (connectSlack, { client: hull, ship }, messages = []) {
+  _.map(messages, (message = {}) => {
+    const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
+    const bot = connectSlack({ hull, ship });
+    const { private_settings = {} } = ship;
+    const {
+      token = "",
+      user_id = "",
+      actions = [],
+      notify_events = [],
+      notify_segments = [],
+      whitelist = []
+    } = private_settings;
 
-  const { private_settings = {} } = ship;
-  const {
-    token = "",
-    user_id = "",
-    actions = [],
-    notify_events = [],
-    notify_segments = [],
-    whitelist = []
-  } = private_settings;
+    if (!hull || !user.id || !token) return hull.logger.info("outgoing.user.skip", { message: "Missing credentials", user_id: user.id, token: !!token });
 
+    const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
-  if (!hull || !user.id || !token) { return hull.logger.info("user.notification.skip", { message: "Missing credentials" }); }
+    // Early return if no channel names configured
+    if (!channels.length) return hull.logger.info("outgoing.user.skip", { userId: user.id, message: "No channels matching to post user" });
 
-  const channels = getUniqueChannelNames(getNotifyChannels(ship));
+    const msgs = [];
 
-  // Early return if no channel names configured
-  if (!channels.length) return hull.logger.info("user.notification.skip", { userId: user.id, message: "No channels matching to post user" });
+    // Change Triggers
+    const changeActions = getChanges(changes, notify_segments);
+    const { entered, left } = changeActions;
+    hull.logger.debug("outgoing.user.changes", changeActions);
 
-  const messages = [];
+    // Event Triggers
+    const eventActions = getEvents(events, notify_events);
+    const { triggered } = eventActions;
+    hull.logger.debug("outgoing.user.events", eventActions);
 
-  // Change Triggers
-  const changeActions = getChanges(changes, notify_segments);
-  const { entered, left } = changeActions;
-  hull.logger.debug("user.notification.changes", changeActions);
+    // Build message array
+    msgs.push(...changeActions.messages, ...eventActions.messages);
+    hull.logger.debug("outgoing.user.messages", msgs);
 
-  // Event Triggers
-  const eventActions = getEvents(events, notify_events);
-  const { triggered } = eventActions;
-  hull.logger.debug("user.notification.events", eventActions);
+    const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
 
+    // Early return if no marching cnannel
+    hull.logger.debug("outgoing.user.channels", currentNotificationChannelNames);
+    if (!currentNotificationChannelNames.length) return hull.logger.info("outgoing.user.skip", { userId: user.id, message: "No matching channels" });
 
-  // Build message array
-  messages.push(...changeActions.messages, ...eventActions.messages);
-  hull.logger.debug("user.notification.messages", messages);
+    // Build entire Notification payload
+    const payload = userPayload({ ...message, hull, actions, message: msgs.join("\n"), whitelist });
 
-  const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
-
-  // Early return if no marching cnannel
-  hull.logger.debug("user.notification.channels", currentNotificationChannelNames);
-  if (!currentNotificationChannelNames.length) return hull.logger.info("user.notification.skip", { userId: user.id, message: "No matching channels" });
-
-  // Build entire Notification payload
-  const payload = userPayload({ ...message, hull, actions, message: messages.join('\n'), whitelist });
-
-  function tellUser(msg, error) {
-    hull.logger.info("user.notification.error", { userId: user.id, error, message: msg });
-    sayInPrivate(bot, user_id, msg);
-  }
-
-  return setupChannels({ hull, bot, token, channels })
-  .then((teamChannels) => {
-    function postToChannel(channel) {
-      hull.logger.info("user.notification.post", { text: payload.text, channel });
-      return bot.say({ ...payload, channel });
+    function tellUser(msg, error) {
+      hull.logger.info("outgoing.user.error", { userId: user.id, error, message: msg });
+      sayInPrivate(bot, user_id, msg);
     }
-    _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
-  }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
-  .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
+
+    return setupChannels({ hull, bot, app_token: token, channels })
+    .then(({ teamChannels, teamMembers }) => {
+      function postToChannel(channel) {
+        hull.logger.info("outgoing.user.success", { text: payload.text, channel });
+        return bot.say({ ...payload, channel });
+      }
+      function postToMember(channel) {
+        hull.logger.info("outgoing.user.success", { text: payload.text, member: channel });
+        return bot.say({ ...payload, channel });
+      }
+      _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
+      _.map(getChannelIds(teamMembers, _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))), postToMember);
+    }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
+    .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
+  });
 }

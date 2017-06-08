@@ -16,7 +16,7 @@ function colorFactory() {
   let i = -1;
   const l = COLORS.length;
   return function cycle() {
-    i++;
+    i+=1;
     return COLORS[i % l];
   };
 }
@@ -27,26 +27,26 @@ const FORMATTER = [
     value: email => `:love_letter: ${email}`,
     short: true
   },
-  {
-    key: "phone",
-    value: phone => `:telephone_receiver: ${phone}`,
-    short: true
-  },
-  {
-    key: "address_country",
-    value: (address = {}, user) => `${flags(user.address_country)} ${_.join(_.compact([user.address_country, user.address_state, user.address_city]), ", ")}`,
-    short: false
-  },
-  {
-    key: "first_seen_at",
-    value: first_seen_at => `:stopwatch: *First Seen*: ${moment(first_seen_at).format(MOMENT_FORMAT)}`,
-    short: false
-  },
-  {
-    key: "created_at",
-    value: created_at => `:stopwatch: *Signup*: ${moment(created_at).format(MOMENT_FORMAT)}`,
-    short: false
-  }
+  // {
+  //   key: "phone",
+  //   value: phone => `:telephone_receiver: ${phone}`,
+  //   short: true
+  // },
+  // {
+  //   key: "address_country",
+  //   value: (address = {}, user) => `${flags(user.address_country)} ${_.join(_.compact([user.address_country, user.address_state, user.address_city]), ", ")}`,
+  //   short: false
+  // },
+  // {
+  //   key: "first_seen_at",
+  //   value: first_seen_at => `:stopwatch: *First Seen*: ${moment(first_seen_at).format(MOMENT_FORMAT)}`,
+  //   short: false
+  // },
+  // {
+  //   key: "created_at",
+  //   value: created_at => `:stopwatch: *Signup*: ${moment(created_at).format(MOMENT_FORMAT)}`,
+  //   short: false
+  // }
 ];
 
 function getUserAttachment(user, color, pretext) {

@@ -1,27 +1,22 @@
-import express from "express";
-import path from "path";
-import { renderFile } from "ejs";
 import { Strategy as SlackStrategy } from "passport-slack";
+import { notifHandler, oAuthHandler } from "hull/lib/utils";
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 
 module.exports = function Server(options = {}) {
   const { port, hostSecret, clientID, clientSecret, Hull, devMode } = options;
-  const { NotifHandler, Routes, OAuthHandler } = Hull;
-  const { Readme, Manifest } = Routes;
-
+  const { Middleware } = Hull;
   const { controller, connectSlack, getBot } = BotFactory({ port, hostSecret, clientID, clientSecret, Hull, devMode });
 
   controller.setupWebserver(port, function onServerStart(err, app) {
-    app.set("views", `${__dirname}/../views`);
-    app.set("view engine", "ejs");
-    app.engine("html", renderFile);
-    app.use(express.static(path.resolve(__dirname, "..", "dist")));
-    app.use(express.static(path.resolve(__dirname, "..", "assets")));
+    const connector = new Hull.Connector({ port, hostSecret });
 
+    connector.setupApp(app);
     controller.createWebhookEndpoints(app);
+    connector.startApp(app);
 
-    app.use("/auth", OAuthHandler({
+
+    app.use("/auth", oAuthHandler({
       hostSecret,
       name: "Slack",
       Strategy: SlackStrategy,
@@ -31,10 +26,11 @@ module.exports = function Server(options = {}) {
         scope: "bot, channels:write",
         skipUserProfile: true
       },
-      isSetup(req, { /* hull, */ ship }) {
+      isSetup(req) {
         if (req.query.reset) return Promise.reject();
-        const { token, bot = {} } = ship.private_settings || {};
-        const { bot_access_token } = bot || {};
+        const { private_settings = {} } = req.hull.ship;
+        const { token, bot = {} } = private_settings;
+        const { bot_access_token } = bot;
         return (!!token && !!bot_access_token) ? Promise.resolve({
           credentials: true,
           connected: getBot(bot_access_token)
@@ -43,7 +39,10 @@ module.exports = function Server(options = {}) {
           connected: getBot(bot_access_token)
         });
       },
-      onAuthorize: (req, { hull, ship }) => {
+      onAuthorize: (req) => {
+        const { hull = {} } = req;
+        const { client, ship } = hull;
+        if (!client || !ship) return;
         const { accessToken, params = {} } = (req.account || {});
         const { ok, bot = {}, team_id, user_id, incoming_webhook = {} } = params;
         if (!ok) return Promise.reject("Error");
@@ -57,8 +56,8 @@ module.exports = function Server(options = {}) {
             token: accessToken
           }
         };
-        connectSlack({ hull, ship: shipData });
-        return hull.put(ship.id, shipData);
+        connectSlack({ hull: client, ship: shipData });
+        return client.put(ship.id, shipData);
       },
       views: {
         login: "login.html",
@@ -72,7 +71,9 @@ module.exports = function Server(options = {}) {
       req.hull = { ...req.hull, token: req.query.token };
       next();
     },
-    Hull.Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
+
+    Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
+
     function onReconnect(req, res) {
       connectSlack({ hull: req.hull.client, ship: req.hull.ship });
       setTimeout(() => {
@@ -80,11 +81,7 @@ module.exports = function Server(options = {}) {
       }, 2000);
     });
 
-    app.get("/manifest.json", Manifest(__dirname));
-    app.get("/", Readme);
-    app.get("/readme", Readme);
-
-    app.post("/notify", NotifHandler({
+    app.post("/notify", notifHandler({
       hostSecret,
       handlers: {
         "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship, force: true }),
@@ -93,6 +90,7 @@ module.exports = function Server(options = {}) {
     }));
 
     Hull.logger.info("app.start", { port });
+
     return app;
   });
 };

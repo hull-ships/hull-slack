@@ -1,5 +1,6 @@
 import _ from "lodash";
 import getTeamChannels from "./get-team-channels";
+import getTeamMembers from "./get-team-members";
 
 function inviteBot(bot, token, channels) {
   const user = bot.config.bot_id;
@@ -7,7 +8,7 @@ function inviteBot(bot, token, channels) {
     return new Promise((resolve, reject) => {
       bot.api.channels.invite({ token, channel: channel.id, user }, function inviteDone(err) {
         if (err) return reject(err);
-        return resolve(channel);
+        return resolve(channel.id);
       });
     });
   }));
@@ -33,25 +34,36 @@ function getChannelsToJoin(teamChannels, channels) {
 }
 
 function getChannelsToCreate(teamChannels, channels) {
-  return _.filter(channels, channel => !_.includes(_.map(teamChannels, 'name'), channel));
+  return _.filter(channels, channel => !_.includes(_.map(teamChannels, "name"), channel));
 }
 
-
 export default function ({ hull, bot, app_token, channels }) {
-  return getTeamChannels(bot)
-  .then((teamChannels) => {
-    const notifyChannels = getNotifyChannels(teamChannels, channels);
-    const channelsToJoin = getChannelsToJoin(teamChannels, channels);
-    const channelsToCreate = getChannelsToCreate(teamChannels, channels);
+  return Promise.all([getTeamChannels(bot), getTeamMembers(bot)])
+  .then(([teamChannels, teamMembers]) => {
+    const chans = _.filter(channels, c => c.indexOf("@") !== 0);
+    const notifyChannels = getNotifyChannels(teamChannels, chans);
+    const channelsToJoin = getChannelsToJoin(teamChannels, chans);
+    const channelsToCreate = getChannelsToCreate(teamChannels, chans);
 
-    hull.logger.info("channelSetup.start", { channels, teamChannels: _.map(teamChannels, 'id'), notifyChannels, channelsToJoin });
+    hull.logger.info("outgoing.setup.start", { object: "channel", chans, teamChannels: _.map(teamChannels, "id"), notifyChannels, channelsToJoin, channelsToCreate });
+
+    if (!channelsToCreate.length && !channelsToJoin.length) return Promise.resolve({ teamChannels, teamMembers });
 
     return createChannels(bot, app_token, channelsToCreate)
-    .catch(err => hull.logger.error("channelSetup.create.error", { error: err }))
-
-    .then(() => inviteBot(bot, app_token, channelsToJoin))
-    .catch(err => hull.logger.error("channelSetup.invite.error", { error: err }))
-
-    .then(() => teamChannels);
-  }, err => hull.logger.error("channelSetup.error", { error: err }));
+    .then(
+      () => getTeamChannels(bot, true),
+      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "create", error: err })
+    )
+    .then(
+      () => inviteBot(bot, app_token, channelsToJoin),
+      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "refresh", error: err })
+    )
+    .catch(
+      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "invite", error: err })
+    )
+    .then(
+      () => ({ teamChannels, teamMembers }),
+    );
+    //Always return data.
+  }, err => hull.logger.error("outgoing.setup.error", { error: err }));
 }

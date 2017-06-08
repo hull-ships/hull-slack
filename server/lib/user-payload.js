@@ -81,17 +81,12 @@ module.exports = function userPayload({
     // "@hull user@example.com full|traits"
     attachments.push(...atts.traits);
     // No whitelist: Default payload for User attachement;
-    if (!w.length) attachments.unshift(atts.user);
+    // if (!w.length)
   }
+  attachments.unshift(atts.user);
 
   // Add Actions
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
-
-  console.log("------------------")
-  console.log("------------------")
-  console.log(w, group, whitelist);
-  console.log(atts.traits);
-  console.log("------------------")
 
   return {
     text: `*<${user_url}|${name}>*`,

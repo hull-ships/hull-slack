@@ -72,7 +72,7 @@
 
     {
       "name": "whitelist",
-      "title": "Displayed Attributes (none displays everything)",
+      "title": "Attributes to send (none sends everything)",
       "type": "array",
       "default": [],
       "format": "trait"
@@ -86,7 +86,7 @@
     },
     {
       "name": "notify_segments",
-      "title": "Notify when User enters or leaves segment",
+      "title": "Notify when Segments change",
       "type": "array",
       "format": "table",
       "default": [{ "segment": "", "channel": "" }],
@@ -100,7 +100,7 @@
             "format": "segment"
           },
           "channel": {
-            "title": "Channel Name",
+            "title": "@user or #channel",
             "type": "string",
             "format": "string"
           },
@@ -119,7 +119,7 @@
     },
     {
       "name": "notify_events",
-      "title": "Notify when user performs Event",
+      "title": "Notify when events performed",
       "type": "array",
       "format": "table",
       "default": [{ "event": "", "channel": "" }],
@@ -133,7 +133,7 @@
             "format": "event"
           },
           "channel": {
-            "title": "Channel Name",
+            "title": "@user or #channel",
             "type": "string",
             "format": "string"
           }

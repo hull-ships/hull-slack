@@ -76,7 +76,7 @@ function postUser(type, options = {}) {
       }
 
       const res = userPayload(pl);
-      hull.logger.debug('user.post', res);
+      hull.logger.debug('outgoing.user.reply', res);
       if (pagination.total > 1) res.text = `Found ${pagination.total} users, Showing ${res.text}`;
       return res;
     }, sad.bind(undefined, hull, bot, msg))

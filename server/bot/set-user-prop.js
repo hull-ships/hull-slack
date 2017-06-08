@@ -12,7 +12,7 @@
 //       // const qs = querystring.parse()
 //       fetchUser(type, bot, message, function callback({ hull, /* search,*/ results }) {
 //         if (!results || !results.user) return "¯\\_(ツ)_/¯ Couldn't find anyone!";
-//         hull.as(results.user.id).traits(payload);
+//         hull.asUser(results.user.id).traits(payload);
 //         return bot.reply(message, {
 //           text: `Updated ${results.user.email}`,
 //           attachments: [{
