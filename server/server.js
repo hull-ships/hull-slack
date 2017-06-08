@@ -13,7 +13,7 @@ module.exports = function Server(options = {}) {
 
     connector.setupApp(app);
     controller.createWebhookEndpoints(app);
-    connector.startApp(app);
+    // connector.startApp(app);
 
 
     app.use("/auth", oAuthHandler({
@@ -42,10 +42,10 @@ module.exports = function Server(options = {}) {
       onAuthorize: (req) => {
         const { hull = {} } = req;
         const { client, ship } = hull;
-        if (!client || !ship) return;
+        if (!client || !ship) return Promise.reject("Error, no Ship or Client");
         const { accessToken, params = {} } = (req.account || {});
         const { ok, bot = {}, team_id, user_id, incoming_webhook = {} } = params;
-        if (!ok) return Promise.reject("Error");
+        if (!ok) return Promise.reject("Error, invalid reply");
         const shipData = {
           private_settings: {
             ...ship.private_settings,
@@ -89,7 +89,10 @@ module.exports = function Server(options = {}) {
       }
     }));
 
+
     Hull.logger.info("app.start", { port });
+
+    app.use(connector.instrumentation.stopMiddleware());
 
     return app;
   });
