@@ -1,14 +1,14 @@
 import _ from "lodash";
 import moment from "moment";
 import humanize from "./humanize";
-import flags from "./flags";
+// import flags from "./flags";
 import getUserName from "./get-user-name";
 import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
 
 function formatObjToText(ob) {
-  return _.join(_.map(format(_.omit(ob, 'id')), p => `*${p.title}*: ${p.value}`), "\n");
+  return _.join(_.map(format(_.omit(ob, "id")), p => `*${p.title}*: ${p.value}`), "\n");
 }
 
 function colorFactory() {
@@ -16,7 +16,7 @@ function colorFactory() {
   let i = -1;
   const l = COLORS.length;
   return function cycle() {
-    i+=1;
+    i += 1;
     return COLORS[i % l];
   };
 }
@@ -97,7 +97,7 @@ function getTraitsAttachments(user, color) {
 
 function getWhitelistedUser({ user = {}, whitelist = [], hull }) {
   return hull.utils.groupTraits(_.reduce(whitelist, (uu, value) => {
-    const t = value.indexOf('/') > -1 ? value.replace('/', '.').replace(/^traits_/, '') : value;
+    const t = value.indexOf("/") > -1 ? value.replace("/", ".").replace(/^traits_/, "") : value;
     uu[value] = _.get(user, t);
     return uu;
   }, {}));

@@ -45,25 +45,25 @@ export default function ({ hull, bot, app_token, channels }) {
     const channelsToJoin = getChannelsToJoin(teamChannels, chans);
     const channelsToCreate = getChannelsToCreate(teamChannels, chans);
 
-    hull.logger.info("outgoing.setup.start", { object: "channel", chans, teamChannels: _.map(teamChannels, "id"), notifyChannels, channelsToJoin, channelsToCreate });
+    hull.logger.info("bot.setup.start", { object: "channel", chans, teamChannels: _.map(teamChannels, "id"), notifyChannels, channelsToJoin, channelsToCreate });
 
     if (!channelsToCreate.length && !channelsToJoin.length) return Promise.resolve({ teamChannels, teamMembers });
 
     return createChannels(bot, app_token, channelsToCreate)
     .then(
       () => getTeamChannels(bot, true),
-      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "create", error: err })
+      err => hull.logger.error("bot.setup.error", { object: "channel", type: "create", error: err })
     )
     .then(
       () => inviteBot(bot, app_token, channelsToJoin),
-      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "refresh", error: err })
+      err => hull.logger.error("bot.setup.error", { object: "channel", type: "refresh", error: err })
     )
     .catch(
-      err => hull.logger.error("outgoing.setup.error", { object: "channel", type: "invite", error: err })
+      err => hull.logger.error("bot.setup.error", { object: "channel", type: "invite", error: err })
     )
     .then(
       () => ({ teamChannels, teamMembers }),
     );
-    //Always return data.
-  }, err => hull.logger.error("outgoing.setup.error", { error: err }));
+    // Always return data.
+  }, err => hull.logger.error("bot.setup.error", { error: err }));
 }

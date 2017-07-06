@@ -4,7 +4,7 @@ module.exports = function ack(bot, message, name = "robot_face") {
       timestamp: message.ts,
       channel: message.channel,
       name
-    }, err => {
+    }, (err) => {
       if (err) console.log(err);
       return true;
     });

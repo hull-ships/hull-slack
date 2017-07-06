@@ -122,7 +122,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
         hullConfig: _.pick(conf, "organization", "id", "secret")
       };
 
-      hull.logger.info('bot.spawn.start');
+      hull.logger.info("bot.spawn.start");
       const bot = controller.spawn(config);
       controller.trigger("create_bot", [bot, config]);
       return bot;

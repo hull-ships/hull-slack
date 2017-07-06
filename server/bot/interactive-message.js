@@ -18,7 +18,7 @@ module.exports = function interactiveMessage(bot, message) {
       hull.asUser(callback_id).traits(JSON.parse(value), { sync: true });
       bot.reply(message, "User Updated :thumbsup:");
     } catch (e) {
-      hull.logger.error("interactiveMessage.update.error", { message: e.message });
+      hull.logger.error("bot.interactiveMessage.error", { type: "update", message: e.message });
     }
   } else if (name === "expand") {
     if (value === "event") {
@@ -36,7 +36,7 @@ module.exports = function interactiveMessage(bot, message) {
         attachement.actions = [];
         bot.replyInteractive(message, { ...original_message, attachments });
       })
-      .catch(err => hull.logger.error("interactiveMessage.event.error", { message: err.message }));
+      .catch(err => hull.logger.error("bot.interactiveMessage.error", { type: "event", message: err.message }));
     }
 
     if (value === "traits" || value === "events") {

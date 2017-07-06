@@ -1,45 +1,50 @@
-# Hull + Slack
+# Hull Slack Connector
 
-This Ship adds a Bot (@hull) to your Slack Team. The Bot can:
+This Connector adds a Bot (@hull) to your Slack Team. The Bot can:
 
-- Notify you when customers enter or leave specific segments and perform certain events.
-- Retreive the entire set of data for any customer just by typing his email or his name.
-- Add buttons that set values (like `send_emails` for instance) on a given user, opening the door to incredibly powerful control over your entire Stack in one click.
+- Notify a channel or a Slack User when a Hull User enters or leaves specific segments
+- Notify a channel or a Slack User when a Hull User performs certain events.
+- Search for any user in the Hull database and return it.
+- Add buttons that set values (like `send_emails` for instance) on a user, opening the door to triggered actions directly from Slack.
+
+*Note: Private Channels and Groups aren't supported for the moment*
+
+#### Data
+
+The Bot can return either all available data for users or a set of whitelisted properties picked from their profile. In the settings tab, if you leave the box blank then all properties will be returned.
+
+In Slack, you can toggle between User Attributes and their latest events by clicking the buttons at the footer of each user profile.
 
 ####  To install:
 
 - Click the "Connect to Slack" button on the Dashboard page,
 - Authorize Slack to access your account.
+- You should see green checkboxes on both "Slack credentials saved" and "Slack Bot online"
 
 #### Usage
 
-To get in-app help, invite it to a channel or start a conversation and type `@hull help`.
-
-The bot can fetch information for a customer from his/her email, or his/her name, and display the latest events and all his/her properties.
-
-#### Posting in Channels
-
-Like a vampire, your bot needs to be invited in a channel to be able to post to it.
-to do so, just type:  `/invite @hull` from the channel.
+To get in-app help:
+- Invite `@hull` to a channel and type `@hull help`.
+- Start a private conversation with `@hull` and simply type `help`
 
 #### Conversations
 
 - `@hull user@example.com`
 
-> get data for the user with this email. You can filter what's displayed from the Ship's settings tab in your dashboard_
+> get data for the user with this email. You can filter what's displayed from the Connector's settings tab in your dashboard_
 
 - `@hull user@example.com full` 
 
 > get full data for the user with this email. Shows the entire profile_
+> returns everything even if the Settings specify which fields to return.
 
 - `@hull user@example.com <intercom>` 
 
-> get `intercom` data for the user with this email. Replace with the service you want to display
+> get data in the `intercom` group for the user with this email. Replace with the service you want to display
 
 - `@hull events user@example.com` 
 
 > get latest events for the user with this email_
-
 
 - `@hull help`
 
@@ -47,4 +52,4 @@ to do so, just type:  `/invite @hull` from the channel.
 
 #### Buttons
 
-In the Slack Ship settings screen, you can add up to 3 buttons that will set a value on the User. You can use this to create `Enable Emails` and `Disable Emails` toggles for instance.
+In the Slack Connector settings screen, you can add up to 3 buttons that will set a value on the User. You can use this to create `Enable Emails` and `Disable Emails` toggles for instance.

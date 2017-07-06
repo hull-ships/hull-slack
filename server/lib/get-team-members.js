@@ -7,7 +7,7 @@ export default function getTeamMembers(bot, force = false) {
       if (!ok) return reject({ message: "Not Ok" });
       return resolve(members);
     });
-  }).catch(err => {
+  }).catch((err) => {
     console.log(err);
     delete bot.config.team_members;
   });

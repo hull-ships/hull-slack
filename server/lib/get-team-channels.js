@@ -7,7 +7,7 @@ export default function getTeamChannels(bot, force = false) {
       if (!ok) return reject({ message: "Not Ok" });
       return resolve(channels);
     });
-  }).catch(err => {
+  }).catch((err) => {
     console.log(err);
     delete bot.config.team_channels;
   });

@@ -14,5 +14,5 @@ module.exports = function fetchEvent({ hull, search }) {
   .then(({ pagination = {}, data = [] }) => {
     if (!data.length) return Promise.reject();
     return { events: data, pagination };
-  }, (err) => console.log(err));
+  }, err => console.log(err));
 };

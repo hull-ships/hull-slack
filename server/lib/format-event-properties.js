@@ -7,7 +7,7 @@ module.exports = function formatEventProperties(props = {}) {
       _.fromPairs(
         _.map(props, p => [p.field_name, p.text_value])
       )
-    ), prop => {
+    ), (prop) => {
     return { value: `*${prop.title}: * ${prop.value}`, short: false };
   });
 };
