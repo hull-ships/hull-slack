@@ -75,46 +75,46 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
     const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
     // Early return if no channel names configured
-    if (!channels.length) return client.info("outgoing.user.skip", { message: "No channels matching to post user" });
+    if (!channels.length) return client.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
 
     const msgs = [];
 
     // Change Triggers
     const changeActions = getChanges(changes, notify_segments);
     const { entered, left } = changeActions;
-    client.debug("outgoing.user.changes", changeActions);
+    client.logger.debug("outgoing.user.changes", changeActions);
 
     // Event Triggers
     const eventActions = getEvents(events, notify_events);
     const { triggered } = eventActions;
-    client.debug("outgoing.user.events", eventActions);
+    client.logger.debug("outgoing.user.events", eventActions);
 
     // Build message array
     msgs.push(...changeActions.messages, ...eventActions.messages);
-    client.debug("outgoing.user.messages", msgs);
+    client.logger.debug("outgoing.user.messages", msgs);
 
     const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
 
     // Early return if no marching cnannel
-    client.debug("outgoing.user.channels", currentNotificationChannelNames);
-    if (!currentNotificationChannelNames.length) return client.info("outgoing.user.skip", { message: "No matching channels" });
+    client.logger.debug("outgoing.user.channels", currentNotificationChannelNames);
+    if (!currentNotificationChannelNames.length) return client.logger.info("outgoing.user.skip", { message: "No matching channels" });
 
     // Build entire Notification payload
     const payload = userPayload({ ...message, hull, actions, message: msgs.join("\n"), whitelist });
 
     function tellUser(msg, error) {
-      client.info("outgoing.user.error", { error, message: msg });
+      client.logger.info("outgoing.user.error", { error, message: msg });
       sayInPrivate(bot, user_id, msg);
     }
 
     return setupChannels({ hull, bot, app_token: token, channels })
     .then(({ teamChannels, teamMembers }) => {
       function postToChannel(channel) {
-        client.info("outgoing.user.success", { text: payload.text, channel });
+        client.logger.info("outgoing.user.success", { text: payload.text, channel });
         return bot.say({ ...payload, channel });
       }
       function postToMember(channel) {
-        client.info("outgoing.user.success", { text: payload.text, member: channel });
+        client.logger.info("outgoing.user.success", { text: payload.text, member: channel });
         return bot.say({ ...payload, channel });
       }
       _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
