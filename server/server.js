@@ -1,5 +1,5 @@
 import { Strategy as SlackStrategy } from "passport-slack";
-import { notifHandler, oAuthHandler } from "hull/lib/utils";
+import { notifHandler, oAuthHandler, smartNotifierHandler } from "hull/lib/utils";
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 
@@ -9,7 +9,7 @@ module.exports = function Server(options = {}) {
   const { controller, connectSlack, getBot } = BotFactory({ port, hostSecret, clientID, clientSecret, Hull, devMode });
 
   controller.setupWebserver(port, function onServerStart(err, app) {
-    const connector = new Hull.Connector({ port, hostSecret });
+    const connector = new Hull.Connector({ port, hostSecret, skipSignatureValidation: true });
 
     connector.setupApp(app);
     controller.createWebhookEndpoints(app);
@@ -72,20 +72,40 @@ module.exports = function Server(options = {}) {
       next();
     },
 
-    Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
+      Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
 
-    function onReconnect(req, res) {
-      connectSlack({ hull: req.hull.client, ship: req.hull.ship });
-      setTimeout(() => {
-        res.redirect(req.header("Referer"));
-      }, 2000);
-    });
+      function onReconnect(req, res) {
+        connectSlack({ hull: req.hull.client, ship: req.hull.ship });
+        setTimeout(() => {
+          res.redirect(req.header("Referer"));
+        }, 2000);
+      });
 
-    app.post("/notify", notifHandler({
+    const smartNotifierFlowControl = {
+      type: "next",
+      in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 1000,
+      size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100
+    };
+
+    app.use("/notify", notifHandler({
       hostSecret,
       handlers: {
         "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship, force: true }),
         "user:update": updateUser.bind(undefined, connectSlack)
+      }
+    }));
+
+    app.use("/smart-notifier", smartNotifierHandler({
+      handlers: {
+        "ship:update": ({ message = {} }, { hull = {}, ship = {}, smartNotifierResponse }) => {
+          smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
+          return Promise.resolve(connectSlack({ hull, ship, force: true }));
+        },
+        "user:update": (ctx, messages) => {
+          ctx.smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
+          const update = updateUser.bind(undefined, connectSlack);
+          return Promise.all(update(ctx, messages));
+        }
       }
     }));
 
