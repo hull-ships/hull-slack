@@ -9,7 +9,7 @@ module.exports = function Server(options = {}) {
   const { controller, connectSlack, getBot } = BotFactory({ port, hostSecret, clientID, clientSecret, Hull, devMode });
 
   controller.setupWebserver(port, function onServerStart(err, app) {
-    const connector = new Hull.Connector({ port, hostSecret, skipSignatureValidation: true });
+    const connector = new Hull.Connector({ port, hostSecret, skipSignatureValidation: devMode });
 
     connector.setupApp(app);
     controller.createWebhookEndpoints(app);
