@@ -90,16 +90,16 @@ module.exports = function Server(options = {}) {
     app.use("/notify", notifHandler({
       hostSecret,
       handlers: {
-        "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship, force: true }),
+        "ship:update": ({ client = {}, ship = {} }) => connectSlack({ client, ship, force: true }),
         "user:update": updateUser.bind(undefined, connectSlack)
       }
     }));
 
     app.use("/smart-notifier", smartNotifierHandler({
       handlers: {
-        "ship:update": ({ message = {} }, { hull = {}, ship = {}, smartNotifierResponse }) => {
+        "ship:update": ({ client = {}, ship = {}, smartNotifierResponse }) => {
           smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
-          return Promise.resolve(connectSlack({ hull, ship, force: true }));
+          return Promise.resolve(connectSlack({ client, ship, force: true }));
         },
         "user:update": (ctx, messages) => {
           ctx.smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
