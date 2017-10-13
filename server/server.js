@@ -1,5 +1,5 @@
 import { Strategy as SlackStrategy } from "passport-slack";
-import { oAuthHandler, smartNotifierHandler } from "hull/lib/utils";
+import { oAuthHandler, notifHandler, smartNotifierHandler } from "hull/lib/utils";
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 
@@ -87,6 +87,14 @@ module.exports = function Server(options = {}) {
       size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100
     };
 
+    app.use("/notify", notifHandler({
+      hostSecret,
+      handlers: {
+        "ship:update": ({ message = {} }, { hull = {}, ship = {} }) => connectSlack({ hull, ship, force: true }),
+        "user:update": updateUser.bind(undefined, connectSlack)
+      }
+    }));
+
     app.use("/smart-notifier", smartNotifierHandler({
       handlers: {
         "ship:update": ({ message = {} }, { hull = {}, ship = {}, smartNotifierResponse }) => {
@@ -96,7 +104,7 @@ module.exports = function Server(options = {}) {
         "user:update": (ctx, messages) => {
           ctx.smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
           const update = updateUser.bind(undefined, connectSlack);
-          return Promise.all(update(ctx, messages));
+          return update(ctx, messages);
         }
       }
     }));

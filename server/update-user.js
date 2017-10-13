@@ -55,7 +55,7 @@ function getChannelIds(teamChannels, channelNames) {
 }
 
 export default function (connectSlack, { client: hull, ship }, messages = []) {
-  return _.map(messages, (message = {}) => {
+  return Promise.all(_.map(messages, (message = {}) => {
     const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
     const bot = connectSlack({ hull, ship });
     const { private_settings = {} } = ship;
@@ -121,5 +121,5 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
       _.map(getChannelIds(teamMembers, _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))), postToMember);
     }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
     .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
-  });
+  }));
 }
