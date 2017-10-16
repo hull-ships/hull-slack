@@ -56,7 +56,7 @@ module.exports = function Server(options = {}) {
             token: accessToken
           }
         };
-        connectSlack({ hull: client, ship: shipData });
+        connectSlack({ client, ship: shipData });
         return client.put(ship.id, shipData);
       },
       views: {

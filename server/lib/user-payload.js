@@ -89,7 +89,8 @@ module.exports = function userPayload({
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
 
   return {
-    text: `*<${user_url}|${name}>*`,
+    text: "Ala ma kota <@mickaw>",
+    // text: `*<${user_url}|${name}>*`,
     attachments
   };
 };
