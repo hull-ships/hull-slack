@@ -91,10 +91,9 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship, force = false }) {
-      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
-
-      const conf = hull.configuration();
+    connectSlack: function connectSlack({ client, ship, force = false }) {
+      if (!ship || !client || !ship.private_settings || !ship.private_settings.bot) return false;
+      const conf = client.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const token = ship.private_settings.bot.bot_access_token;
@@ -122,7 +121,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
         hullConfig: _.pick(conf, "organization", "id", "secret")
       };
 
-      hull.logger.info("bot.spawn.start");
+      client.logger.info("bot.spawn.start");
       const bot = controller.spawn(config);
       controller.trigger("create_bot", [bot, config]);
       return bot;
