@@ -121,7 +121,7 @@ function getSegmentAttachments(changes = {}, segments, color) {
   };
 }
 
-function getEventsAttachements(events = [], color) {
+function getEventsAttachments(events = [], color) {
   if (!events.length) return {};
   return _.map(events, (e) => {
     try {
@@ -154,7 +154,7 @@ module.exports = function buildAttachments({ hull, user = {}, segments = [], cha
   return {
     user: getUserAttachment(traitsSource, color, pretext),
     segments: getSegmentAttachments(changes, segments, color),
-    events: getEventsAttachements(events, color),
+    events: getEventsAttachments(events, color),
     changes: getChangesAttachment(changes, color),
     traits: getTraitsAttachments(traitsSource, color)
   };
