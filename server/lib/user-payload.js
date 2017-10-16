@@ -51,6 +51,14 @@ const getActions = (user, traits, events, actions, group = "") => ({
   ]
 });
 
+function replaceMarks(message) {
+  const liquidRegex = /{{(([a-z]*[A-Z]*\.*_*-*)*)}}/g;
+  const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
+  return message
+    .replace(liquidRegex, (match, userProperty) => _.get(this.state.currentUser, userProperty))
+    .replace(annotationsRegex, (match, prop) => `<${prop}>`);
+}
+
 module.exports = function userPayload({
   hull,
   user = {},
@@ -89,7 +97,7 @@ module.exports = function userPayload({
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
 
   return {
-    text: "Ala ma kota <@mickaw>",
+    text: replaceMarks("Ala ma kota @mickaw"),
     // text: `*<${user_url}|${name}>*`,
     attachments
   };
