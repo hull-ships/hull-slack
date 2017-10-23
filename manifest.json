@@ -137,6 +137,9 @@
             "title": "@user or #channel",
             "type": "string",
             "format": "string"
+          },
+          "liquid": {
+
           }
         }
       }

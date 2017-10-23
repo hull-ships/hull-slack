@@ -51,37 +51,43 @@ const getActions = (user, traits, events, actions, group = "") => ({
   ]
 });
 
-function replaceMarks(message) {
-  const liquidRegex = /{{(([a-z]*[A-Z]*\.*_*-*)*)}}/g;
+function replaceMarks(message, payload, channels, members) {
+  const liquidRegex = /{{( *(?:\w*\.*_*-*)*) *\|* *((?:\w*\.*@*_*-*)* *)}}/g;
   const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
+  const channelsRegex = /(\B#([a-z]*[A-Z]*[0-9]*)*)/g;
+
   return message
-    .replace(liquidRegex, (match, userProperty) => _.get(this.state.currentUser, userProperty))
-    .replace(annotationsRegex, (match, prop) => `<${prop}>`);
+    .replace(liquidRegex, (match, userProperty, defaultValue) =>
+      _.get(payload, userProperty, _.isNull(defaultValue) || _.isUndefined(defaultValue) ? "Unknown Value" : defaultValue ))
+    .replace(annotationsRegex, (match, prop) =>
+      `<@${_.get(_.find(members, member => member.name === prop.replace(/@/, "")), "id", "Unknown User")}>`)
+    .replace(channelsRegex, (match, prop) =>
+      `<#${_.get(_.find(channels, channel => channel.name === prop.replace(/#/, "")), "id", "Unknown Channel")}>`);
 }
 
 module.exports = function userPayload({
   hull,
   user = {},
   events = [],
+  event,
+  segment,
   segments = {},
   changes = [],
   actions = [],
   whitelist = [],
   message = "",
+  liquidMessage = "",
+  teamChannels,
+  teamMembers,
   group = "",
 }) {
-  const user_url = urlFor(user, hull.configuration().organization);
   const w = (group ? [] : whitelist);
   const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist: w });
-  const name = getUserName(user);
-
   // common items;
   const attachments = _.values(_.pick(atts, "segments", "changes"));
 
   // "@hull events user@example.com"
-  if (group === "events" && events.length) {
-    attachments.push(...atts.events);
-  } else if (group && group !== "traits") {
+  if (group && group !== "traits") {
     // "@hull user@example.com intercom" -> return only Intercom group;
     const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
     attachments.push(...t);
@@ -96,9 +102,12 @@ module.exports = function userPayload({
   // Add Actions
   attachments.push(getActions(user, atts.traits, atts.events, actions, group));
 
+  const basicText = `*<${urlFor(user, hull.configuration().organization)}|${getUserName(user)}>*`;
+  console.log(user, event, "TUTAJ");
+
   return {
-    text: replaceMarks("Ala ma kota @mickaw"),
-    // text: `*<${user_url}|${name}>*`,
+    text: liquidMessage ? `${basicText}
+${replaceMarks(liquidMessage, { user, event, segment }, teamChannels, teamMembers)}` : basicText,
     attachments
   };
 };
