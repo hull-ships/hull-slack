@@ -122,4 +122,4 @@ ${replaceMarks(liquidMessage, { user, event, segment }, teamChannels, teamMember
 ${defaultMessage}`,
     attachments
   };
-};
+}

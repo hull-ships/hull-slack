@@ -27,7 +27,7 @@
     "start": "node ./lib",
     "start:dev": "./node_modules/.bin/nodemon -V -w server -x ./node_modules/.bin/babel-node -- server",
     "ngrok": "ngrok http 8082 --region eu --subdomain slack",
-    "test": "npm run test:lint && npm run test:modules",
+    "test": "npm run test:lint && npm run test:modules && npm run test:unit",
     "test:unit": "NODE_ENV=test mocha --require babel-register -R spec ./test/unit",
     "test:lint": "./node_modules/.bin/eslint server",
     "test:modules": "npm outdated --depth=0",
