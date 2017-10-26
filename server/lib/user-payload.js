@@ -20,7 +20,7 @@ function cast(v) {
   return v;
 }
 
-const getActions = (user, traits, events, actions, group = "") => ({
+const getActions = (user, traits, events, actions) => ({
   title: `Actions for ${user.name || user.email}`,
   fallback: "Can't show message actions",
   attachment_type: "default",
