@@ -97,9 +97,9 @@ module.exports = function Server(options = {}) {
 
     app.use("/smart-notifier", smartNotifierHandler({
       handlers: {
-        "ship:update": ({ client = {}, ship = {}, smartNotifierResponse }) => {
+        "ship:update": ({ client = {}, ship = {}, smartNotifierResponse, helpers }) => {
           smartNotifierResponse.setFlowControl(smartNotifierFlowControl);
-          return Promise.resolve(connectSlack({ client, ship, force: true }));
+          return Promise.resolve(connectSlack({ client, ship, force: true, helpers }));
         },
         "user:update": (ctx, messages) => {
           ctx.smartNotifierResponse.setFlowControl(smartNotifierFlowControl);

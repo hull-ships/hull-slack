@@ -25,26 +25,39 @@ function getChanges(changes, notify_segments) {
 
     _.map(notify_segments, (notify) => {
       const { segment, channel, enter, leave, liquidMessage } = notify;
-      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) entered.push({ segment, channel, liquidMessage: liquidMessage || `Entered ${segment}` });
-      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) left.push({ segment, channel, liquidMessage: liquidMessage || `Left ${segment}` });
+      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
+        entered.push({
+          segment,
+          channel,
+          liquidMessage,
+          defaultMessage: `Entered ${segment}`
+        });
+      }
+      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
+        left.push({
+          segment,
+          channel,
+          liquidMessage,
+          defaultMessage: `Left ${segment}`
+        });
+      }
     });
   }
   return { entered, left, messages };
 }
 
 function getEvents(events, notify_events) {
-  const messages = [];
   const triggered = [];
   if (notify_events.length) {
     const event_names = _.map(events, "event");
-    _.forEach(notify_events, ({ event, channel, liquidMessage = `YOLO ${event} @mickaw #testy` }) => { // eslint-disable-line no-unused-vars
+    _.forEach(notify_events, ({ event, channel, liquidMessage }) => { // eslint-disable-line no-unused-vars = `YOLO ${event} @mickaw #testy`
       if (_.includes(event_names, event)) {
-        triggered.push({ event, channel, liquidMessage: liquidMessage || `Performed ${event}` });
+        triggered.push({ event, channel, liquidMessage, defaultMessage: `Performed ${event}` });
       }
       // keep compatibility
     });
   }
-  return { triggered, messages };
+  return { triggered };
 }
 
 function getChannelId(teamChannels, channelName) {
@@ -91,17 +104,12 @@ export default function (connectSlack, { client, ship }, messages = []) {
     const { triggered } = eventActions;
     asUser.logger.debug("outgoing.user.events", eventActions);
 
-    // Build message array
-    msgs.push(...changeActions.messages, ...eventActions.messages);
-    asUser.logger.debug("outgoing.user.messages", msgs);
-
     const mapNotifications = notifications =>
-      _.map(notifications,
-        notification => ({
-          channel: getCompactChannelName(notification.channel),
-          liquidMessage: notification.liquidMessage
-        })
-      );
+      _.map(notifications, notification => ({
+        channel: getCompactChannelName(notification.channel),
+        liquidMessage: notification.liquidMessage,
+        defaultMessage: notification.defaultMessage
+      }));
 
     const enteredSegmentsNotifications = mapNotifications(entered);
     const leftSegmentsNotifications = mapNotifications(left);
@@ -137,28 +145,26 @@ export default function (connectSlack, { client, ship }, messages = []) {
         }
 
         function sendNotifications(notifications) {
-          _.map(notifications, (notif) => {
+          _.forEach(notifications, (notif) => {
             const payload = userPayload({
               ...message,
               event: notif.event,
               segment: notif.segment,
-              subject: notifications.subject,
               hull: client,
               actions,
               message: msgs.join("\n"),
               whitelist,
               liquidMessage: notif.liquidMessage,
+              defaultMessage: notif.defaultMessage,
               teamChannels,
               teamMembers
             });
 
-            _.startsWith(notif.channel, "@")
-              ?
-              postToMember(
+            return _.startsWith(notif.channel, "@")
+              ? postToMember(
                 getChannelId(teamMembers, notif.channel.replace(/^@/, "")),
                 payload)
-              :
-              postToChannel(
+              : postToChannel(
                 getChannelId(teamChannels, notif.channel),
                 payload);
           });

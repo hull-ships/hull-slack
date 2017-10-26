@@ -91,7 +91,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ client, ship, force = false }) {
+    connectSlack: function connectSlack({ client, ship, force = false, helpers }) {
       if (!ship || !client || !ship.private_settings || !ship.private_settings.bot) return false;
       const conf = client.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;

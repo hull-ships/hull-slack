@@ -34,35 +34,35 @@ const getActions = (user, traits, events, actions, group = "") => ({
         text: a.label,
         type: "button"
       };
-    })),
-    {
-      name: "expand",
-      style: (group === "events") ? "primary" : "default",
-      value: "events",
-      text: "Show latest events",
-      type: "button"
-    }, {
-      name: "expand",
-      style: (group === "traits") ? "primary" : "default",
-      value: "traits",
-      text: "Show all attributes",
-      type: "button"
-    }
+    }))
+    // {
+    //   name: "expand",
+    //   style: (group === "events") ? "primary" : "default",
+    //   value: "events",
+    //   text: "Show latest events",
+    //   type: "button"
+    // }, {
+    //   name: "expand",
+    //   style: (group === "traits") ? "primary" : "default",
+    //   value: "traits",
+    //   text: "Show all attributes",
+    //   type: "button"
+    // }
   ]
 });
 
 function replaceMarks(message, payload, channels, members) {
-  const liquidRegex = /{{( *(?:\w*\.*_*-*)*) *\|* *((?:\w*\.*@*_*-*)* *)}}/g;
+  const liquidRegex = /{{(\s*(?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*\/*-*)*\s*)}}/g;
   const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
   const channelsRegex = /(\B#([a-z]*[A-Z]*[0-9]*)*)/g;
 
   return message
-    .replace(liquidRegex, (match, userProperty, defaultValue) =>
-      _.get(payload, userProperty, _.isNull(defaultValue) || _.isUndefined(defaultValue) ? "Unknown Value" : defaultValue ))
-    .replace(annotationsRegex, (match, prop) =>
-      `<@${_.get(_.find(members, member => member.name === prop.replace(/@/, "")), "id", "Unknown User")}>`)
-    .replace(channelsRegex, (match, prop) =>
-      `<#${_.get(_.find(channels, channel => channel.name === prop.replace(/#/, "")), "id", "Unknown Channel")}>`);
+    .replace(liquidRegex, (match, property, defaultValue) =>
+      _.get(payload, property, (defaultValue == null || defaultValue === "") ? "Unknown Value" : defaultValue.trim()))
+    .replace(annotationsRegex, (match, property) =>
+      `<@${_.get(_.find(members, member => member.name === property.replace(/@/, "")), "id", "Unknown User")}>`)
+    .replace(channelsRegex, (match, property) =>
+      `<#${_.get(_.find(channels, channel => channel.name === property.replace(/#/, "")), "id", "Unknown Channel")}>`);
 }
 
 module.exports = function userPayload({
@@ -76,7 +76,8 @@ module.exports = function userPayload({
   actions = [],
   whitelist = [],
   message = "",
-  liquidMessage = "",
+  liquidMessage,
+  defaultMessage = "",
   teamChannels,
   teamMembers,
   group = "",
@@ -87,27 +88,38 @@ module.exports = function userPayload({
   const attachments = _.values(_.pick(atts, "segments", "changes"));
 
   // "@hull events user@example.com"
-  if (group && group !== "traits") {
-    // "@hull user@example.com intercom" -> return only Intercom group;
-    const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
-    attachments.push(...t);
-  } else {
-    // "@hull user@example.com full|traits"
-    attachments.push(...atts.traits);
-    // No whitelist: Default payload for User attachement;
-    // if (!w.length)
-  }
-  attachments.unshift(atts.user);
+  if (!liquidMessage) {
+    if (group && group !== "traits") {
+      // "@hull user@example.com intercom" -> return only Intercom group;
+      const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
+      attachments.push(...t);
+    } else {
+      // "@hull user@example.com full|traits"
+      attachments.push(...atts.traits);
+      // No whitelist: Default payload for User attachement;
+      // if (!w.length)
+    }
+    attachments.unshift(atts.user);
 
-  // Add Actions
-  attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+    // Add Actions
+    attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+  } else {
+    const acts = getActions(user, atts.traits, atts.events, actions, group);
+    if (acts && acts.actions && acts.actions.length > 0) {
+      attachments.push(acts);
+    }
+  }
 
   const basicText = `*<${urlFor(user, hull.configuration().organization)}|${getUserName(user)}>*`;
-  console.log(user, event, "TUTAJ");
 
-  return {
-    text: liquidMessage ? `${basicText}
-${replaceMarks(liquidMessage, { user, event, segment }, teamChannels, teamMembers)}` : basicText,
+  return liquidMessage ? {
+    text: `${basicText}
+${replaceMarks(liquidMessage, { user, event, segment }, teamChannels, teamMembers)}`,
+    ...(actions.length > 0) && attachments
+  } :
+  {
+    text: `${basicText}
+${defaultMessage}`,
     attachments
   };
 };

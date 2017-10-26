@@ -69,16 +69,6 @@
         }
       }
     },
-
-
-    {
-      "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
-      "type": "array",
-      "default": [],
-      "format": "trait"
-    },
-
     {
       "name": "notify_header",
       "title": "Notifications",
@@ -114,6 +104,16 @@
             "title": "Notify on leave",
             "type": "boolean",
             "format": "checkbox"
+          },
+          "liquidMessage": {
+            "type": "string",
+            "title": "Message",
+            "format": "liquid",
+            "options": {
+              "help": "some help message",
+              "edit_label": "Edit message",
+              "type": "segment"
+            }
           }
         }
       }
@@ -138,8 +138,15 @@
             "type": "string",
             "format": "string"
           },
-          "liquid": {
-
+          "liquidMessage": {
+            "type": "string",
+            "title": "Message",
+            "format": "liquid",
+            "options": {
+              "help": "some help message",
+              "edit_label": "Edit message",
+              "type": "event"
+            }
           }
         }
       }
