@@ -52,7 +52,7 @@ const getActions = (user, traits, events, actions) => ({
 });
 
 export function replaceMarks(message, payload, channels, members) {
-  const liquidRegex = /{{\s*((?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*\/*-*)*\s*)}}/g;
+  const liquidRegex = /{{\s*((?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*=*\/*-*)*\s*)}}/g;
   const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
   const channelsRegex = /(\B#([a-z]*[A-Z]*[0-9]*)*)/g;
 

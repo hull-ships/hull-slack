@@ -95,4 +95,12 @@ describe("Replacement function", function test() {
 
     assert.equal(replaceMarks(message, payload, channels, members), expectedMessage);
   });
+
+  it("should handle special characters in default value like '@' and '/', '='", () => {
+    const message = "{{ some.value | email@test.com}} and {{ some.value | traits_customerio/id=elo}}";
+
+    const expectedMessage = "email@test.com and traits_customerio/id=elo";
+
+    assert.equal(replaceMarks(message, {}, channels, members), expectedMessage);
+  });
 });
