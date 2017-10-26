@@ -51,8 +51,8 @@ const getActions = (user, traits, events, actions) => ({
   ]
 });
 
-function replaceMarks(message, payload, channels, members) {
-  const liquidRegex = /{{(\s*(?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*\/*-*)*\s*)}}/g;
+export function replaceMarks(message, payload, channels, members) {
+  const liquidRegex = /{{\s*((?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*\/*-*)*\s*)}}/g;
   const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
   const channelsRegex = /(\B#([a-z]*[A-Z]*[0-9]*)*)/g;
 
@@ -65,7 +65,7 @@ function replaceMarks(message, payload, channels, members) {
       `<#${_.get(_.find(channels, channel => channel.name === property.replace(/#/, "")), "id", "Unknown Channel")}>`);
 }
 
-module.exports = function userPayload({
+export function userPayload({
   hull,
   user = {},
   events = [],

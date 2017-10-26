@@ -1,5 +1,5 @@
 import _ from "lodash";
-import userPayload from "./lib/user-payload";
+import { userPayload } from "./lib/user-payload";
 import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
