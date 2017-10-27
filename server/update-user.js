@@ -27,7 +27,7 @@ function getChanges(changes, notify_segments) {
       const { segment, channel, enter, leave, liquidMessage } = notify;
       if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
         entered.push({
-          segment,
+          segment: _.get(_.find(changes.segments.entered, s => s.id === segment), "name"),
           channel,
           liquidMessage,
           defaultMessage: `Entered ${segment}`
@@ -35,7 +35,7 @@ function getChanges(changes, notify_segments) {
       }
       if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
         left.push({
-          segment,
+          segment: _.get(_.find(changes.segments.left, s => s.id === segment), "name"),
           channel,
           liquidMessage,
           defaultMessage: `Left ${segment}`
@@ -50,11 +50,10 @@ function getEvents(events, notify_events) {
   const triggered = [];
   if (notify_events.length) {
     const event_names = _.map(events, "event");
-    _.forEach(notify_events, ({ event, channel, liquidMessage }) => { // eslint-disable-line no-unused-vars = `YOLO ${event} @mickaw #testy`
+    _.forEach(notify_events, ({ event, channel, liquidMessage }) => {
       if (_.includes(event_names, event)) {
-        triggered.push({ event, channel, liquidMessage, defaultMessage: `Performed ${event}` });
+        triggered.push({ event: _.find(events, e => e.event === event), channel, liquidMessage, defaultMessage: `Performed ${event}` });
       }
-      // keep compatibility
     });
   }
   return { triggered };
@@ -108,7 +107,9 @@ export default function (connectSlack, { client, ship }, messages = []) {
       _.map(notifications, notification => ({
         channel: getCompactChannelName(notification.channel),
         liquidMessage: notification.liquidMessage,
-        defaultMessage: notification.defaultMessage
+        defaultMessage: notification.defaultMessage,
+        event: notification.event,
+        segment: notification.segment
       }));
 
     const enteredSegmentsNotifications = mapNotifications(entered);

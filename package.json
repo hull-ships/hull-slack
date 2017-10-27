@@ -76,6 +76,7 @@
     "moment": "^2.17.1",
     "node-slack": "0.0.7",
     "passport": "^0.3.2",
+    "sinon": "^1.17.4",
     "passport-slack": "0.0.7",
     "rimraf": "^2.5.4",
     "winston-logstash": "^0.3.0"
