@@ -71,6 +71,7 @@ export function userPayload({
   events = [],
   event,
   segment,
+  account,
   segments = {},
   changes = [],
   actions = [],
@@ -114,7 +115,7 @@ export function userPayload({
 
   return liquidMessage ? {
     text: `${basicText}
-${replaceMarks(liquidMessage, { user, event, segment }, teamChannels, teamMembers)}`,
+${replaceMarks(liquidMessage, { user, event, segment, account: user.account || account }, teamChannels, teamMembers)}`,
     ...(actions.length > 0) && attachments
   } :
   {

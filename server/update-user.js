@@ -49,11 +49,13 @@ function getChanges(changes, notify_segments) {
 function getEvents(events, notify_events) {
   const triggered = [];
   if (notify_events.length) {
-    const event_names = _.map(events, "event");
-    _.forEach(notify_events, ({ event, channel, liquidMessage }) => {
-      if (_.includes(event_names, event)) {
-        triggered.push({ event: _.find(events, e => e.event === event), channel, liquidMessage, defaultMessage: `Performed ${event}` });
-      }
+    _.forEach(events, (eventFromPlatform) => {
+      _.forEach(notify_events, ({ event, channel, liquidMessage }) => {
+        console.log(eventFromPlatform, event);
+        if (eventFromPlatform.event === event) {
+          triggered.push({ event: eventFromPlatform, channel, liquidMessage, defaultMessage: `Performed ${event}` });
+        }
+      });
     });
   }
   return { triggered };

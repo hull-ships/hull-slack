@@ -83,8 +83,8 @@ module.exports = function Server(options = {}) {
 
     const smartNotifierFlowControl = {
       type: "next",
-      in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 1000,
-      size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100
+      in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 10,
+      size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 10
     };
 
     app.use("/notify", notifHandler({
