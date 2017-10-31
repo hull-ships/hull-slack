@@ -180,5 +180,5 @@ export default function (connectSlack, { client, ship }, messages = []) {
         sendNotifications(enteredSegmentsNotifications);
         return sendNotifications(leftSegmentsNotifications);
       })).catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
-    }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err));
+    }).catch(err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err));
 }
