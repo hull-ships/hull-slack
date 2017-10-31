@@ -10,7 +10,6 @@ module.exports = function Server(options = {}) {
   const { Middleware } = Hull;
   const { controller, connectSlack, getBot } = BotFactory({ port, hostSecret, clientID, clientSecret, Hull, devMode });
 
-  // controller.setupWebserver(port, function onServerStart(err, app) {
   const app = express();
   app.use(bodyParser.json({ limit: "10mb" }));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -120,5 +119,4 @@ module.exports = function Server(options = {}) {
   app.use(connector.instrumentation.stopMiddleware());
 
   return app;
-  // });
 };
