@@ -66,71 +66,74 @@ function getChannelId(teamChannels, channelName) {
 }
 
 export default function (connectSlack, { client, ship }, messages = []) {
-  return Promise.all(_.map(messages, (message = {}) => {
-    const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
-    const bot = connectSlack({ client, ship });
-    const { private_settings = {} } = ship;
-    const {
-      token = "",
-      user_id = "",
-      actions = [],
-      notify_events = [],
-      notify_segments = [],
-      whitelist = []
-    } = private_settings;
+  const channels = getNotifyChannels(ship).map(getCompactChannelName);
+  const bot = connectSlack({ client, ship });
 
-    if (!client || !user.id || !token) {
-      return client.logger.info("outgoing.user.skip", {
-        message: "Missing credentials",
-        token: !!token
-      });
-    }
+  const { private_settings = {} } = ship;
+  const {
+    token = "",
+    user_id = "",
+    actions = [],
+    notify_events = [],
+    notify_segments = [],
+    whitelist = []
+  } = private_settings;
 
-    const asUser = client.asUser(_.pick(user, "email", "id", "external_id"));
+  function tellUser(msg, error) {
+    client.logger.info("outgoing.user.error", { error, message: msg, user_id });
+    sayInPrivate(bot, user_id, msg);
+  }
 
-    const channels = getNotifyChannels(ship).map(getCompactChannelName);
+  return setupChannels({ hull: client, bot, app_token: token, channels })
+    .then(({ teamChannels, teamMembers }) => {
+      return Promise.all(_.map(messages, (message = {}) => {
+        const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
 
-    // Early return if no channel names configured
-    if (!channels.length) return asUser.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
+        if (!client || !user.id || !token) {
+          return client.logger.info("outgoing.user.skip", {
+            message: "Missing credentials",
+            token: !!token
+          });
+        }
 
-    const msgs = [];
+        const asUser = client.asUser(_.pick(user, "email", "id", "external_id"));
 
-    // Change Triggers
-    const changeActions = getChanges(changes, notify_segments);
-    const { entered, left } = changeActions;
-    asUser.logger.debug("outgoing.user.changes", changeActions);
+        // Early return if no channel names configured
+        if (!channels.length) return asUser.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
 
-    // Event Triggers
-    const eventActions = getEvents(events, notify_events);
-    const { triggered } = eventActions;
-    asUser.logger.debug("outgoing.user.events", eventActions);
+        const msgs = [];
 
-    const mapNotifications = notifications =>
-      _.map(notifications, notification => ({
-        channel: getCompactChannelName(notification.channel),
-        liquidMessage: notification.liquidMessage,
-        defaultMessage: notification.defaultMessage,
-        event: notification.event,
-        segment: notification.segment
-      }));
+        // Change Triggers
+        const changeActions = getChanges(changes, notify_segments);
+        const { entered, left } = changeActions;
+        asUser.logger.debug("outgoing.user.changes", changeActions);
 
-    const enteredSegmentsNotifications = mapNotifications(entered);
-    const leftSegmentsNotifications = mapNotifications(left);
-    const eventsNotifications = mapNotifications(triggered);
+        // Event Triggers
+        const eventActions = getEvents(events, notify_events);
+        const { triggered } = eventActions;
+        asUser.logger.debug("outgoing.user.events", eventActions);
 
-    // Early return if no matching channel
-    asUser.logger.debug("outgoing.user.channels", enteredSegmentsNotifications, leftSegmentsNotifications, eventsNotifications);
-    if (!enteredSegmentsNotifications.length && !leftSegmentsNotifications.length && !eventsNotifications.length) {
-      return asUser.logger.info("outgoing.user.skip", { message: "No matching channels" });
-    }
+        const mapNotifications = notifications =>
+          _.map(notifications, notification => ({
+            channel: getCompactChannelName(notification.channel),
+            liquidMessage: notification.liquidMessage,
+            defaultMessage: notification.defaultMessage,
+            event: notification.event,
+            segment: notification.segment
+          }));
 
-    function tellUser(msg, error) {
-      asUser.logger.info("outgoing.user.error", { error, message: msg });
-      sayInPrivate(bot, user_id, msg);
-    }
+        const enteredSegmentsNotifications = mapNotifications(entered);
+        const leftSegmentsNotifications = mapNotifications(left);
+        const eventsNotifications = mapNotifications(triggered);
 
-    return setupChannels({ hull: client, bot, app_token: token, channels })
-      .then(({ teamChannels, teamMembers }) => {
+        // Early return if no matching channel
+        asUser.logger.debug("outgoing.user.channels", enteredSegmentsNotifications, leftSegmentsNotifications, eventsNotifications);
+        if (!enteredSegmentsNotifications.length && !leftSegmentsNotifications.length && !eventsNotifications.length) {
+          return asUser.logger.info("outgoing.user.skip", { message: "No matching channels" });
+        }
+
+        // return setupChannels({ hull: client, bot, app_token: token, channels })
+        //   .then(({ teamChannels, teamMembers }) => {
         function postToChannel(channel, payload) {
           if (channel) {
             asUser.logger.info("outgoing.user.success", { text: payload.text, channel });
@@ -175,8 +178,7 @@ export default function (connectSlack, { client, ship }, messages = []) {
 
         sendNotifications(eventsNotifications);
         sendNotifications(enteredSegmentsNotifications);
-        sendNotifications(leftSegmentsNotifications);
-      }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
-      .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
-  }));
+        return sendNotifications(leftSegmentsNotifications);
+      })).catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
+    }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err));
 }
