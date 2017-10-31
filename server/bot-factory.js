@@ -4,7 +4,7 @@ import interactiveMessage from "./bot/interactive-message";
 import { replies, join } from "./bot";
 import getTeamChannels from "./lib/get-team-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
-import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import getUniqueChannelName from "./lib/get-compact-channel-name";
 
 import setupChannels from "./lib/setup-channels";
 
@@ -91,16 +91,15 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship, force = false }) {
-      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
-
-      const conf = hull.configuration();
+    connectSlack: function connectSlack({ client, ship, force = false }) {
+      if (!ship || !client || !ship.private_settings || !ship.private_settings.bot) return false;
+      const conf = client.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const token = ship.private_settings.bot.bot_access_token;
       const app_token = ship.private_settings.token;
 
-      const channels = getUniqueChannelNames(getNotifyChannels(ship));
+      const channels = getNotifyChannels(ship).map(getUniqueChannelName);
       const oldBot = _getBotByToken(token);
       if (oldBot && oldBot.rtm) {
         if (force) {
@@ -122,7 +121,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
         hullConfig: _.pick(conf, "organization", "id", "secret")
       };
 
-      hull.logger.info("bot.spawn.start");
+      client.logger.info("bot.spawn.start");
       const bot = controller.spawn(config);
       controller.trigger("create_bot", [bot, config]);
       return bot;

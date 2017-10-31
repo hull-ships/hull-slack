@@ -20,7 +20,7 @@ function cast(v) {
   return v;
 }
 
-const getActions = (user, traits, events, actions, group = "") => ({
+const getActions = (user, traits, events, actions) => ({
   title: `Actions for ${user.name || user.email}`,
   fallback: "Can't show message actions",
   attachment_type: "default",
@@ -34,62 +34,93 @@ const getActions = (user, traits, events, actions, group = "") => ({
         text: a.label,
         type: "button"
       };
-    })),
-    {
-      name: "expand",
-      style: (group === "events") ? "primary" : "default",
-      value: "events",
-      text: "Show latest events",
-      type: "button"
-    }, {
-      name: "expand",
-      style: (group === "traits") ? "primary" : "default",
-      value: "traits",
-      text: "Show all attributes",
-      type: "button"
-    }
+    }))
+    // {
+    //   name: "expand",
+    //   style: (group === "events") ? "primary" : "default",
+    //   value: "events",
+    //   text: "Show latest events",
+    //   type: "button"
+    // }, {
+    //   name: "expand",
+    //   style: (group === "traits") ? "primary" : "default",
+    //   value: "traits",
+    //   text: "Show all attributes",
+    //   type: "button"
+    // }
   ]
 });
 
-module.exports = function userPayload({
+export function replaceMarks(message, payload, channels, members) {
+  const liquidRegex = /{{\s*((?:\w*\.*_*\/*-*)*)\s*\|*\s*((?:\w*\.*@*_*\s*=*\/*-*)*\s*)}}/g;
+  const annotationsRegex = /(\B@([a-z]*[A-Z]*[0-9]*)*)/g;
+  const channelsRegex = /(\B#([a-z]*[A-Z]*[0-9]*)*)/g;
+
+  return message
+    .replace(liquidRegex, (match, property, defaultValue) =>
+      _.get(payload, property, (defaultValue == null || defaultValue === "") ? "Unknown Value" : defaultValue.trim()))
+    .replace(annotationsRegex, (match, property) =>
+      `<@${_.get(_.find(members, member => member.name === property.replace(/@/, "")), "id", "Unknown User")}>`)
+    .replace(channelsRegex, (match, property) =>
+      `<#${_.get(_.find(channels, channel => channel.name === property.replace(/#/, "")), "id", "Unknown Channel")}>`);
+}
+
+export function userPayload({
   hull,
   user = {},
   events = [],
+  event,
+  segment,
+  account,
   segments = {},
   changes = [],
   actions = [],
   whitelist = [],
   message = "",
+  liquidMessage,
+  defaultMessage = "",
+  teamChannels,
+  teamMembers,
   group = "",
 }) {
-  const user_url = urlFor(user, hull.configuration().organization);
   const w = (group ? [] : whitelist);
   const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist: w });
-  const name = getUserName(user);
-
   // common items;
   const attachments = _.values(_.pick(atts, "segments", "changes"));
 
   // "@hull events user@example.com"
-  if (group === "events" && events.length) {
-    attachments.push(...atts.events);
-  } else if (group && group !== "traits") {
-    // "@hull user@example.com intercom" -> return only Intercom group;
-    const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
-    attachments.push(...t);
+  if (!liquidMessage) {
+    if (group && group !== "traits") {
+      // "@hull user@example.com intercom" -> return only Intercom group;
+      const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
+      attachments.push(...t);
+    } else {
+      // "@hull user@example.com full|traits"
+      attachments.push(...atts.traits);
+      // No whitelist: Default payload for User attachement;
+      // if (!w.length)
+    }
+    attachments.unshift(atts.user);
+
+    // Add Actions
+    attachments.push(getActions(user, atts.traits, atts.events, actions, group));
   } else {
-    // "@hull user@example.com full|traits"
-    attachments.push(...atts.traits);
-    // No whitelist: Default payload for User attachement;
-    // if (!w.length)
+    const acts = getActions(user, atts.traits, atts.events, actions, group);
+    if (acts && acts.actions && acts.actions.length > 0) {
+      attachments.push(acts);
+    }
   }
-  attachments.unshift(atts.user);
 
-  // Add Actions
-  attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+  const basicText = `*<${urlFor(user, hull.configuration().organization)}|${getUserName(user)}>*`;
 
-  return {
-    text: `*<${user_url}|${name}>*`,
+  return liquidMessage ? {
+    text: `${basicText}
+${replaceMarks(liquidMessage, { user, event, segment, account: user.account || account }, teamChannels, teamMembers)}`,
+    ...(actions.length > 0) && attachments
+  } :
+  {
+    text: `${basicText}
+${defaultMessage}`,
     attachments
   };
-};
+}

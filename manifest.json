@@ -6,7 +6,8 @@
   "tags": [
     "incoming",
     "outgoing",
-    "oneColumn"
+    "oneColumn",
+    "smart-notifier"
   ],
   "settings": [],
   "private_settings": [
@@ -68,16 +69,6 @@
         }
       }
     },
-
-
-    {
-      "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
-      "type": "array",
-      "default": [],
-      "format": "trait"
-    },
-
     {
       "name": "notify_header",
       "title": "Notifications",
@@ -113,6 +104,16 @@
             "title": "Notify on leave",
             "type": "boolean",
             "format": "checkbox"
+          },
+          "liquidMessage": {
+            "type": "string",
+            "title": "Message",
+            "format": "liquid",
+            "options": {
+              "help": "some help message",
+              "edit_label": "Edit message",
+              "type": "segment"
+            }
           }
         }
       }
@@ -136,6 +137,16 @@
             "title": "@user or #channel",
             "type": "string",
             "format": "string"
+          },
+          "liquidMessage": {
+            "type": "string",
+            "title": "Message",
+            "format": "liquid",
+            "options": {
+              "help": "some help message",
+              "edit_label": "Edit message",
+              "type": "event"
+            }
           }
         }
       }
@@ -179,7 +190,7 @@
   "ui": false,
   "subscriptions": [
     {
-      "url": "/notify"
+      "url": "/smart-notifier"
     }
   ]
 }
