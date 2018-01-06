@@ -1,0 +1,21 @@
+{
+  "testPathIgnorePatterns": [
+    "<rootDir>/(dist|docs|dll|config|flow-typed|node_modules)/"
+  ],
+  "collectCoverageFrom": [
+    "src/**/*.{js,jsx}",
+    "!src/dll.js",
+    "!src/vendors.js"
+  ],
+  "setupFiles": [
+    "<rootDir>/config/jest/polyfills.js",
+    "<rootDir>/config/jest/browserMock.js",
+    "<rootDir>/config/jest/Hull/index.js"
+  ],
+  "transform": {
+    "^.+\\.(js|jsx)$": "<rootDir>/node_modules/babel-jest",
+    "^(?!.*\\.(js|jsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
+  },
+  "testEnvironment": "node",
+  "transformIgnorePatterns": ["[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"]
+}

@@ -1,14 +1,12 @@
 {
-  "name": "Slack",
-  "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
+  "name": "hull-slack",
+  "version": "1.0.0",
+  "description": "Send Notifications to Slack",
+  "tags": ["incoming", "outgoing", "oneColumn", "smart-notifier"],
+  "ui": false,
   "picture": "picture.png",
-  "version": "0.0.3",
-  "tags": [
-    "incoming",
-    "outgoing",
-    "oneColumn"
-  ],
-  "settings": [],
+  "admin": "admin.html",
+  "readme": "readme.md",
   "private_settings": [
     {
       "name": "token",
@@ -172,14 +170,15 @@
       }
     }
   ],
-  "deployment_settings": [],
-  "resources": [],
-  "readme": "readme.md",
+  "settings": [],
   "admin": "/auth/",
-  "ui": false,
-  "subscriptions": [
+  "resources": [],
+  "schedules" : [
     {
-      "url": "/notify"
+      "url": "/status",
+      "type": "interval",
+      "value": 5
     }
-  ]
+  ],
+  "subscriptions": [{ "url": "/smart-notifier" }]
 }

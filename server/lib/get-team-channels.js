@@ -4,10 +4,15 @@ export default function getTeamChannels(bot, force = false) {
   bot.config.team_channels = new Promise((resolve, reject) => {
     bot.api.channels.list({}, (err, { ok, channels }) => {
       if (err) return reject(err);
-      if (!ok) return reject({ message: "Not Ok" });
+      if (!ok)
+        return reject(
+          new Error({
+            message: "Not Ok"
+          })
+        );
       return resolve(channels);
     });
-  }).catch((err) => {
+  }).catch(err => {
     console.log(err);
     delete bot.config.team_channels;
   });

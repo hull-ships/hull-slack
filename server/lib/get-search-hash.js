@@ -1,17 +1,18 @@
 module.exports = function getSearchHash(type, message) {
   const search = {};
   const { match = [] } = message;
+  const [, id, rest, email, emailRest] = match;
   if (type === "email") {
-    search.email = match[3];
-    if (match[4]) search.rest = match[4];
+    if (email) search.email = email;
+    if (rest) search.rest = emailRest;
     return search;
   }
 
   if (type === "id") {
-    search.id = match[1];
-    search.rest = match[2];
+    search.id = id;
+    search.rest = rest;
   } else {
-    search.name = match[1];
+    search.name = id;
   }
   return search;
 };

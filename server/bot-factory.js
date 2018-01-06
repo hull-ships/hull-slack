@@ -41,7 +41,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
   //   });
   // });
 
-  controller.on("create_bot", function botSpawned(bot, config) {
+  controller.on("create_bot", (bot, config) => {
     const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
     const hull = new Hull(hullConfig);
 
@@ -50,7 +50,6 @@ module.exports = function BotFactory({ Hull, devMode }) {
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
     hull.logger.info("register.success");
-
 
     bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
       if (err) {
@@ -66,11 +65,14 @@ module.exports = function BotFactory({ Hull, devMode }) {
           token,
           app_token,
           user_id: bot_id,
-          createdBy: user_id,
+          createdBy: user_id
         }
       };
-      controller.saveTeam(team, (error) => {
-        if (error) return hull.logger.error("register.teamSave.error", { message: error.message });
+      controller.saveTeam(team, error => {
+        if (error)
+          return hull.logger.error("register.teamSave.error", {
+            message: error.message
+          });
         hull.logger.log("register.teamSave.success", { ...config.team });
         return setupChannels({ hull, bot, token: app_token, channels });
       });
@@ -84,15 +86,29 @@ module.exports = function BotFactory({ Hull, devMode }) {
   controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
   controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
   controller.on("interactive_message_callback", interactiveMessage);
-  _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} }) => {
-    controller.hears(message, context, ...middlewares, reply);
-  });
+  _.map(
+    replies,
+    ({
+      message = "test",
+      context = "direct_message",
+      middlewares = [],
+      reply = () => {}
+    }) => {
+      controller.hears(message, context, ...middlewares, reply);
+    }
+  );
 
   return {
     controller,
     getBot: _getBotByToken,
     connectSlack: function connectSlack({ hull, ship, force = false }) {
-      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
+      if (
+        !ship ||
+        !hull ||
+        !ship.private_settings ||
+        !ship.private_settings.bot
+      )
+        return false;
 
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
