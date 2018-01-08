@@ -8,7 +8,12 @@
   "keywords": [
     "hull",
     "ship",
-    "hull-ship"
+    "hull-ship",
+    "webhooks",
+    "integration",
+    "user",
+    "sync",
+    "slack"
   ],
   "author": {
     "name": "Hull",
@@ -32,16 +37,6 @@
       "git add"
     ]
   },
-  "keywords": [
-    "hull",
-    "ship",
-    "hull-ship",
-    "webhooks",
-    "integration",
-    "user",
-    "sync",
-    "slack"
-  ],
   "scripts": {
     "ngrok": "ngrok http 8082 --region eu --subdomain hull-slack",
     "build": "builder run build",
@@ -65,6 +60,7 @@
     "test": "builder run npm:test"
   },
   "dependencies": {
+    "@slack/client": "^3.15.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "botkit": "^0.6.7",
@@ -82,7 +78,6 @@
     "lodash": "^4.17.4",
     "minimist": "^1.2.0",
     "moment": "^2.20.1",
-    "node-slack": "^0.0.7",
     "passport-slack": "^0.0.7",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",

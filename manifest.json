@@ -27,28 +27,10 @@
       "format": "hidden"
     },
     {
-      "name": "incoming_webhook",
-      "title": "Incoming Webhook",
-      "type": "object",
-      "format": "hidden",
-      "properties": {
-        "url": {
-          "title": "url",
-          "type": "string"
-        },
-        "channel": {
-          "title": "channel",
-          "type": "string"
-        },
-        "channel_id": {
-          "title": "channel_id",
-          "type": "string"
-        },
-        "configuration_url": {
-          "title": "configuration_url",
-          "type": "string"
-        }
-      }
+      "name": "scope",
+      "title": "scope",
+      "type": "string",
+      "format": "hidden"
     },
     {
       "name": "bot",
@@ -177,7 +159,7 @@
     {
       "url": "/status",
       "type": "interval",
-      "value": 5
+      "value": "5"
     }
   ],
   "subscriptions": [{ "url": "/smart-notifier" }]

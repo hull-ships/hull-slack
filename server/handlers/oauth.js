@@ -16,7 +16,7 @@ export default function oAuth({
     options: {
       clientID,
       clientSecret,
-      scope: "bot, channels:write",
+      scope: "bot, channels:write, users:read",
       skipUserProfile: true
     },
     isSetup(req) {
@@ -44,14 +44,15 @@ export default function oAuth({
       const { client, ship } = hull;
       if (!client || !ship)
         return Promise.reject(new Error("No Ship or Client"));
-      const { accessToken, params = {} } = req.account || {};
+      console.log(req.account);
+      const { accessToken: token, params = {} } = req.account || {};
       const { ok } = params;
       if (!ok) return Promise.reject(new Error("Invalid reply"));
       const shipData = {
         private_settings: {
           ...ship.private_settings,
-          ..._.pick(params, "team_id", "user_id", "incoming_webhook", "bot"),
-          token: accessToken
+          ..._.pick(params, "team_id", "user_id", "bot", "scope"),
+          token
         }
       };
       connectSlack({ hull: client, ship: shipData });
