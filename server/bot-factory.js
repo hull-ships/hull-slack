@@ -1,7 +1,8 @@
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
-import { replies, join } from "./bot";
+import replies from "./bot/replies";
+import { join } from "./bot/utils";
 import getTeamChannels from "./lib/get-team-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
@@ -10,8 +11,8 @@ import setupChannels from "./lib/setup-channels";
 
 module.exports = function BotFactory({ Hull, devMode }) {
   const controller = Botkit.slackbot({
+    send_via_rtm: true,
     stats_optout: true,
-    interactive_replies: true,
     debug: devMode
   });
 
@@ -51,7 +52,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
     _cacheBot(bot);
     hull.logger.info("register.success");
 
-    bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
+    bot.startRTM((err /* , __, {  team, self, ok, users } */) => {
       if (err) {
         // Clear cache if we failed registering RTM
         _clearCache(token);
@@ -114,7 +115,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const token = ship.private_settings.bot.bot_access_token;
-      const app_token = ship.private_settings.token;
+      const appToken = ship.private_settings.token;
 
       const channels = getUniqueChannelNames(getNotifyChannels(ship));
       const oldBot = _getBotByToken(token);
@@ -132,7 +133,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
         id: ship.private_settings.team_id, // TEAM ID
         bot_id: ship.private_settings.bot.bot_user_id,
         channels,
-        app_token,
+        app_token: appToken,
         token, // BOT TOKEN
         // send_via_rtm: true,
         hullConfig: _.pick(conf, "organization", "id", "secret")

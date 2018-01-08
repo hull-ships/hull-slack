@@ -3,7 +3,7 @@ import queries from "./queries";
 
 /**
  * return { user, events, segments, pagination }
-*/
+ */
 
 module.exports = function fetchUser({ hull, search, options = {} }) {
   const { email, name, id } = search;
@@ -17,29 +17,41 @@ module.exports = function fetchUser({ hull, search, options = {} }) {
 
   hull.logger.debug("outgoing.user.search", params);
 
-  return hull.post("search/user_reports", params)
+  return hull
+    .post("search/user_reports", params)
 
-  .then((args) => {
-    const { pagination = {}, data = [] } = args;
-    const [user] = data;
-    if (!user || !user.id) return Promise.reject({ message: "User not found!" });
+    .then(args => {
+      const { pagination = {}, data = [] } = args;
+      const [user] = data;
+      if (!user || !user.id) throw new Error("User not found!");
 
-    const q = [hull.asUser(user.id).get("/me/segments")];
-    if (eventSearch) {
-      const eventParams = (search.rest) ? queries.filteredEvents(user.id, search.rest) : queries.events(user.id);
-      hull.logger.debug("outgoing.event.search", eventParams);
-      q.push(hull.post("search/events", eventParams));
-    }
-    return Promise.all(q)
-    .then(([segments, events = {}]) => {
-      if (eventSearch && !events.data.length) return { message: `\n Couldn't find "${search.rest}" events for ${user.name} - Search is case-sensitive` };
+      const q = [hull.asUser(user.id).get("/me/segments")];
+      if (eventSearch) {
+        const eventParams = search.rest
+          ? queries.filteredEvents(user.id, search.rest)
+          : queries.events(user.id);
+        hull.logger.debug("outgoing.event.search", eventParams);
+        q.push(hull.post("search/events", eventParams));
+      }
+      return Promise.all(q).then(([segments, events = {}]) => {
+        if (eventSearch && !events.data.length) {
+          throw new Error(
+            `\nCouldn't find "${search.rest}" events for ${
+              user.name
+            } - Search is case-sensitive`
+          );
+        }
 
-      if (!user) return { message: "Couldn't find anyone!" };
+        if (!user) throw new Error("Couldn't find anyone!");
 
-      const groupedUser = hull.utils.groupTraits(_.omitBy(user, v => (v === null || v === "" || v === undefined)));
-      return { user: groupedUser, events: events.data, segments, pagination };
-    }, (err) => { return { message: `An error occured ${err.message}!` }; }
-    , (err) => { return { message: `An error occured ${err.message}!` }; }
-    );
-  });
+        return {
+          subject: hull.utils.groupTraits(
+            _.omitBy(user, v => v === null || v === "" || v === undefined)
+          ),
+          events: events.data,
+          segments,
+          pagination
+        };
+      });
+    });
 };

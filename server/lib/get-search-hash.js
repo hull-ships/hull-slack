@@ -1,18 +1,23 @@
-module.exports = function getSearchHash(type, message) {
-  const search = {};
+import _ from "lodash";
+
+export default function getSearchHash(type, message) {
+  console.log("get Search Hash", type, message);
   const { match = [] } = message;
-  const [, id, rest, email, emailRest] = match;
+  if (type === "domain") {
+    const [, , , domain, rest] = match;
+    return _.pickBy({ domain, rest }, v => !!v);
+  }
+
   if (type === "email") {
-    if (email) search.email = email;
-    if (rest) search.rest = emailRest;
-    return search;
+    const [, , , email, rest] = match;
+    return _.pickBy({ email, rest }, v => !!v);
   }
 
   if (type === "id") {
-    search.id = id;
-    search.rest = rest;
-  } else {
-    search.name = id;
+    const [, id, rest] = match;
+    return { id, rest };
   }
-  return search;
-};
+
+  const [, name] = match;
+  return { name };
+}

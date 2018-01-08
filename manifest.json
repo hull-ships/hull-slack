@@ -14,6 +14,7 @@
       "type": "string",
       "format": "hidden"
     },
+
     {
       "name": "team_id",
       "title": "team_id",
@@ -49,13 +50,8 @@
       }
     },
 
-
     {
-      "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
-      "type": "array",
-      "default": [],
-      "format": "trait"
+
     },
 
     {
@@ -64,92 +60,12 @@
       "type": "string",
       "format": "title"
     },
-    {
-      "name": "notify_segments",
-      "title": "Notify when Segments change",
-      "type": "array",
-      "format": "table",
-      "default": [{ "segment": "", "channel": "" }],
-      "items": {
-        "type": "object",
-        "required": [ "channel", "segment"],
-        "properties": {
-          "segment": {
-            "title": "Segment Name",
-            "type": "string",
-            "format": "segment"
-          },
-          "channel": {
-            "title": "@user or #channel",
-            "type": "string",
-            "format": "string"
-          },
-          "enter": {
-            "title": "Notify on enter",
-            "type": "boolean",
-            "format": "checkbox"
-          },
-          "leave": {
-            "title": "Notify on leave",
-            "type": "boolean",
-            "format": "checkbox"
-          }
-        }
-      }
-    },
-    {
-      "name": "notify_events",
-      "title": "Notify when events performed",
-      "type": "array",
-      "format": "table",
-      "default": [{ "event": "", "channel": "" }],
-      "items": {
-        "type": "object",
-        "required": ["channel", "event"],
-        "properties": {
-          "event": {
-            "title": "Event Name",
-            "type": "string",
-            "format": "event"
-          },
-          "channel": {
-            "title": "@user or #channel",
-            "type": "string",
-            "format": "string"
-          }
-        }
-      }
-    },
+
     {
       "name": "button_header",
       "title": "Actions",
       "type": "string",
       "format": "title"
-    },
-    {
-      "name": "actions",
-      "title": "Add Action Buttons to update User attributes on click",
-      "default": [{ "label": "", "property": "", "value": "" }],
-      "type": "array",
-      "format": "table",
-      "items": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "title": "Button Label",
-            "type": "string"
-          },
-          "property": {
-            "title": "Property name",
-            "type": "string",
-            "format": "trait"
-          },
-          "value": {
-            "title": "Property Value",
-            "type": "string"
-          }
-        }
-      }
     }
   ],
   "settings": [],

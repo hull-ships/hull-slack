@@ -1,10 +1,10 @@
 import _ from "lodash";
-import userPayload from "./lib/user-payload";
+import getPayload from "./lib/payload";
 import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
-import { sayInPrivate } from "./bot";
+import { sayInPrivate } from "./bot/utils";
 
 function flattenForText(array = []) {
   return _.map(array, e => `"${e}"`).join(", ");
@@ -131,7 +131,7 @@ export default function(connectSlack, { client: hull, ship }, messages = []) {
       });
 
     // Build entire Notification payload
-    const payload = userPayload({
+    const payload = getPayload({
       ...message,
       hull,
       actions,

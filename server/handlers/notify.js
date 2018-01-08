@@ -6,8 +6,10 @@ export default function handler({ connectSlack }) {
   const update = updateUser.bind(undefined, connectSlack);
   return smartNotifierHandler({
     handlers: {
-      "ship:update": (ctx, { hull = {}, ship = {} }) =>
-        connectSlack({ hull, ship, force: true }),
+      "ship:update": (ctx, { hull = {}, ship = {} }) => {
+        connectSlack({ hull, ship, force: true });
+        return Promise.resolve();
+      },
       "user:update": (ctx, messages = []) => {
         messages.map(m => update(ctx, m));
         // Get 100 users every 100ms at most.

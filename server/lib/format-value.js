@@ -3,7 +3,7 @@ import moment from "moment";
 import humanize from "./humanize";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
-module.exports = function format(hash) {
+export function format(hash) {
   return _.map(
     hash,
     (v, key) => {
@@ -16,4 +16,13 @@ module.exports = function format(hash) {
     },
     {}
   );
-};
+}
+export function objectToFields(obj) {
+  return _.map(obj, (value, title) => ({ title, value, short: true }));
+}
+export function objectToText(obj) {
+  return _.join(
+    _.map(format(_.omit(obj, "id")), p => `*${p.title}*: ${p.value}`),
+    "\n"
+  );
+}
