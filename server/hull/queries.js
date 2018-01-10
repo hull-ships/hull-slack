@@ -20,7 +20,7 @@ function id(query) {
     filter: {
       filtered: {
         query: { match_all: {} },
-        filter: { and: { filters: [{ terms: { id: [query] } }] } }
+        filter: { and: { filters: [{ terms: { external_id: [query] } }] } }
       }
     },
     sort: {
