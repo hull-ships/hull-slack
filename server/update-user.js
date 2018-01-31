@@ -68,14 +68,16 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
       whitelist = []
     } = private_settings;
 
-    if (!hull || !user.id || !token) return hull.logger.info("outgoing.user.skip", { message: "Missing credentials", token: !!token });
+    if (!hull || !user.id || !token) return ;
+    // hull.logger.info("outgoing.user.skip", { message: "Missing credentials", token: !!token });
 
     const client = hull.asUser(_.pick(user, "email", "id", "external_id"));
 
     const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
     // Early return if no channel names configured
-    if (!channels.length) return client.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
+    if (!channels.length) return;
+    // client.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
 
     const msgs = [];
 
@@ -97,7 +99,8 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
 
     // Early return if no marching cnannel
     client.logger.debug("outgoing.user.channels", currentNotificationChannelNames);
-    if (!currentNotificationChannelNames.length) return client.logger.info("outgoing.user.skip", { message: "No matching channels" });
+    if (!currentNotificationChannelNames.length) return;
+    //client.logger.info("outgoing.user.skip", { message: "No matching channels" });
 
     // Build entire Notification payload
     const payload = userPayload({ ...message, hull, actions, message: msgs.join("\n"), whitelist });
