@@ -86,31 +86,6 @@
       "format": "title"
     },
     {
-      "name": "workflows",
-      "title": "Workflows",
-      "type": "array",
-      "format": "table",
-      "default": [{ "segment": "", "trigger": "", "message": "" }],
-      "items": {
-        "type": "object",
-        "required": ["segment", "trigger", "action"],
-        "properties": {
-          "segment": { "title": "Segments", "type": "string", "format": "segment" },
-          "event": { "title": "Trigger", "type": "string", "format": "event" },
-          "action":  {
-            "title": "Message",
-            "type": "string",
-            "format": "liquid",
-            "options": {
-              "help": "some help message",
-              "edit_label": "Edit message",
-              "type": "event"
-            }
-          }
-        }
-      }
-    },
-    {
       "name": "notify_segments",
       "title": "Notify when Segments change",
       "type": "array",
