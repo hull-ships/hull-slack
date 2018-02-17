@@ -215,14 +215,18 @@ export default function (
         });
         return null;
       });
-  })).then((responses) => {
-    if (smartNotifierResponse) {
-      smartNotifierResponse.setFlowControl({
-        type: "next",
-        size: 100,
-        in: 1
-      });
-    }
-    processResponses(hull, responses);
-  });
+  }))
+    .then((responses) => {
+      if (smartNotifierResponse) {
+        smartNotifierResponse.setFlowControl({
+          type: "next",
+          size: 100,
+          in: 1
+        });
+      }
+      processResponses(hull, responses);
+    })
+    .catch((err) => {
+      throw err;
+    });
 }
