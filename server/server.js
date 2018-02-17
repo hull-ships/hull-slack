@@ -6,7 +6,7 @@ import {
 } from "hull/lib/utils";
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
-import _ from "lodash";
+import statusHandler from "./status";
 
 module.exports = function Server(options = {}) {
   const {
@@ -92,6 +92,8 @@ module.exports = function Server(options = {}) {
         }
       })
     );
+
+    app.all("/status", statusHandler);
 
     app.get(
       "/connect",
