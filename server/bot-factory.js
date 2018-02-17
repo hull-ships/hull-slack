@@ -78,7 +78,10 @@ module.exports = function BotFactory({ Hull, devMode }) {
         }
         hull.logger.log("register.teamSave.success", { ...config.team });
         return setupChannels({
-          hull, bot, token: app_token, channels
+          hull,
+          bot,
+          token: app_token,
+          channels
         });
       });
       /* Create a Hull instance */
@@ -87,9 +90,10 @@ module.exports = function BotFactory({ Hull, devMode }) {
     return true;
   });
 
+  const getTeamChans = getTeamChannels(true);
   controller.on("bot_channel_join", join);
-  controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
-  controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
+  controller.on("bot_channel_join", getTeamChans);
+  controller.on("bot_channel_leave", getTeamChans);
   controller.on("interactive_message_callback", interactiveMessage);
   _.map(
     replies,
@@ -106,17 +110,20 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ client: hull, ship, force = false }) {
+    connectSlack: function connectSlack({ hull, ship, force = false }) {
       if (
         !ship ||
         !hull ||
         !ship.private_settings ||
         !ship.private_settings.bot
-      ) { return false; }
+      ) {
+        throw new Error(`Settings are invalid: ship:${!!ship}, hull:${!!hull}, private_settings:${ship.private_settings}, bot: ${!!ship.private_settings.bot}`);
+      }
 
       const conf = hull.configuration();
-      hull.logger.debug("bot.connect.start", conf);
-      if (!conf.organization || !conf.id || !conf.secret) return false;
+      if (!conf.organization || !conf.id || !conf.secret) {
+        throw new Error("Config is invalid");
+      }
 
       const token = ship.private_settings.bot.bot_access_token;
       const app_token = ship.private_settings.token;

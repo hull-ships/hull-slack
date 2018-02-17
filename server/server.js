@@ -137,7 +137,7 @@ module.exports = function Server(options = {}) {
       Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
 
       function onReconnect(req, res) {
-        connectSlack({ client: req.hull.client, ship: req.hull.ship });
+        connectSlack({ hull: req.hull.client, ship: req.hull.ship });
         setTimeout(() => {
           res.redirect(req.header("Referer"));
         }, 2000);
@@ -150,7 +150,7 @@ module.exports = function Server(options = {}) {
         hostSecret,
         handlers: {
           "ship:update": ({ client, ship = {} }) =>
-            connectSlack({ client, ship, force: true }),
+            connectSlack({ hull: client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack)
         }
       })
@@ -162,7 +162,7 @@ module.exports = function Server(options = {}) {
         hostSecret,
         handlers: {
           "ship:update": ({ client, ship = {} }) =>
-            connectSlack({ client, ship, force: true }),
+            connectSlack({ hull: client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack)
         }
       })

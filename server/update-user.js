@@ -220,7 +220,7 @@ export default function (
       if (smartNotifierResponse) {
         smartNotifierResponse.setFlowControl({
           type: "next",
-          size: 10,
+          size: 50,
           in: 1
         });
       }
