@@ -7,6 +7,7 @@ import {
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 import statusHandler from "./status";
+import setupWebserver from "./setup-webserver";
 
 module.exports = function Server(options = {}) {
   const {
@@ -22,7 +23,38 @@ module.exports = function Server(options = {}) {
     devMode
   });
 
-  controller.setupWebserver(port, function onServerStart(err, app) {
+  // const connector = new Hull.Connector({ port, hostSecret });
+  // const app = express();
+  // connector.setupApp(app);
+  // app.post(
+  //   "/smart-notify",
+  //   bodyParser.json({ limit: "500mb" }),
+  //   smartNotifierHandler({
+  //     hostSecret,
+  //     handlers: {
+  //       "ship:update": (ctx) => {
+  //         ctx.smartNotifierResponse.setFlowControl({
+  //           type: "next",
+  //           size: 10,
+  //           in: 1
+  //         });
+  //         return Promise.resolve();
+  //       },
+  //       "user:update": (ctx) => {
+  //         ctx.smartNotifierResponse.setFlowControl({
+  //           type: "next",
+  //           size: 10,
+  //           in: 1
+  //         });
+  //         return Promise.resolve();
+  //       }
+  //     }
+  //   })
+  // );
+  // app.listen(port);
+
+  // controller.setupWebserver(port);
+  setupWebserver(controller, port, function onServerStart(err, app) {
     const connector = new Hull.Connector({ port, hostSecret });
 
     connector.setupApp(app);
@@ -51,16 +83,16 @@ module.exports = function Server(options = {}) {
               credentials: true,
               connected: getBot(bot_access_token)
             })
-            : Promise.reject({
+            : Promise.reject(new Error({
               credentials: false,
               connected: getBot(bot_access_token)
-            });
+            }));
         },
         onAuthorize: (req) => {
           const { hull = {} } = req;
           const { client, ship } = hull;
           if (!client || !ship) {
-            return Promise.reject("Error, no Ship or Client");
+            return Promise.reject(new Error("Error, no Ship or Client"));
           }
           const { accessToken, params = {} } = req.account || {};
           const {
@@ -70,7 +102,7 @@ module.exports = function Server(options = {}) {
             user_id,
             incoming_webhook = {}
           } = params;
-          if (!ok) return Promise.reject("Error, invalid reply");
+          if (!ok) return Promise.reject(new Error("Error, invalid reply"));
           const shipData = {
             private_settings: {
               ...ship.private_settings,
@@ -125,7 +157,7 @@ module.exports = function Server(options = {}) {
     );
 
     app.post(
-      "/smart-notifier",
+      "/smart-notify",
       smartNotifierHandler({
         hostSecret,
         handlers: {
