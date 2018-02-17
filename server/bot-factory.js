@@ -42,7 +42,9 @@ module.exports = function BotFactory({ Hull, devMode }) {
   // });
 
   controller.on("create_bot", function botSpawned(bot, config) {
-    const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
+    const {
+      bot_id, app_token, user_id, token, channels, hullConfig
+    } = config;
     const hull = new Hull(hullConfig);
 
     if (_getBotByToken(token)) return hull.logger.debug("register.skip");
@@ -51,8 +53,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
     _cacheBot(bot);
     hull.logger.info("register.success");
 
-
-    bot.startRTM((err /* , __, {  team, self, ok, users }*/) => {
+    bot.startRTM((err /* , __, {  team, self, ok, users } */) => {
       if (err) {
         // Clear cache if we failed registering RTM
         _clearCache(token);
@@ -66,13 +67,19 @@ module.exports = function BotFactory({ Hull, devMode }) {
           token,
           app_token,
           user_id: bot_id,
-          createdBy: user_id,
+          createdBy: user_id
         }
       };
       controller.saveTeam(team, (error) => {
-        if (error) return hull.logger.error("register.teamSave.error", { message: error.message });
+        if (error) {
+          return hull.logger.error("register.teamSave.error", {
+            message: error.message
+          });
+        }
         hull.logger.log("register.teamSave.success", { ...config.team });
-        return setupChannels({ hull, bot, token: app_token, channels });
+        return setupChannels({
+          hull, bot, token: app_token, channels
+        });
       });
       /* Create a Hull instance */
       return true;
@@ -84,15 +91,28 @@ module.exports = function BotFactory({ Hull, devMode }) {
   controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
   controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
   controller.on("interactive_message_callback", interactiveMessage);
-  _.map(replies, ({ message = "test", context = "direct_message", middlewares = [], reply = () => {} }) => {
-    controller.hears(message, context, ...middlewares, reply);
-  });
+  _.map(
+    replies,
+    ({
+      message = "test",
+      context = "direct_message",
+      middlewares = [],
+      reply = () => {}
+    }) => {
+      controller.hears(message, context, ...middlewares, reply);
+    }
+  );
 
   return {
     controller,
     getBot: _getBotByToken,
     connectSlack: function connectSlack({ hull, ship, force = false }) {
-      if (!ship || !hull || !ship.private_settings || !ship.private_settings.bot) return false;
+      if (
+        !ship ||
+        !hull ||
+        !ship.private_settings ||
+        !ship.private_settings.bot
+      ) { return false; }
 
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) return false;
