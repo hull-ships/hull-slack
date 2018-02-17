@@ -1,12 +1,10 @@
 {
   "name": "hull-slack",
-  "version": "1.0.0",
   "description": "Send Notifications to Slack",
-  "tags": ["incoming", "outgoing", "oneColumn", "smart-notifier"],
-  "ui": false,
   "picture": "picture.png",
-  "admin": "admin.html",
-  "readme": "readme.md",
+  "version": "2.0.0",
+  "tags": ["incoming", "outgoing", "oneColumn", "smart-notifier"],
+  "settings": [],
   "private_settings": [
     {
       "name": "token",
@@ -14,7 +12,6 @@
       "type": "string",
       "format": "hidden"
     },
-
     {
       "name": "team_id",
       "title": "team_id",
@@ -38,6 +35,9 @@
       "title": "Bot",
       "type": "object",
       "format": "hidden",
+      "options": {
+        "edit_label": "Compose Message"
+      },
       "properties": {
         "bot_user_id": {
           "title": "bot_user_id",
@@ -49,34 +49,67 @@
         }
       }
     },
-
     {
-
-    },
-
-    {
-      "name": "notify_header",
-      "title": "Notifications",
-      "type": "string",
-      "format": "title"
-    },
-
-    {
-      "name": "button_header",
-      "title": "Actions",
-      "type": "string",
-      "format": "title"
+      "name": "Workflow",
+      "type": "object",
+      "title": "Message",
+      "format": "workflow",
+      "properties": {
+        "segments": {
+          "title": "segment",
+          "type": "array",
+          "format": "segment"
+        },
+        "triggers": {
+          "title": "event",
+          "type": "string",
+          "format": "event"
+        },
+        "action": {
+          "type": "object",
+          "format": "composer",
+          "title": "Edit Message",
+          "options": {
+            "preview": "/preview"
+          },
+          "properties": {
+            "channel": {
+              "title": "Message",
+              "type": "string",
+              "format": "liquid",
+              "options": {
+                "lines": "single",
+                "preview": "false"
+              }
+            },
+            "message": {
+              "title": "Message",
+              "type": "string",
+              "format": "liquid",
+              "options": {
+                "help":
+                  "[_Slack-specific_ formatting](https://api.slack.com/docs/message-formatting) supported."
+              }
+            }
+          }
+        }
+      }
     }
   ],
-  "settings": [],
-  "admin": "/auth/",
   "resources": [],
-  "schedules" : [
+  "readme": "readme.md",
+  "admin": "/auth/",
+  "ui": false,
+  "subscriptions": [
+    {
+      "url": "/smart-notifier"
+    }
+  ],
+  "schedules": [
     {
       "url": "/status",
       "type": "interval",
       "value": "5"
     }
-  ],
-  "subscriptions": [{ "url": "/smart-notifier" }]
+  ]
 }

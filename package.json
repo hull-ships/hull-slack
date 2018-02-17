@@ -1,6 +1,6 @@
 {
   "name": "hull-slack",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Send Notifications to Slack",
   "main": "index.js",
   "license": "MIT",
@@ -70,8 +70,8 @@
     "ejs": "^2.5.7",
     "express": "^4.16.2",
     "hull": "^0.13.9",
-    "hull-connector": "^1.0.37",
-    "hull-connector-dev": "^1.0.37",
+    "hull-connector": "^1.0.41",
+    "hull-connector-dev": "^1.0.41",
     "jwt-simple": "^0.5.1",
     "liquid": "^1.2.1",
     "liquid-node": "^3.0.0",
@@ -87,7 +87,8 @@
     "redux-actions": "^2.2.1",
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.5.3",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "slackdown": "^0.1.1"
   },
   "devDependencies": {
     "concurrently": "^3.5.1",

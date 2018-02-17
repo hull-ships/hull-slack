@@ -26,19 +26,34 @@ const colorFactory = () => {
 export default function buildPayload(payload) {
   const {
     hull,
+    type,
     /* user = {}, */
+    subject = {},
     changes = {},
     events = {},
     segments = {},
-    account = {},
     message = "",
     group = ""
   } = payload;
-  const type = _.size(account) ? "account" : "user";
-  const subject = payload[type];
+  console.log("------Type", type);
+  console.log("------Subject", subject);
   const name = getName(subject, type);
+  console.log("------Name", name);
   const url = urlFor(subject, type, hull);
+  console.log("------Url", url);
   const color = colorFactory();
+  console.log(
+    "------getProfile",
+    getProfile({
+      subject,
+      name,
+      type,
+      color
+    })
+  );
+  console.log("------getChanges", getChanges({ changes, type, color }));
+  console.log("------Events", getEvents({ events, type, color }));
+  console.log("------Attributes", getAttributes({ subject, type, color }));
   return {
     text: `*<${url}|${name}>*\n${message}`,
     attachments: _.compact([

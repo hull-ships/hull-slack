@@ -1,6 +1,11 @@
 import { errorHandler } from "hull-connector";
-import { statusHandler, notifyHandler, oAuthHandler } from "./handlers";
-
+import bodyParser from "body-parser";
+import {
+  previewHandler,
+  statusHandler,
+  notifyHandler,
+  oAuthHandler
+} from "./handlers";
 import BotFactory from "./bot-factory";
 
 export default function Server(options = {}) {
@@ -38,6 +43,7 @@ export default function Server(options = {}) {
 
     app.post("/smart-notifier", notifyHandler({ connectSlack }));
     app.all("/status", statusHandler);
+    app.post("/preview", bodyParser.json(), previewHandler);
 
     Hull.logger.info("app.start", { port });
 

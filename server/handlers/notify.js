@@ -11,14 +11,13 @@ export default function handler({ connectSlack }) {
         return Promise.resolve();
       },
       "user:update": (ctx, messages = []) => {
-        messages.map(m => update(ctx, m));
         // Get 100 users every 100ms at most.
         ctx.smartNotifierResponse.setFlowControl({
           type: "next",
-          size: 100,
-          in: 100
+          size: 50,
+          in: 1
         });
-        return Promise.resolve();
+        return Promise.all(messages.map(m => update(ctx, m)));
       }
     }
   });
