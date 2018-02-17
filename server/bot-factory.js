@@ -115,6 +115,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
       ) { return false; }
 
       const conf = hull.configuration();
+      hull.logger.debug("bot.connect.start", conf);
       if (!conf.organization || !conf.id || !conf.secret) return false;
 
       const token = ship.private_settings.bot.bot_access_token;
