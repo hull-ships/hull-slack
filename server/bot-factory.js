@@ -106,7 +106,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship, force = false }) {
+    connectSlack: function connectSlack({ client: hull, ship, force = false }) {
       if (
         !ship ||
         !hull ||

@@ -149,8 +149,8 @@ module.exports = function Server(options = {}) {
       notifHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ hull = {}, ship = {} }) =>
-            connectSlack({ hull, ship, force: true }),
+          "ship:update": ({ client, ship = {} }) =>
+            connectSlack({ client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack)
         }
       })
@@ -161,8 +161,8 @@ module.exports = function Server(options = {}) {
       smartNotifierHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ hull = {}, ship = {} }) =>
-            connectSlack({ hull, ship, force: true }),
+          "ship:update": ({ client, ship = {} }) =>
+            connectSlack({ client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack)
         }
       })
