@@ -1,4 +1,4 @@
-//@noflow
+//@flow
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
@@ -6,10 +6,13 @@ import { replies, join } from "./bot";
 import getTeamChannels from "./lib/get-team-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import type { Hull, ConnectSlackParams, Bot } from "./types";
 
 import setupChannels from "./lib/setup-channels";
 
-module.exports = function BotFactory({ Hull, devMode }) {
+type BotFactoryParams = { Hull: Hull, devMode: boolean };
+
+module.exports = function BotFactory({ Hull, devMode }: BotFactoryParams) {
   const controller = Botkit.slackbot({
     stats_optout: true,
     interactive_replies: true,
@@ -22,11 +25,11 @@ module.exports = function BotFactory({ Hull, devMode }) {
     _bots[bot.config.token] = bot;
     return bot;
   }
-  function _clearCache(token) {
+  function _clearCache(token: string) {
     delete _bots[token];
   }
 
-  function _getBotByToken(token) {
+  function _getBotByToken(token: string) {
     return _bots[token];
   }
 
@@ -44,6 +47,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
 
   controller.on("create_bot", (bot, config) => {
     const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
+    // $FlowFixMe
     const hull = new Hull(hullConfig);
 
     if (_getBotByToken(token)) return hull.logger.debug("register.skip");
@@ -109,7 +113,11 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship, force = false }) {
+    connectSlack: function connectSlack({
+      hull,
+      ship,
+      force = false,
+    }: ConnectSlackParams): Bot {
       if (
         !ship ||
         !hull ||
@@ -117,9 +125,9 @@ module.exports = function BotFactory({ Hull, devMode }) {
         !ship.private_settings.bot
       ) {
         throw new Error(
-          `Settings are invalid: ship:${!!ship}, hull:${!!hull}, private_settings:${
+          `Settings are invalid: private_settings:${JSON.stringify(
             ship.private_settings
-          }, bot: ${!!ship.private_settings.bot}`
+          )}, bot: ${!!ship.private_settings.bot}`
         );
       }
 

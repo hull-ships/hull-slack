@@ -6,6 +6,7 @@ import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import { sayInPrivate } from "./bot";
+import type { HullContext, ConnectSlackParams } from "./types";
 
 const flattenForText = (array = []) => _.map(array, e => `"${e}"`).join(", ");
 
@@ -88,17 +89,13 @@ const processResponses = (hull, responses) =>
 
 export default function(
   connectSlack: Object => any,
-  { client: hull, ship, metric, smartNotifierResponse }: Object,
+  { client: hull, ship, metric, smartNotifierResponse }: HullContext,
   messages: Array<Object> = []
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const {
-        user = {},
-        /* segments = [], */ changes = {},
-        events = [],
-      } = message;
-      const bot = connectSlack({ hull, ship });
+      const { user, /* segments = [], */ changes = {}, events = [] } = message;
+      const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
         token = "",
@@ -113,7 +110,7 @@ export default function(
         return {
           action: "skip",
           user_id: user.id,
-          message: `Missing credentials token_exists:${token}`,
+          message: `Missing credentials token_exists: ${token}`,
         };
       }
 
@@ -144,7 +141,7 @@ export default function(
 
       // Build message array
       msgs.push(...changeActions.messages, ...eventActions.messages);
-      client.logger.debug("outgoing.user.messages", msgs);
+      client.logger.debug("outgoing.user.messages", { messages: msgs });
 
       const currentNotificationChannelNames = getUniqueChannelNames(
         _.concat(entered, left, triggered)
