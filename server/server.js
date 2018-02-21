@@ -1,17 +1,16 @@
+//@noflow
 import { Strategy as SlackStrategy } from "passport-slack";
 import {
   notifHandler,
   smartNotifierHandler,
-  oAuthHandler
+  oAuthHandler,
 } from "hull/lib/utils";
 import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 import statusHandler from "./status";
 
 module.exports = function Server(options = {}) {
-  const {
-    port, hostSecret, clientID, clientSecret, Hull, devMode
-  } = options;
+  const { port, hostSecret, clientID, clientSecret, Hull, devMode } = options;
   const { Middleware } = Hull;
   const { controller, connectSlack, getBot } = BotFactory({
     port,
@@ -19,10 +18,10 @@ module.exports = function Server(options = {}) {
     clientID,
     clientSecret,
     Hull,
-    devMode
+    devMode,
   });
 
-  controller.setupWebserver(port, function onServerStart(err, app) {
+  controller.setupWebserver(port, (err, app) => {
     const connector = new Hull.Connector({ port, hostSecret });
 
     connector.setupApp(app);
@@ -39,7 +38,7 @@ module.exports = function Server(options = {}) {
           clientID,
           clientSecret,
           scope: "bot, channels:write",
-          skipUserProfile: true
+          skipUserProfile: true,
         },
         isSetup(req) {
           if (req.query.reset) return Promise.reject();
@@ -48,15 +47,15 @@ module.exports = function Server(options = {}) {
           const { bot_access_token } = bot;
           return !!token && !!bot_access_token
             ? Promise.resolve({
-              credentials: true,
-              connected: getBot(bot_access_token)
-            })
+                credentials: true,
+                connected: getBot(bot_access_token),
+              })
             : Promise.reject({
-              credentials: false,
-              connected: getBot(bot_access_token)
-            });
+                credentials: false,
+                connected: getBot(bot_access_token),
+              });
         },
-        onAuthorize: (req) => {
+        onAuthorize: req => {
           const { hull = {} } = req;
           const { client, ship } = hull;
           if (!client || !ship) {
@@ -68,7 +67,7 @@ module.exports = function Server(options = {}) {
             bot = {},
             team_id,
             user_id,
-            incoming_webhook = {}
+            incoming_webhook = {},
           } = params;
           if (!ok) return Promise.reject("Error, invalid reply");
           const shipData = {
@@ -78,8 +77,8 @@ module.exports = function Server(options = {}) {
               bot,
               team_id,
               user_id,
-              token: accessToken
-            }
+              token: accessToken,
+            },
           };
           connectSlack({ hull: client, ship: shipData });
           return client.put(ship.id, shipData);
@@ -88,8 +87,8 @@ module.exports = function Server(options = {}) {
           login: "login.html",
           home: "home.html",
           failure: "failure.html",
-          success: "success.html"
-        }
+          success: "success.html",
+        },
       })
     );
 
@@ -97,14 +96,14 @@ module.exports = function Server(options = {}) {
 
     app.get(
       "/connect",
-      function parseToken(req, res, next) {
+      (req, res, next) => {
         req.hull = { ...req.hull, token: req.query.token };
         next();
       },
 
       Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
 
-      function onReconnect(req, res) {
+      (req, res) => {
         connectSlack({ hull: req.hull.client, ship: req.hull.ship });
         setTimeout(() => {
           res.redirect(req.header("Referer"));
@@ -119,8 +118,8 @@ module.exports = function Server(options = {}) {
         handlers: {
           "ship:update": ({ hull = {}, ship = {} }) =>
             connectSlack({ hull, ship, force: true }),
-          "user:update": updateUser.bind(undefined, connectSlack)
-        }
+          "user:update": updateUser.bind(undefined, connectSlack),
+        },
       })
     );
 
@@ -129,10 +128,12 @@ module.exports = function Server(options = {}) {
       smartNotifierHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ hull = {}, ship = {} }) =>
-            connectSlack({ hull, ship, force: true }),
-          "user:update": updateUser.bind(undefined, connectSlack)
-        }
+          "ship:update": ({ hull = {}, ship = {} }) => {
+            connectSlack({ hull, ship, force: true });
+            Promise.resolve({});
+          },
+          "user:update": updateUser.bind(undefined, connectSlack),
+        },
       })
     );
 

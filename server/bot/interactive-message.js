@@ -1,3 +1,4 @@
+//@noflow
 import Hull from "hull";
 import _ from "lodash";
 import fetchEvent from "../hull/fetch-event";
@@ -20,7 +21,7 @@ module.exports = function interactiveMessage(bot, message) {
     } catch (e) {
       hull.logger.error("bot.interactiveMessage.error", {
         type: "update",
-        message: e.message
+        message: e.message,
       });
     }
   } else if (name === "expand") {
@@ -45,15 +46,16 @@ module.exports = function interactiveMessage(bot, message) {
         .catch(err =>
           hull.logger.error("bot.interactiveMessage.error", {
             type: "event",
-            message: err.message
-          }));
+            message: err.message,
+          })
+        );
     }
 
     if (value === "traits" || value === "events") {
       return fetchUser({
         hull,
         search: { id: callback_id },
-        options: { action: { value } }
+        options: { action: { value } },
       }).then(results =>
         bot.replyInteractive(
           message,
@@ -61,9 +63,10 @@ module.exports = function interactiveMessage(bot, message) {
             ...results,
             hull,
             group: value,
-            whitelist: []
+            whitelist: [],
           })
-        ));
+        )
+      );
     }
   }
   return true;

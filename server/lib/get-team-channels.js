@@ -1,3 +1,4 @@
+//@noflow
 export default function getTeamChannels(bot, force = false) {
   if (!force && bot.config.team_channels) return bot.config.team_channels;
 
@@ -7,7 +8,7 @@ export default function getTeamChannels(bot, force = false) {
       if (!ok) return reject({ message: "Not Ok" });
       return resolve(channels);
     });
-  }).catch((err) => {
+  }).catch(err => {
     console.log(err);
     delete bot.config.team_channels;
   });

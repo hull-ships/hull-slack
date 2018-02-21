@@ -1,3 +1,4 @@
+//@noflow
 /* ACTIONS */
 
 // function traitUser(type) {
