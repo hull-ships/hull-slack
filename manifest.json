@@ -63,7 +63,10 @@
         "triggers": {
           "title": "event",
           "type": "string",
-          "format": "event"
+          "format": "event",
+          "options": {
+            "allowCreate": true
+          }
         },
         "action": {
           "type": "object",
@@ -98,7 +101,15 @@
   ],
   "resources": [],
   "readme": "readme.md",
-  "admin": "/auth/",
+  "admin": "/auth",
+  "tabs": [
+    {
+      "title": "Credentials",
+      "url": "/auth",
+      "size": "small",
+      "editable": false
+    }
+  ],
   "ui": false,
   "subscriptions": [
     {
