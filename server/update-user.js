@@ -6,32 +6,41 @@ import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import { sayInPrivate } from "./bot";
 
-function flattenForText(array = []) {
-  return _.map(array, e => `"${e}"`).join(", ");
-}
-function getChanges(changes, notify_segments) {
+const flattenForText = (array = []) => _.map(array, e => `"${e}"`).join(", ");
+
+const getChanges = (changes, notify_segments) => {
   // Changes of Segments
   let messages = [];
   const entered = [];
   const left = [];
 
-  if (changes && changes.segments && (changes.segments.entered || changes.segments.left)) {
+  if (
+    changes &&
+    changes.segments &&
+    (changes.segments.entered || changes.segments.left)
+  ) {
     messages = _.map(changes.segments, (values, action) => {
       const names = _.map(values, "name");
-      const s = (names.length > 1) ? "s" : "";
+      const s = names.length > 1 ? "s" : "";
       return `${humanize(action)} segment${s} ${flattenForText(names)}`;
     });
 
     _.map(notify_segments, (notify) => {
-      const { segment, channel, enter, leave } = notify;
-      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) entered.push(channel);
-      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) left.push(channel);
+      const {
+        segment, channel, enter, leave
+      } = notify;
+      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
+        entered.push(channel);
+      }
+      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
+        left.push(channel);
+      }
     });
   }
   return { entered, left, messages };
-}
+};
 
-function getEvents(events, notify_events) {
+const getEvents = (events, notify_events) => {
   const messages = [];
   const triggered = [];
   if (notify_events.length) {
@@ -48,15 +57,45 @@ function getEvents(events, notify_events) {
     }
   }
   return { triggered, messages };
-}
+};
 
-function getChannelIds(teamChannels, channelNames) {
-  return _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
-}
+const getChannelIds = (teamChannels, channelNames) =>
+  _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
 
-export default function (connectSlack, { client: hull, ship }, messages = []) {
-  _.map(messages, (message = {}) => {
-    const { user = {}, /* segments = [], */ changes = {}, events = [] } = message;
+const getLoggableMessages = responses =>
+  _.groupBy(_.compact(responses), "action");
+
+const reduceActionUsers = actions =>
+  _.reduce(
+    actions,
+    (m, v) => {
+      m[v.user_id] = m.message;
+      return m;
+    },
+    {}
+  );
+
+const processResponses = (hull, responses) =>
+  _.map(getLoggableMessages(responses), (actions, name) => {
+    hull.logger.info(`outgoing.user.${name}`, {
+      user_ids: _.map(actions, "user_id"),
+      data: reduceActionUsers(actions)
+    });
+  });
+
+export default function (
+  connectSlack,
+  {
+    client: hull, ship, metric, smartNotifierResponse
+  },
+  messages = []
+) {
+  return Promise.all(_.map(messages, (message = {}) => {
+    const {
+      user = {},
+      /* segments = [], */ changes = {},
+      events = []
+    } = message;
     const bot = connectSlack({ hull, ship });
     const { private_settings = {} } = ship;
     const {
@@ -68,16 +107,26 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
       whitelist = []
     } = private_settings;
 
-    if (!hull || !user.id || !token) return ;
-    // hull.logger.info("outgoing.user.skip", { message: "Missing credentials", token: !!token });
+    if (!hull || !user.id || !token) {
+      return {
+        action: "skip",
+        user_id: user.id,
+        message: `Missing credentials token_exists:${!!token}`
+      };
+    }
 
-    const client = hull.asUser(_.pick(user, "email", "id", "external_id"));
+    const client = hull.asUser(user);
 
     const channels = getUniqueChannelNames(getNotifyChannels(ship));
 
     // Early return if no channel names configured
-    if (!channels.length) return;
-    // client.logger.info("outgoing.user.skip", { message: "No channels matching to post user" });
+    if (!channels.length) {
+      return {
+        action: "skip",
+        user_id: user.id,
+        message: "No channels matching to post user"
+      };
+    }
 
     const msgs = [];
 
@@ -98,31 +147,86 @@ export default function (connectSlack, { client: hull, ship }, messages = []) {
     const currentNotificationChannelNames = getUniqueChannelNames(_.concat(entered, left, triggered));
 
     // Early return if no marching cnannel
-    client.logger.debug("outgoing.user.channels", currentNotificationChannelNames);
-    if (!currentNotificationChannelNames.length) return;
-    //client.logger.info("outgoing.user.skip", { message: "No matching channels" });
-
-    // Build entire Notification payload
-    const payload = userPayload({ ...message, hull, actions, message: msgs.join("\n"), whitelist });
-
-    function tellUser(msg, error) {
-      client.logger.info("outgoing.user.error", { error, message: msg });
-      sayInPrivate(bot, user_id, msg);
+    client.logger.debug(
+      "outgoing.user.channels",
+      currentNotificationChannelNames
+    );
+    if (!currentNotificationChannelNames.length) {
+      return {
+        action: "skip",
+        user_id: user.id,
+        message: "No matching channels"
+      };
     }
 
-    return setupChannels({ hull, bot, app_token: token, channels })
-    .then(({ teamChannels, teamMembers }) => {
-      function postToChannel(channel) {
-        client.logger.info("outgoing.user.success", { text: payload.text, channel });
-        return bot.say({ ...payload, channel });
+    // Build entire Notification payload
+    const payload = userPayload({
+      ...message,
+      hull,
+      actions,
+      message: msgs.join("\n"),
+      whitelist
+    });
+
+    const post = p => (channel) => {
+      client.logger.info("outgoing.user.success", {
+        text: p.text,
+        channel
+      });
+      metric.increment("ship.service_api.call");
+      return bot.say({ ...p, channel });
+    };
+
+    const tellUser = (msg, error) => {
+      client.logger.info("outgoing.user.error", { error, message: msg });
+      sayInPrivate(bot, user_id, msg);
+    };
+
+    metric.increment("ship.outgoing.users");
+
+    return setupChannels({
+      hull,
+      bot,
+      app_token: token,
+      channels
+    })
+      .then(({ teamChannels, teamMembers }) => {
+        const channel_ids = getChannelIds(
+          teamChannels,
+          currentNotificationChannelNames
+        );
+        const member_ids = getChannelIds(
+          teamMembers,
+          _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))
+        );
+        _.map(channel_ids, post(payload));
+        _.map(member_ids, post(payload));
+        return null;
+      })
+      .catch((err) => {
+        tellUser(
+          `:crying_cat_face: Something bad happened while posting to the channels :${
+            err.message
+          }`,
+          err
+        );
+        client.logger.error("outgoing.user.error", {
+          error: err.message
+        });
+        return null;
+      });
+  }))
+    .then((responses) => {
+      if (smartNotifierResponse) {
+        smartNotifierResponse.setFlowControl({
+          type: "next",
+          size: 50,
+          in: 1
+        });
       }
-      function postToMember(channel) {
-        client.logger.info("outgoing.user.success", { text: payload.text, member: channel });
-        return bot.say({ ...payload, channel });
-      }
-      _.map(getChannelIds(teamChannels, currentNotificationChannelNames), postToChannel);
-      _.map(getChannelIds(teamMembers, _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))), postToMember);
-    }, err => tellUser(`:crying_cat_face: Something bad happened while setting up the channels :${err.message}`, err))
-    .catch(err => tellUser(`:crying_cat_face: Something bad happened while posting to the channels :${err.message}`, err));
-  });
+      processResponses(hull, responses);
+    })
+    .catch((err) => {
+      throw err;
+    });
 }
