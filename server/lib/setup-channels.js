@@ -1,39 +1,39 @@
+//@noflow
 import _ from "lodash";
 import getTeamChannels from "./get-team-channels";
 import getTeamMembers from "./get-team-members";
 
 function inviteBot(bot, token, channels) {
   const user = bot.config.bot_id;
-  return Promise.all(_.map(channels, (channel) => {
-    return new Promise((resolve, reject) => {
-      bot.api.channels.invite(
-        { token, channel: channel.id, user },
-        function inviteDone(err) {
+  return Promise.all(
+    _.map(channels, channel => {
+      return new Promise((resolve, reject) => {
+        bot.api.channels.invite({ token, channel: channel.id, user }, err => {
           if (err) return reject(err);
           return resolve(channel.id);
-        }
-      );
-    });
-  }));
+        });
+      });
+    })
+  );
 }
 
 function createChannels(bot, token, channelsToJoin = []) {
-  return Promise.all(_.map(channelsToJoin, (name) => {
-    return new Promise((resolve, reject) => {
-      bot.api.channels.create({ token, name }, function channelCreated(
-        err,
-        channel = {}
-      ) {
-        if (err) return reject(err);
-        return resolve(channel.id);
+  return Promise.all(
+    _.map(channelsToJoin, name => {
+      return new Promise((resolve, reject) => {
+        bot.api.channels.create({ token, name }, (err, channel = {}) => {
+          if (err) return reject(err);
+          return resolve(channel.id);
+        });
       });
-    });
-  }));
+    })
+  );
 }
 
 function getNotifyChannels(teamChannels, notifyChannelsNames) {
   return _.filter(teamChannels, channel =>
-    _.includes(notifyChannelsNames, channel.name));
+    _.includes(notifyChannelsNames, channel.name)
+  );
 }
 
 function getChannelsToJoin(teamChannels, channels) {
@@ -50,9 +50,7 @@ function getChannelsToCreate(teamChannels, channels) {
   );
 }
 
-export default function ({
-  hull, bot, app_token, channels
-}) {
+export default function({ hull, bot, app_token, channels }) {
   return Promise.all([getTeamChannels(false)(bot), getTeamMembers(bot)]).then(
     ([teamChannels, teamMembers]) => {
       const chans = _.filter(channels, c => c.indexOf("@") !== 0);
@@ -66,10 +64,12 @@ export default function ({
         teamChannels: _.map(teamChannels, "id"),
         notifyChannels,
         channelsToJoin,
-        channelsToCreate
+        channelsToCreate,
       });
 
-      if (!channelsToCreate.length && !channelsToJoin.length) { return Promise.resolve({ teamChannels, teamMembers }); }
+      if (!channelsToCreate.length && !channelsToJoin.length) {
+        return Promise.resolve({ teamChannels, teamMembers });
+      }
 
       return createChannels(bot, app_token, channelsToCreate)
         .then(
@@ -78,7 +78,7 @@ export default function ({
             hull.logger.error("bot.setup.error", {
               object: "channel",
               type: "create",
-              error: err
+              error: err,
             })
         )
         .then(
@@ -87,15 +87,16 @@ export default function ({
             hull.logger.error("bot.setup.error", {
               object: "channel",
               type: "refresh",
-              error: err
+              error: err,
             })
         )
         .catch(err =>
           hull.logger.error("bot.setup.error", {
             object: "channel",
             type: "invite",
-            error: err
-          }))
+            error: err,
+          })
+        )
         .then(() => ({ teamChannels, teamMembers }));
       // Always return data.
     },

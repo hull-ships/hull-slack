@@ -1,3 +1,4 @@
+//@noflow
 import _ from "lodash";
 import buildAttachments from "./build-attachments";
 import getUserName from "./get-user-name";
@@ -27,28 +28,37 @@ const getActions = (user, traits, events, actions, group = "") => ({
   mrkdwn_in: ["text", "fields", "pretext"],
   callback_id: user.id,
   actions: [
-    ..._.map(_.filter(actions, a => (a.label !== "" && a.property !== "" && a.value !== ""), (a) => {
-      return {
-        name: "trait",
-        value: JSON.stringify({ [a.property.replace(/^traits_/, "")]: cast(a.value) }),
-        text: a.label,
-        type: "button"
-      };
-    })),
+    ..._.map(
+      _.filter(
+        actions,
+        a => a.label !== "" && a.property !== "" && a.value !== "",
+        a => {
+          return {
+            name: "trait",
+            value: JSON.stringify({
+              [a.property.replace(/^traits_/, "")]: cast(a.value),
+            }),
+            text: a.label,
+            type: "button",
+          };
+        }
+      )
+    ),
     {
       name: "expand",
-      style: (group === "events") ? "primary" : "default",
+      style: group === "events" ? "primary" : "default",
       value: "events",
       text: "Show latest events",
-      type: "button"
-    }, {
+      type: "button",
+    },
+    {
       name: "expand",
-      style: (group === "traits") ? "primary" : "default",
+      style: group === "traits" ? "primary" : "default",
       value: "traits",
       text: "Show all attributes",
-      type: "button"
-    }
-  ]
+      type: "button",
+    },
+  ],
 });
 
 module.exports = function userPayload({
@@ -63,8 +73,16 @@ module.exports = function userPayload({
   group = "",
 }) {
   const user_url = urlFor(user, hull.configuration().organization);
-  const w = (group ? [] : whitelist);
-  const atts = buildAttachments({ hull, user, segments, changes, events, pretext: message, whitelist: w });
+  const w = group ? [] : whitelist;
+  const atts = buildAttachments({
+    hull,
+    user,
+    segments,
+    changes,
+    events,
+    pretext: message,
+    whitelist: w,
+  });
   const name = getUserName(user);
 
   // common items;
@@ -75,7 +93,10 @@ module.exports = function userPayload({
     attachments.push(...atts.events);
   } else if (group && group !== "traits") {
     // "@hull user@example.com intercom" -> return only Intercom group;
-    const t = _.filter(atts.traits, traitGroup => (traitGroup.fallback.toLowerCase() === group.toLowerCase()));
+    const t = _.filter(
+      atts.traits,
+      traitGroup => traitGroup.fallback.toLowerCase() === group.toLowerCase()
+    );
     attachments.push(...t);
   } else {
     // "@hull user@example.com full|traits"
@@ -90,6 +111,6 @@ module.exports = function userPayload({
 
   return {
     text: `*<${user_url}|${name}>*`,
-    attachments
+    attachments,
   };
 };

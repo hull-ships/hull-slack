@@ -1,4 +1,5 @@
-const getTeamChannels = (force = false) => (bot) => {
+// @noflow
+const getTeamChannels = (force = false) => bot => {
   if (!force && bot.config.team_channels) return bot.config.team_channels;
 
   bot.config.team_channels = new Promise((resolve, reject) => {
@@ -7,7 +8,7 @@ const getTeamChannels = (force = false) => (bot) => {
       if (!ok) return reject(new Error({ message: "Not Ok" }));
       return resolve(channels);
     });
-  }).catch((err) => {
+  }).catch(err => {
     console.log(err);
     delete bot.config.team_channels;
   });

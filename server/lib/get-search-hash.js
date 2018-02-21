@@ -1,3 +1,4 @@
+//@noflow
 module.exports = function getSearchHash(type, message) {
   const search = {};
   const { match = [] } = message;

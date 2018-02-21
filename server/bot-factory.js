@@ -1,3 +1,4 @@
+//@noflow
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
@@ -12,7 +13,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
   const controller = Botkit.slackbot({
     stats_optout: true,
     interactive_replies: true,
-    debug: devMode
+    debug: devMode,
   });
 
   const _bots = {};
@@ -41,10 +42,8 @@ module.exports = function BotFactory({ Hull, devMode }) {
   //   });
   // });
 
-  controller.on("create_bot", function botSpawned(bot, config) {
-    const {
-      bot_id, app_token, user_id, token, channels, hullConfig
-    } = config;
+  controller.on("create_bot", (bot, config) => {
+    const { bot_id, app_token, user_id, token, channels, hullConfig } = config;
     const hull = new Hull(hullConfig);
 
     if (_getBotByToken(token)) return hull.logger.debug("register.skip");
@@ -67,13 +66,13 @@ module.exports = function BotFactory({ Hull, devMode }) {
           token,
           app_token,
           user_id: bot_id,
-          createdBy: user_id
-        }
+          createdBy: user_id,
+        },
       };
-      controller.saveTeam(team, (error) => {
+      controller.saveTeam(team, error => {
         if (error) {
           return hull.logger.error("register.teamSave.error", {
-            message: error.message
+            message: error.message,
           });
         }
         hull.logger.log("register.teamSave.success", { ...config.team });
@@ -81,7 +80,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
           hull,
           bot,
           token: app_token,
-          channels
+          channels,
         });
       });
       /* Create a Hull instance */
@@ -101,7 +100,7 @@ module.exports = function BotFactory({ Hull, devMode }) {
       message = "test",
       context = "direct_message",
       middlewares = [],
-      reply = () => {}
+      reply = () => {},
     }) => {
       controller.hears(message, context, ...middlewares, reply);
     }
@@ -117,7 +116,11 @@ module.exports = function BotFactory({ Hull, devMode }) {
         !ship.private_settings ||
         !ship.private_settings.bot
       ) {
-        throw new Error(`Settings are invalid: ship:${!!ship}, hull:${!!hull}, private_settings:${ship.private_settings}, bot: ${!!ship.private_settings.bot}`);
+        throw new Error(
+          `Settings are invalid: ship:${!!ship}, hull:${!!hull}, private_settings:${
+            ship.private_settings
+          }, bot: ${!!ship.private_settings.bot}`
+        );
       }
 
       const conf = hull.configuration();
@@ -147,13 +150,13 @@ module.exports = function BotFactory({ Hull, devMode }) {
         app_token,
         token, // BOT TOKEN
         // send_via_rtm: true,
-        hullConfig: _.pick(conf, "organization", "id", "secret")
+        hullConfig: _.pick(conf, "organization", "id", "secret"),
       };
 
       hull.logger.info("bot.spawn.start");
       const bot = controller.spawn(config);
       controller.trigger("create_bot", [bot, config]);
       return bot;
-    }
+    },
   };
 };

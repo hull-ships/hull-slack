@@ -1,3 +1,4 @@
+//@noflow
 import Hull from "hull";
 import _ from "lodash";
 import userPayload from "../lib/user-payload";
@@ -31,7 +32,7 @@ export function sayInPrivate(bot, user_id, msg = []) {
 export function join(bot, message) {
   bot.say({
     text: messages.join,
-    channel: message.channel
+    channel: message.channel,
   });
 }
 
@@ -44,7 +45,7 @@ function sad(hull, bot, message, err) {
 function rpl(hull, bot, message, res = {}) {
   hull.logger.info("bot.reply", {
     ...getMessageLogData(message),
-    text: res.text
+    text: res.text,
   });
   return bot.reply(message, res);
 }
@@ -59,13 +60,14 @@ function postUser(type, options = {}) {
 
     const msgdata = getMessageLogData(msg);
     hull.logger.info("bot.hear", {
-      type, search, options, ...msgdata
+      type,
+      search,
+      options,
+      ...msgdata,
     });
 
     fetchUser({ hull, search, options })
-      .then(({
-        user, events, segments, pagination, message = ""
-      }) => {
+      .then(({ user, events, segments, pagination, message = "" }) => {
         if (!user) {
           hull.logger.info("user.fetch.fail", { message, search, type });
           return `¯\\_(ツ)_/¯ ${message}`;
@@ -81,7 +83,7 @@ function postUser(type, options = {}) {
           segments,
           actions,
           pagination,
-          whitelist
+          whitelist,
         };
 
         if (action.name === "expand") {
@@ -93,7 +95,8 @@ function postUser(type, options = {}) {
 
         const res = userPayload(pl);
         hull.logger.debug("outgoing.user.reply", res);
-        if (pagination.total > 1) { res.text = `Found ${pagination.total} users, Showing ${res.text}`; }
+        if (pagination.total > 1)
+          res.text = `Found ${pagination.total} users, Showing ${res.text}`;
         return res;
       }, sad.bind(undefined, hull, bot, msg))
       .then(
@@ -108,30 +111,30 @@ export const replies = [
   {
     message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
     context: "direct_message,mention,direct_mention",
-    reply: postUser("email")
+    reply: postUser("email"),
   },
   {
     message: [
       "^\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
-      "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$"
+      "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$",
     ],
     context: "direct_message,mention,direct_mention",
-    reply: postUser("email", { action: { name: "expand", value: "traits" } })
+    reply: postUser("email", { action: { name: "expand", value: "traits" } }),
   },
   {
     message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s*$"],
     context: "direct_message,mention,direct_mention",
-    reply: postUser("email", { action: { name: "expand", value: "events" } })
+    reply: postUser("email", { action: { name: "expand", value: "events" } }),
   },
   {
     message: "^(info|search)\\sid:(.+)",
     context: "direct_message,mention,direct_mention",
-    reply: postUser("id")
+    reply: postUser("id"),
   },
   {
-    message: ["^info\\s\"(.+)\"\\s?(.*)$", "^info (.+)$"],
+    message: ['^info\\s"(.+)"\\s?(.*)$', "^info (.+)$"],
     context: "direct_message,mention,direct_mention",
-    reply: postUser("name")
+    reply: postUser("name"),
   },
   {
     message: ["hello", "hi"],
@@ -139,7 +142,7 @@ export const replies = [
     reply: (bot, message) => {
       const hull = new Hull(bot.config.hullConfig);
       return rpl(hull, bot, message, messages.hi);
-    }
+    },
   },
   {
     message: "help",
@@ -149,7 +152,7 @@ export const replies = [
       const hull = new Hull(bot.config.hullConfig);
       if (m) return rpl(hull, bot, message, _replaceBotName(bot, m));
       return rpl(hull, bot, message, messages.notfound);
-    }
+    },
   },
   {
     message: "^kill$",
@@ -157,8 +160,8 @@ export const replies = [
       ack(bot, message, "cry");
       bot.reply(message, ":wave: Bby");
       bot.rtm.close();
-    }
-  }
+    },
+  },
   //   message: [
   //     "^set\\s+<(mailto):(.+?)\\|(.+)>\\s+(.+)$"
   //   ],

@@ -1,3 +1,4 @@
+//@noflow
 export default function getTeamMembers(bot, force = false) {
   if (!force && bot.config.team_members) return bot.config.team_members;
 
@@ -7,7 +8,7 @@ export default function getTeamMembers(bot, force = false) {
       if (!ok) return reject({ message: "Not Ok" });
       return resolve(members);
     });
-  }).catch((err) => {
+  }).catch(err => {
     console.log(err);
     delete bot.config.team_members;
   });
