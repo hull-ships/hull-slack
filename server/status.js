@@ -12,9 +12,9 @@ export default function statusCheck(req, res) {
     token,
     team_id,
     user_id,
-    bot: { bot_user_id, bot_access_token },
-    notify_segments,
-    notify_events,
+    bot: { bot_user_id, bot_access_token } = {},
+    notify_segments = [],
+    notify_events = [],
   } = private_settings;
 
   if (!token) {
