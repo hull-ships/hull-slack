@@ -57,7 +57,7 @@ export class Hull {
   asUser: User => Hull;
 }
 
-export type LoggerMethod = (string, ?{}) => void;
+export type LoggerMethod = string => void;
 
 export type HullContext = {
   client: Hull,
@@ -66,7 +66,7 @@ export type HullContext = {
     setFlowControl: SmartNotifierResponse => void,
   },
   metric: {
-    increment: (string, ?number) => void,
+    increment: string => void,
   },
 };
 
