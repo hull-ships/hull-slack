@@ -1,4 +1,4 @@
-//@noflow
+// @flow
 import { Strategy as SlackStrategy } from "passport-slack";
 import {
   notifHandler,
@@ -9,9 +9,16 @@ import updateUser from "./update-user";
 import BotFactory from "./bot-factory";
 import statusHandler from "./status";
 import setupWebserver from "./setup-webserver";
+import type { HullContext, ServerOptions } from "./types";
 
-module.exports = function Server(options = {}) {
-  const { port, hostSecret, clientID, clientSecret, Hull, devMode } = options;
+module.exports = function Server({
+  port,
+  hostSecret,
+  clientID,
+  clientSecret,
+  Hull,
+  devMode,
+}: ServerOptions) {
   const { Middleware } = Hull;
   const { controller, connectSlack, getBot } = BotFactory({
     port,
@@ -22,37 +29,6 @@ module.exports = function Server(options = {}) {
     devMode,
   });
 
-  // const connector = new Hull.Connector({ port, hostSecret });
-  // const app = express();
-  // connector.setupApp(app);
-  // app.post(
-  //   "/smart-notify",
-  //   bodyParser.json({ limit: "500mb" }),
-  //   smartNotifierHandler({
-  //     hostSecret,
-  //     handlers: {
-  //       "ship:update": (ctx) => {
-  //         ctx.smartNotifierResponse.setFlowControl({
-  //           type: "next",
-  //           size: 10,
-  //           in: 1
-  //         });
-  //         return Promise.resolve();
-  //       },
-  //       "user:update": (ctx) => {
-  //         ctx.smartNotifierResponse.setFlowControl({
-  //           type: "next",
-  //           size: 10,
-  //           in: 1
-  //         });
-  //         return Promise.resolve();
-  //       }
-  //     }
-  //   })
-  // );
-  // app.listen(port);
-
-  // controller.setupWebserver(port);
   setupWebserver(controller, port, (err, app) => {
     const connector = new Hull.Connector({ port, hostSecret });
 
@@ -150,7 +126,7 @@ module.exports = function Server(options = {}) {
       notifHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ client, ship = {} }) =>
+          "ship:update": ({ client, ship }: HullContext) =>
             connectSlack({ hull: client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack),
         },
@@ -162,8 +138,8 @@ module.exports = function Server(options = {}) {
       smartNotifierHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ hull = {}, ship = {} }) => {
-            connectSlack({ hull, ship, force: true });
+          "ship:update": ({ client, ship }: HullContext) => {
+            connectSlack({ hull: client, ship, force: true });
             Promise.resolve({});
           },
           "user:update": updateUser.bind(undefined, connectSlack),

@@ -176,7 +176,15 @@
   "deployment_settings": [],
   "resources": [],
   "readme": "readme.md",
-  "admin": "/auth/",
+  "admin": "/auth",
+  "tabs": [
+    {
+      "title": "Set Up",
+      "url": "/auth",
+      "size": "small",
+      "editable": false
+    }
+  ],
   "ui": false,
   "subscriptions": [
     {

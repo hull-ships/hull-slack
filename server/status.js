@@ -13,8 +13,8 @@ export default function statusCheck(req, res) {
     team_id,
     user_id,
     bot: { bot_user_id, bot_access_token } = {},
-    notify_segments,
-    notify_events,
+    notify_segments = [],
+    notify_events = [],
   } = private_settings;
 
   if (!token) {
