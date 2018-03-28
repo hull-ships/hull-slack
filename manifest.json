@@ -1,13 +1,13 @@
 {
-  "name": "Slack",
-  "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
+  "name": "hull-slack",
+  "description": "Send Notifications to Slack",
   "picture": "picture.png",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "tags": [
     "incoming",
     "outgoing",
     "oneColumn",
-    "smart-notifier"
+    "kraken"
   ],
   "settings": [],
   "private_settings": [
@@ -30,34 +30,19 @@
       "format": "hidden"
     },
     {
-      "name": "incoming_webhook",
-      "title": "Incoming Webhook",
-      "type": "object",
-      "format": "hidden",
-      "properties": {
-        "url": {
-          "title": "url",
-          "type": "string"
-        },
-        "channel": {
-          "title": "channel",
-          "type": "string"
-        },
-        "channel_id": {
-          "title": "channel_id",
-          "type": "string"
-        },
-        "configuration_url": {
-          "title": "configuration_url",
-          "type": "string"
-        }
-      }
+      "name": "scope",
+      "title": "scope",
+      "type": "string",
+      "format": "hidden"
     },
     {
       "name": "bot",
       "title": "Bot",
       "type": "object",
       "format": "hidden",
+      "options": {
+        "edit_label": "Compose Message"
+      },
       "properties": {
         "bot_user_id": {
           "title": "bot_user_id",
@@ -69,129 +54,62 @@
         }
       }
     },
-
-
     {
-      "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
-      "type": "array",
-      "default": [],
-      "format": "trait"
-    },
-
-    {
-      "name": "notify_header",
-      "title": "Notifications",
-      "type": "string",
-      "format": "title"
-    },
-    {
-      "name": "notify_segments",
-      "title": "Notify when Segments change",
-      "type": "array",
-      "format": "table",
-      "default": [{ "segment": "", "channel": "" }],
-      "items": {
-        "type": "object",
-        "required": [ "channel", "segment"],
-        "properties": {
-          "segment": {
-            "title": "Segment Name",
-            "type": "string",
-            "format": "segment"
+      "name": "Workflow",
+      "type": "object",
+      "title": "Message",
+      "format": "workflow",
+      "properties": {
+        "segments": {
+          "title": "segment",
+          "type": "array",
+          "format": "segment"
+        },
+        "triggers": {
+          "title": "event",
+          "type": "string",
+          "format": "event"
+        },
+        "action": {
+          "type": "object",
+          "format": "composer",
+          "title": "Edit Message",
+          "options": {
+            "preview": "/preview"
           },
-          "channel": {
-            "title": "@user or #channel",
-            "type": "string",
-            "format": "string"
-          },
-          "enter": {
-            "title": "Notify on enter",
-            "type": "boolean",
-            "format": "checkbox"
-          },
-          "leave": {
-            "title": "Notify on leave",
-            "type": "boolean",
-            "format": "checkbox"
-          }
-        }
-      }
-    },
-    {
-      "name": "notify_events",
-      "title": "Notify when events performed",
-      "type": "array",
-      "format": "table",
-      "default": [{ "event": "", "channel": "" }],
-      "items": {
-        "type": "object",
-        "required": ["channel", "event"],
-        "properties": {
-          "event": {
-            "title": "Event Name",
-            "type": "string",
-            "format": "event"
-          },
-          "channel": {
-            "title": "@user or #channel",
-            "type": "string",
-            "format": "string"
-          }
-        }
-      }
-    },
-    {
-      "name": "button_header",
-      "title": "Actions",
-      "type": "string",
-      "format": "title"
-    },
-    {
-      "name": "actions",
-      "title": "Add Action Buttons to update User attributes on click",
-      "default": [{ "label": "", "property": "", "value": "" }],
-      "type": "array",
-      "format": "table",
-      "items": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "title": "Button Label",
-            "type": "string"
-          },
-          "property": {
-            "title": "Property name",
-            "type": "string",
-            "format": "trait"
-          },
-          "value": {
-            "title": "Property Value",
-            "type": "string"
+          "properties": {
+            "channel": {
+              "title": "Message",
+              "type": "string",
+              "format": "liquid",
+              "options": {
+                "lines": "single",
+                "preview": "false"
+              }
+            },
+            "message": {
+              "title": "Message",
+              "type": "string",
+              "format": "liquid",
+              "options": {
+                "help": "[_Slack-specific_ formatting](https://api.slack.com/docs/message-formatting) supported."
+              }
+            }
           }
         }
       }
     }
   ],
-  "deployment_settings": [],
   "resources": [],
   "readme": "readme.md",
+  "admin": "/auth/",
   "ui": false,
-  "admin": "/auth",
-  "tabs": [
-    {
-      "title": "Set up",
-      "url": "/auth",
-      "size": "small",
-      "editable": false
-    }
-  ],
   "subscriptions": [
     {
-      "url": "/smart-notify"
+      "url": "/smart-notifier"
     }
   ],
-  "schedules" : [
+  "schedules": [
     {
       "url": "/status",
       "type": "interval",
