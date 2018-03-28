@@ -1,9 +1,8 @@
 import slackdown from "slackdown";
 
 export default function previewHandler(req, res) {
-  console.log(req.body)
-  if (!req.body.preview) {
-    return res.send("No Message received");
-  }
-  return res.send(slackdown.parse(req.body.preview));
+  if (!req.body.preview) return res.send("No Message received");
+  const msg = slackdown.parse(req.body.preview).replace(/\n/g, "<br/>");
+  console.log(msg);
+  return res.send(msg);
 }
