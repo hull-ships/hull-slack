@@ -140,7 +140,7 @@ module.exports = function Server({
         handlers: {
           "ship:update": ({ client, ship }: HullContext) => {
             connectSlack({ hull: client, ship, force: true });
-            Promise.resolve({});
+            return Promise.resolve({});
           },
           "user:update": updateUser.bind(undefined, connectSlack),
         },
