@@ -14,6 +14,7 @@ export type ServerOptions = {
 export type SmartNotifierResponse = {|
   type: "next" | "retry",
   in: number,
+  inTime: number,
   size: number,
 |};
 
