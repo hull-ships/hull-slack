@@ -81,7 +81,7 @@ export type HullAccountClient = HullClient & {
 };
 
 export type HullUserClient = HullClient & {
-  track: (name: string, properties: {}) => void,
+  track: (name: string, properties: {}, context: {}) => void,
   traits: (properties: {}, context: {}) => void,
   account: AccountClaim => HullAccountClient,
 };
@@ -93,7 +93,7 @@ export type HullContext = {
     setFlowControl: SmartNotifierResponse => void,
   },
   metric: {
-    increment: (string, ?number) => void,
+    increment: (metric: string, count?: number) => void,
   },
 };
 
