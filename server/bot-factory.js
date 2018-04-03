@@ -131,6 +131,7 @@ module.exports = function BotFactory({ Hull, devMode }: BotFactoryParams) {
         );
       }
 
+      console.log("Logging Hull Client", hull, ship);
       const conf = hull.configuration();
       if (!conf.organization || !conf.id || !conf.secret) {
         throw new Error("Config is invalid");
