@@ -40,24 +40,51 @@ export type User = {
   id: string,
 };
 
-export class Hull {
-  constructor(config: HullConfiguration) {}
+export type Hull = HullConfiguration => HullClient;
+
+export type UserClaim = {
+  id?: string,
+  email?: string,
+  anonymous_id?: string,
+};
+
+export type AccountClaim = {
+  id?: string,
+  domain?: string,
+  anonymous_id?: string,
+};
+
+export type LoggerMethod = (logger: string, data?: {}) => void;
+
+export type Logger = {
+  log: LoggerMethod,
+  info: LoggerMethod,
+  debug: LoggerMethod,
+  error: LoggerMethod,
+};
+
+export type HullClient = {
   Middleware: ({
     hostSecret: string,
     fetchShip?: boolean,
     cacheShip?: boolean,
-  }) => void;
-  Connector: HullConnectorOptions => any;
-  configuration: () => HullConfiguration;
-  logger: {
-    info: LoggerMethod,
-    debug: LoggerMethod,
-    error: LoggerMethod,
-  };
-  asUser: User => Hull;
-}
+  }) => void,
+  Connector: HullConnectorOptions => any,
+  configuration: () => HullConfiguration,
+  logger: Logger,
+  asUser: UserClaim => HullUserClient,
+  asAccount: AccountClaim => HullAccountClient,
+};
 
-export type LoggerMethod = (string, ?{}) => void;
+export type HullAccountClient = HullClient & {
+  traits: (properties: {}, context: {}) => void,
+};
+
+export type HullUserClient = HullClient & {
+  track: (name: string, properties: {}) => void,
+  traits: (properties: {}, context: {}) => void,
+  account: AccountClaim => HullAccountClient,
+};
 
 export type HullContext = {
   client: Hull,
