@@ -2,6 +2,9 @@
 
 ## 0.0.4
 
+- Fix missing promise
+- Add flow types
+
 ## 0.0.3
 
 - Update READMEs
