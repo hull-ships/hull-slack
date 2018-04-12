@@ -87,6 +87,8 @@ export type HullUserClient = HullClient & {
   account: AccountClaim => HullAccountClient,
 };
 
+export type LoggerMethod = string => void;
+
 export type HullContext = {
   client: Hull,
   ship: Ship,
