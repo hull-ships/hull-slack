@@ -138,9 +138,19 @@ module.exports = function Server({
       smartNotifierHandler({
         hostSecret,
         handlers: {
-          "ship:update": ({ client, ship }: HullContext) => {
+          "ship:update": ({
+            client,
+            ship,
+            smartNotifierResponse,
+          }: HullContext) => {
             connectSlack({ hull: client, ship, force: true });
-            Promise.resolve({});
+            smartNotifierResponse.setFlowControl({
+              type: "next",
+              size: 1,
+              in: 10,
+              inTime: 10,
+            });
+            return Promise.resolve({});
           },
           "user:update": updateUser.bind(undefined, connectSlack),
         },
