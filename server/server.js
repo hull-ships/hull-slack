@@ -1,5 +1,7 @@
+// @flow
+
 import { errorHandler } from "hull-connector";
-import bodyParser from "body-parser";
+import setupWebserver from "./setup-webserver";
 import {
   previewHandler,
   statusHandler,
@@ -7,14 +9,23 @@ import {
   oAuthHandler
 } from "./handlers";
 import BotFactory from "./bot-factory";
+import type { ServerOptions } from "./types";
 
-export default function Server(options = {}) {
-  const { port, hostSecret, clientID, clientSecret, Hull } = options;
+const { CLIENT_ID, CLIENT_SECRET } = process.env;
+
+export default function Server(options: ServerOptions) {
+  const {
+    port,
+    hostSecret,
+    clientID = CLIENT_ID,
+    clientSecret = CLIENT_SECRET,
+    Hull
+  } = options;
   const { Middleware } = Hull;
 
   const { controller, connectSlack, getBot } = BotFactory(options);
 
-  controller.setupWebserver(port, (err, app) => {
+  setupWebserver(controller, port, (err, app) => {
     const connector = new Hull.Connector({ port, hostSecret });
     connector.setupApp(app);
     controller.createWebhookEndpoints(app);
@@ -34,7 +45,11 @@ export default function Server(options = {}) {
       Middleware({ hostSecret, fetchShip: true, cacheShip: true }),
 
       (req, res) => {
-        connectSlack({ hull: req.hull.client, ship: req.hull.ship });
+        connectSlack({
+          hull: req.hull.client,
+          ship: req.hull.ship,
+          force: false
+        });
         setTimeout(() => {
           res.redirect(req.header("Referer"));
         }, 2000);
@@ -43,7 +58,7 @@ export default function Server(options = {}) {
 
     app.post("/smart-notifier", notifyHandler({ connectSlack }));
     app.all("/status", statusHandler);
-    app.post("/preview", bodyParser.json(), previewHandler);
+    app.post("/preview", previewHandler);
 
     Hull.logger.info("app.start", { port });
 

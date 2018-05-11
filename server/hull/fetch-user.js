@@ -6,16 +6,17 @@ import queries from "./queries";
  */
 
 module.exports = function fetchUser({ hull, search, options = {} }) {
-  const { email, name, id } = search;
+  const { service, email, name, id } = search;
   let params = {};
 
-  if (id) params = queries.id(id);
+  if (service) params = queries.service(`${service}:${id}`);
+  else if (id) params = queries.id(id);
   else if (email) params = queries.email(email);
   else if (name) params = queries.name(name);
 
   const eventSearch = options.action && options.action.value === "events";
 
-  hull.logger.debug("outgoing.user.search", params);
+  hull.logger.info("outgoing.user.search", params);
 
   return hull
     .post("search/user_reports", params)

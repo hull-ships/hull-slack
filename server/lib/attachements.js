@@ -5,7 +5,7 @@ import moment from "moment";
 import humanize from "./humanize";
 import { objectToText, objectToFields } from "./format-value";
 import type { Attribute, Field } from "../types/slack";
-import type { Subject } from "../types/hull";
+import type { Subject } from "../types";
 
 type ColorFn = () => string;
 
@@ -138,7 +138,7 @@ export const getEvents = ({
 // Top level attributes -> { attachment }
 const getAccount = ({ subject, name, color }: Payload): Attribute => {
   const fields = _.omit(_.omitBy(subject, _.isPlainObject), "domain");
-  const { domain } = subject;
+  const { domain = "" } = subject;
   return {
     ...getAttr({ color, name, text: objectToText(fields) }),
     fields: objectToFields(fields),

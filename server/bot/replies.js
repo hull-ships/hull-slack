@@ -17,9 +17,14 @@ const REPLIES = [
     reply: post("domain", { type: "account" })
   },
   {
-    message: ["^(info|search|whois|who is)?\\s?<(mailto):(.+?)\\|(.+)>$"],
+    message: ["^account\\s+id:(.+)"],
     context: "direct_message,mention,direct_mention",
-    reply: post("email")
+    reply: post("id", { type: "account" })
+  },
+  {
+    message: ["^user\\s?<(mailto):(.+?)\\|(.+)>$"],
+    context: "direct_message,mention,direct_mention",
+    reply: post("email", { type: "user" })
   },
   {
     message: [
@@ -27,22 +32,33 @@ const REPLIES = [
       "^attributes\\s*<(mailto):(.+?)\\|(.+)>\\s+(.*)$"
     ],
     context: "direct_message,mention,direct_mention",
-    reply: post("email", { action: { name: "expand", value: "traits" } })
+    reply: post("email", {
+      type: "user",
+      action: { name: "expand", value: "traits" }
+    })
   },
   {
     message: ["^events\\s<(mailto):(.+?)\\|(.+)>\\s*$"],
     context: "direct_message,mention,direct_mention",
-    reply: post("email", { action: { name: "expand", value: "events" } })
+    reply: post("email", {
+      type: "user",
+      action: { name: "expand", value: "events" }
+    })
   },
   {
-    message: "^(info|search)\\sid:(.+)",
+    message: "^user\\s+id:(.+)",
     context: "direct_message,mention,direct_mention",
-    reply: post("id")
+    reply: post("id", { type: "user" })
   },
   {
-    message: ['^info\\s"(.+)"\\s?(.*)$', "^info (.+)$"],
+    message: "^user\\s+(.+):(.+)",
     context: "direct_message,mention,direct_mention",
-    reply: post("name")
+    reply: post("alias", { type: "user" })
+  },
+  {
+    message: "^user\\s(.+)$",
+    context: "direct_message,mention,direct_mention",
+    reply: post("name", { type: "user" })
   },
   {
     message: ["hello", "hi"],

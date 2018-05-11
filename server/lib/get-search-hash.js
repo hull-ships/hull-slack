@@ -2,6 +2,7 @@ import _ from "lodash";
 
 export default function getSearchHash(type, message) {
   console.log("get Search Hash", type, message);
+
   const { match = [] } = message;
   if (type === "domain") {
     const [, , , domain, rest] = match;
@@ -16,6 +17,11 @@ export default function getSearchHash(type, message) {
   if (type === "id") {
     const [, id, rest] = match;
     return { id, rest };
+  }
+
+  if (type === "alias") {
+    const [, service, id, rest] = match;
+    return { id, rest, service };
   }
 
   const [, name] = match;

@@ -1,3 +1,4 @@
+// @flow
 import Botkit from "botkit";
 import _ from "lodash";
 import interactiveMessage from "./bot/interactive-message";
@@ -6,10 +7,18 @@ import { join } from "./bot/utils";
 import getTeamChannels from "./lib/get-team-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
-
+import type { Client, Ship, Hull as HullClass } from "./types";
 import setupChannels from "./lib/setup-channels";
 
-module.exports = function BotFactory({ Hull, devMode }) {
+export type connectSlackSignature = ({ hull: Client, ship: Ship }) => any;
+
+export default function BotFactory({
+  Hull,
+  devMode
+}: {
+  Hull: HullClass,
+  devMode: boolean
+}) {
   const controller = Botkit.slackbot({
     send_via_rtm: true,
     stats_optout: true,
@@ -22,11 +31,10 @@ module.exports = function BotFactory({ Hull, devMode }) {
     _bots[bot.config.token] = bot;
     return bot;
   }
-  function _clearCache(token) {
+  function _clearCache(token: string) {
     delete _bots[token];
   }
-
-  function _getBotByToken(token) {
+  function _getBotByToken(token: string) {
     return _bots[token];
   }
 
@@ -51,7 +59,6 @@ module.exports = function BotFactory({ Hull, devMode }) {
     // Cache the bot so we can prevent Race conditions
     _cacheBot(bot);
     hull.logger.info("register.success");
-
     bot.startRTM((err /* , __, {  team, self, ok, users } */) => {
       if (err) {
         // Clear cache if we failed registering RTM
@@ -86,7 +93,11 @@ module.exports = function BotFactory({ Hull, devMode }) {
   controller.on("bot_channel_join", join);
   controller.on("bot_channel_join", bot => getTeamChannels(bot, true));
   controller.on("bot_channel_leave", bot => getTeamChannels(bot, true));
+
+  // What we do when we get an Interactive Button that's clicked.
   controller.on("interactive_message_callback", interactiveMessage);
+
+  // Below is where we wire up all what the Bot can Hear
   _.map(
     replies,
     ({
@@ -102,7 +113,15 @@ module.exports = function BotFactory({ Hull, devMode }) {
   return {
     controller,
     getBot: _getBotByToken,
-    connectSlack: function connectSlack({ hull, ship, force = false }) {
+    connectSlack: function connectSlack({
+      hull,
+      ship,
+      force = false
+    }: {
+      hull: Client,
+      ship: Ship,
+      force?: boolean
+    }) {
       if (
         !ship ||
         !hull ||
@@ -141,8 +160,9 @@ module.exports = function BotFactory({ Hull, devMode }) {
 
       hull.logger.info("bot.spawn.start");
       const bot = controller.spawn(config);
+      // Beware Race conditions here.
       controller.trigger("create_bot", [bot, config]);
       return bot;
     }
   };
-};
+}

@@ -12,7 +12,7 @@ module.exports = function fetchUser({ hull, search }) {
   else if (domain) params = queries.domain(domain);
   else if (name) params = queries.name(name);
 
-  hull.logger.debug("outgoing.account.search", params);
+  hull.logger.info("outgoing.account.search", params);
 
   return hull.post("search/account_reports", params).then(args => {
     const { pagination = {}, data = [] } = args;

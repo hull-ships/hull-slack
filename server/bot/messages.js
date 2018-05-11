@@ -10,11 +10,13 @@ In your dashboard, you can add buttons to user profiles to perform actions.
 Chat with me privately in a direct channel or invite me to a public channel!
 
 :keyboard: *Commands*
-_\`[@hull] [info] user@example.com\` : get data for the user with this email. You can filter what's displayed from the Ship's settings tab in your dashboard_
-_\`[@hull] [info] user@example.com full\` : get full data for the user with this email. Shows the entire profile_
-_\`[@hull] [info] user@example.com <intercom>\` : get \`intercom\` data for the user with this email. Replace with the service you want to display_
+_\`[@hull] user user@example.com\` : get data for the user with this email. You can filter what's displayed from the Ship's settings tab in your dashboard_
+_\`[@hull] user id:HULL_USER_ID\` : get data for the user with this Hull ID._
+_\`[@hull] user user@example.com full\` : get full data for the user with this email. Shows the entire profile_
+_\`[@hull] user user@example.com <intercom>\` : get \`intercom\` data for the user with this email. Replace with the service you want to display_
 _\`[@hull] events user@example.com\` : get latest events for the user with this email_
 _\`[@hull] account example.com\` : get account details for the account with this domain_
+_\`[@hull] account id:HULL_ACCOUNT_ID\` : get account details for the account with this domain_
 _\`[@hull] users example.com\` : get users for the account with this domain_
 `,
 

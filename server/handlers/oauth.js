@@ -27,6 +27,7 @@ export default function oAuth({
           bot: { bot_access_token: botToken } = {}
         } = {}
       } = req.hull.ship;
+      console.log(getBot(botToken))
       return !!token && !!botToken
         ? Promise.resolve({
             credentials: true,

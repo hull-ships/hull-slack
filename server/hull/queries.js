@@ -17,7 +17,33 @@ const id = query => ({
   filter: {
     filtered: {
       query: { match_all: {} },
-      filter: { and: { filters: [{ terms: { id: [query] } }] } }
+      filter: {
+        or: {
+          filters: [{ terms: { id: [query] } }]
+        }
+      }
+    }
+  },
+  sort: {
+    created_at: "asc"
+  },
+  raw: true,
+  page: 1,
+  per_page: 1
+});
+
+const service = query => ({
+  filter: {
+    filtered: {
+      query: { match_all: {} },
+      filter: {
+        or: {
+          filters: [
+            { prefix: { anonymous_ids: query } },
+            { prefix: { "anonymous_ids.exact": query } }
+          ]
+        }
+      }
     }
   },
   sort: {
@@ -115,4 +141,13 @@ const eventId = i => ({
   per_page: 100
 });
 
-module.exports = { domain, name, email, id, eventId, events, filteredEvents };
+module.exports = {
+  domain,
+  name,
+  email,
+  id,
+  eventId,
+  events,
+  filteredEvents,
+  service
+};

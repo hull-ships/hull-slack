@@ -1,23 +1,29 @@
+// @flow
+
 import Hull from "hull";
+import { dotEnv } from "hull-connector";
 import server from "./server";
 import pkg from "../package.json";
-import { dotEnv } from "hull-connector";
+import type { ServerOptions } from "./types";
+
 dotEnv();
 
 const {
-  SECRET = "1234",
+  SECRET,
   NODE_ENV,
   OVERRIDE_FIREHOSE_URL,
   LOG_LEVEL,
-  PORT = 8082
+  PORT,
+  CLIENT_ID,
+  CLIENT_SECRET
 } = process.env;
 
-const options = {
-  hostSecret: SECRET,
-  clientID: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
+const options: ServerOptions = {
+  hostSecret: SECRET || "1234",
+  clientID: CLIENT_ID || "",
+  clientSecret: CLIENT_SECRET || "",
   devMode: NODE_ENV === "development",
-  port: PORT,
+  port: PORT || 8082,
   ngrok: {
     subdomain: pkg.name
   },

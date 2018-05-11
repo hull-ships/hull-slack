@@ -1,12 +1,19 @@
+// @flow
+
 import Promise from "bluebird";
 import { smartNotifierHandler } from "hull/lib/utils";
 import updateUser from "../update-user";
+import type { connectSlackSignature } from "../bot-factory";
 
-export default function handler({ connectSlack }) {
+export default function handler({
+  connectSlack
+}: {
+  connectSlack: connectSlackSignature
+}) {
   const update = updateUser.bind(undefined, connectSlack);
   return smartNotifierHandler({
     handlers: {
-      "ship:update": (ctx, { hull = {}, ship = {} }) => {
+      "ship:update": (ctx, { hull, ship }) => {
         connectSlack({ hull, ship, force: true });
         return Promise.resolve();
       },

@@ -9,6 +9,8 @@ import { reply, sad } from "./utils";
 
 export default function post(field = "email", options = {}) {
   const { type = "user" } = options;
+  const fetchSubject = type === "account" ? fetchAccount : fetchUser;
+
   return function postSubject(bot, msg) {
     ack(bot, msg, "mag_right");
     const search = getSearchHash(field, msg);
@@ -18,9 +20,7 @@ export default function post(field = "email", options = {}) {
     const msgdata = getMessageLogData(msg);
     hull.logger.info("bot.hear", { field, search, options, ...msgdata });
 
-    const f = options.subject === "account" ? fetchAccount : fetchUser;
-
-    return f({ hull, search, options })
+    return fetchSubject({ hull, search, options })
       .then(({ subject, events, segments, pagination, message = "" }) => {
         if (!subject) {
           hull.logger.info(`${type}.fetch.fail`, { message, search, field });
