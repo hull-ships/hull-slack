@@ -79,12 +79,12 @@
           },
           "properties": {
             "channel": {
-              "title": "Message",
+              "title": "Channel or User",
               "type": "string",
               "format": "liquid",
               "options": {
                 "lines": "single",
-                "preview": "false"
+                "preview": false
               }
             },
             "message": {
@@ -92,6 +92,7 @@
               "type": "string",
               "format": "liquid",
               "options": {
+                "preview": true,
                 "help": "[_Slack-specific_ formatting](https://api.slack.com/docs/message-formatting) supported."
               }
             }
@@ -102,7 +103,12 @@
   ],
   "resources": [],
   "readme": "readme.md",
-  "admin": "/auth/",
+  "tabs": [{
+    "title": "Credentials",
+    "url": "/auth/",
+    "size": "small",
+    "editable": false
+  }],
   "ui": false,
   "subscriptions": [
     {
