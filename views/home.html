@@ -3,9 +3,7 @@
   <title>Hull <%= name %></title>
   <link rel="stylesheet" href="//dd04rofzygnm0.cloudfront.net/releases/master/865f04865d2448286626bac92c518a8f8ea8bafe/stylesheets/neue.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/2.1.0/superagent.min.js" type="text/javascript" charset="utf-8"></script>
-  <style media="screen">
-    bodu { background: white;}
-  </style>
+  <style media="screen"> body{ background-color: white; } </style>
 </head>
 <body>
   <div class="row">
@@ -34,7 +32,7 @@
               <% if(!connected) { %>
                 <span class='pull-right'><a href="#" id="reconnect_button" class='btn btn-rounded btn-pill btn-secondary'>Reconnect Bot</a></span>
               <% } %>
-              <h4 class="m-0 pt-05 text-<%=(connected)?'muted':'danger'%>"><%=name%> Bot <%=(connected)?"Online":"Offline"%></h4>
+              <h4 class="m-0 pt-05 text-<%=(connected)?'muted':'danger'%>"><%=name%> Bot <%=(connected)?"Online":"Offline"%> <%=(connected && " — as @" + connected.identity.name)%></h4>
             </div>
           </div>
         </div>

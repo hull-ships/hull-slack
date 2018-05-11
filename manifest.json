@@ -1,13 +1,13 @@
 {
   "name": "Slack",
-  "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
+  "description": "Send Notifications to Slack",
   "picture": "picture.png",
-  "version": "0.0.4",
+  "version": "1.1.0",
   "tags": [
     "incoming",
     "outgoing",
     "oneColumn",
-    "smart-notifier"
+    "kraken"
   ],
   "settings": [],
   "private_settings": [
@@ -188,7 +188,7 @@
   "ui": false,
   "subscriptions": [
     {
-      "url": "/smart-notify"
+      "url": "/smart-notifier"
     }
   ],
   "schedules" : [

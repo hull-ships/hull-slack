@@ -2,11 +2,14 @@
 import _ from "lodash";
 
 export default function getSlackChannels(ship = {}) {
-  const { private_settings = {} } = ship;
-  if (!private_settings) return [];
+  const { private_settings: privateSettings = {} } = ship;
+  if (!privateSettings) return [];
 
-  const { notify_events = [], notify_segments = [] } = private_settings;
-  if (!notify_events && !notify_segments) return [];
+  const {
+    notify_events: notifyEvents = [],
+    notify_segments: notifySegments = []
+  } = privateSettings;
+  if (!notifyEvents && !notifySegments) return [];
 
-  return _.map(_.concat(notify_segments, notify_events), "channel");
+  return _.map(_.concat(notifyEvents, notifySegments), "channel");
 }

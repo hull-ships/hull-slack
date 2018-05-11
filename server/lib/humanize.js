@@ -1,4 +1,3 @@
-//@noflow
 module.exports = str =>
   str
     .replace(/_/g, " ")

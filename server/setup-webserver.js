@@ -19,7 +19,7 @@ export default function setupWebserver(botkit, port, cb) {
   botkit.webserver.use(bodyParser.json({ limit: "100mb" }));
   botkit.webserver.use(
     bodyParser.urlencoded({
-      extended: true,
+      extended: true
     })
   );
   botkit.webserver.use(express.static(static_dir));

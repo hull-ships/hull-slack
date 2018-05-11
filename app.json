@@ -1,26 +1,15 @@
 {
-  "name": "Hull Slack Connector",
-  "description": "Sends Hull User changes to Slack.",
-  "repository": "https://github.com/hull-ships/hull-slack",
+  "name": "Hull Slack Sync",
+  "description": "A Hull Integration for Slack.",
+  "repository": "https://github.com/hull-ships/hull-hull-slack",
   "website": "http://www.hull.io",
   "success_url": "/readme",
   "env": {
-    "SECRET" : {
-      "description" : "A Secret key used to sign tokens",
-      "generator" : "secret"
-    },
-    "LOG_LEVEL" : {
-      "description" : "Logging level (emerg, alert, crit, error, warning, notice, info, debug)",
-      "value": "info"
-    },
-    "CLIENT_ID" : {
-      "description" : "oAuth Client ID",
-      "required": true
-    },
-    "CLIENT_SECRET" : {
-      "description" : "oAuth Client Secret",
-      "required": true
+    "SECRET": {
+      "description": "A Secret key used to authenticate on Hull API",
+      "generator": "secret"
     }
   },
+  "addons": ["logentries", "newrelic"],
   "scripts": {}
 }

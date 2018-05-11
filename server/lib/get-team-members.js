@@ -5,7 +5,12 @@ export default function getTeamMembers(bot, force = false) {
   bot.config.team_members = new Promise((resolve, reject) => {
     bot.api.users.list({}, (err, { ok, members }) => {
       if (err) return reject(err);
-      if (!ok) return reject({ message: "Not Ok" });
+      if (!ok)
+        return reject(
+          new Error({
+            message: "Not Ok"
+          })
+        );
       return resolve(members);
     });
   }).catch(err => {

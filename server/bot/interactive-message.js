@@ -1,12 +1,12 @@
-//@noflow
 import Hull from "hull";
 import _ from "lodash";
 import fetchEvent from "../hull/fetch-event";
 import fetchUser from "../hull/fetch-user";
 import formatEventProperties from "../lib/format-event-properties";
-import userPayload from "../lib/user-payload";
+import payload from "../lib/payload";
 
 module.exports = function interactiveMessage(bot, message) {
+  console.log("INTERACTIVE MESSAGE", message);
   const { actions, callback_id, original_message } = message;
   const [action] = actions;
   const { name, value } = action;
@@ -21,7 +21,7 @@ module.exports = function interactiveMessage(bot, message) {
     } catch (e) {
       hull.logger.error("bot.interactiveMessage.error", {
         type: "update",
-        message: e.message,
+        message: e.message
       });
     }
   } else if (name === "expand") {
@@ -46,7 +46,7 @@ module.exports = function interactiveMessage(bot, message) {
         .catch(err =>
           hull.logger.error("bot.interactiveMessage.error", {
             type: "event",
-            message: err.message,
+            message: err.message
           })
         );
     }
@@ -55,15 +55,15 @@ module.exports = function interactiveMessage(bot, message) {
       return fetchUser({
         hull,
         search: { id: callback_id },
-        options: { action: { value } },
+        options: { action: { value } }
       }).then(results =>
         bot.replyInteractive(
           message,
-          userPayload({
+          payload({
             ...results,
             hull,
             group: value,
-            whitelist: [],
+            whitelist: []
           })
         )
       );
