@@ -73,7 +73,7 @@ const reduceActionUsers = actions =>
   _.reduce(
     actions,
     (m, v) => {
-      m[v.user_id] = m.message;
+      m[v.user_id] = v.message;
       return m;
     },
     {}
@@ -110,7 +110,7 @@ export default function(
         return {
           action: "skip",
           user_id: user.id,
-          message: `Missing credentials token_exists: ${token}`,
+          message: `Missing credentials, current token value: ${token}`,
         };
       }
 

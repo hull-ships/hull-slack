@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.0.5
+
+- Fix payload building
+- Fix logging information
+
 ## 0.0.4
 
 - Fix missing promise
