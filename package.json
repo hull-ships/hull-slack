@@ -1,7 +1,7 @@
 {
   "name": "hull-slack",
   "description": "Send Notification of User events and segments to Slack",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/hull-ships/hull-slack",
   "license": "MIT",
   "main": "bin/start",

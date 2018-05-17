@@ -60,7 +60,7 @@ module.exports = function BotFactory({ Hull, devMode }: BotFactoryParams) {
       if (err) {
         // Clear cache if we failed registering RTM
         _clearCache(token);
-        return hull.logger.error("register.fail", { message: err.message });
+        return hull.logger.error("register.fail", { error: err.toString() });
       }
 
       const team = {

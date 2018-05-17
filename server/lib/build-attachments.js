@@ -115,20 +115,8 @@ function getTraitsAttachments(user, color) {
 }
 
 function getWhitelistedUser({ user = {}, whitelist = [], hull }) {
-  return hull.utils.groupTraits(
-    _.reduce(
-      whitelist,
-      (uu, value) => {
-        const t =
-          value.indexOf("/") > -1
-            ? value.replace("/", ".").replace(/^traits_/, "")
-            : value;
-        uu[value] = _.get(user, t);
-        return uu;
-      },
-      {}
-    )
-  );
+  const whitelistedUser = _.pick(user, whitelist);
+  return hull.utils.traits.group(whitelistedUser);
 }
 
 function getSegmentAttachments(changes = {}, segments, color) {
