@@ -1,7 +1,7 @@
 {
   "name": "hull-slack",
   "description": "Send Notification of User events and segments to Slack",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/hull-ships/hull-slack",
   "license": "MIT",
   "main": "bin/start",
@@ -55,7 +55,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^2.6.0",
     "flow-bin": "^0.66.0",
-    "nodemon": "^1.11.0",
+    "nodemon": "^1.18.7",
     "updtr": "^2.0.0",
     "watch": "^1.0.1"
   },

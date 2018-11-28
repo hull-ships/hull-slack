@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.6
+- prevent malicious flatmap-stream@0.1.1 dep from installing
+
 ## 0.0.5
 
 - Fix payload building
