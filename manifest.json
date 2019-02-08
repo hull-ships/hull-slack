@@ -63,12 +63,24 @@
         "segments": {
           "title": "segment",
           "type": "array",
-          "format": "segment"
+          "format": "segment",
+          "options": {
+            "standard": {
+              "ALL": "Any Segment"
+            }
+          }
         },
         "triggers": {
           "title": "event",
-          "type": "string",
-          "format": "event"
+          "type": "array",
+          "format": "event",
+          "options": {
+            "standard": {
+              "HULL_ENTER_SEGMENT": "Entering Segment",
+              "HULL_LEAVE_SEGMENT": "Leaving Segment",
+              "ANY": "Any Action"
+            }
+          }
         },
         "action": {
           "type": "object",
@@ -99,16 +111,25 @@
           }
         }
       }
+    },
+    {
+      "name": "attachements",
+      "title": "Attachements",
+      "description": "Pick some user attributes to append to every message posted to Slack",
+      "type": "array",
+      "format": "trait"
     }
   ],
   "resources": [],
   "readme": "readme.md",
-  "tabs": [{
-    "title": "Credentials",
-    "url": "/auth/",
-    "size": "small",
-    "editable": false
-  }],
+  "tabs": [
+    {
+      "title": "Credentials",
+      "url": "/auth/",
+      "size": "small",
+      "editable": false
+    }
+  ],
   "ui": false,
   "subscriptions": [
     {

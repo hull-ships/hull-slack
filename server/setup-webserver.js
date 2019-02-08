@@ -1,7 +1,6 @@
 // @noflow
 // clone of https://github.com/howdyai/botkit/blob/dc0e780d3a50ffbfe89bc8f3908d1f8869d61466/lib/CoreBot.js
 // with higher bodyParser limits to handle Smartnotifier's paylaods.
-import bodyParser from "body-parser";
 import express from "express";
 import _ from "lodash";
 
@@ -16,9 +15,9 @@ export default function setupWebserver(botkit, port, cb) {
   botkit.config.port = port;
 
   botkit.webserver = express();
-  botkit.webserver.use(bodyParser.json({ limit: "100mb" }));
+  botkit.webserver.use(express.json({ limit: "100mb" }));
   botkit.webserver.use(
-    bodyParser.urlencoded({
+    express.urlencoded({
       extended: true
     })
   );

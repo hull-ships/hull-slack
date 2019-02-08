@@ -58,7 +58,7 @@ export default function Server(options: ServerOptions) {
 
     app.post("/smart-notifier", notifyHandler({ connectSlack }));
     app.all("/status", statusHandler);
-    app.post("/preview", previewHandler);
+    app.post("/preview", previewHandler());
 
     Hull.logger.info("app.start", { port });
 
