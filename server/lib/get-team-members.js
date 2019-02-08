@@ -1,3 +1,4 @@
+//@noflow
 export default function getTeamMembers(bot, force = false) {
   if (!force && bot.config.team_members) return bot.config.team_members;
 

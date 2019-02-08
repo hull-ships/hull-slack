@@ -1,3 +1,4 @@
+//@noflow
 import _ from "lodash";
 import format from "./format-value";
 

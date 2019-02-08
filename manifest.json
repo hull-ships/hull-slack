@@ -1,8 +1,8 @@
 {
-  "name": "hull-slack",
+  "name": "Slack",
   "description": "Send Notifications to Slack",
   "picture": "picture.png",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "tags": [
     "incoming",
     "outgoing",
@@ -30,19 +30,34 @@
       "format": "hidden"
     },
     {
-      "name": "scope",
-      "title": "scope",
-      "type": "string",
-      "format": "hidden"
+      "name": "incoming_webhook",
+      "title": "Incoming Webhook",
+      "type": "object",
+      "format": "hidden",
+      "properties": {
+        "url": {
+          "title": "url",
+          "type": "string"
+        },
+        "channel": {
+          "title": "channel",
+          "type": "string"
+        },
+        "channel_id": {
+          "title": "channel_id",
+          "type": "string"
+        },
+        "configuration_url": {
+          "title": "configuration_url",
+          "type": "string"
+        }
+      }
     },
     {
       "name": "bot",
       "title": "Bot",
       "type": "object",
       "format": "hidden",
-      "options": {
-        "edit_label": "Compose Message"
-      },
       "properties": {
         "bot_user_id": {
           "title": "bot_user_id",
@@ -54,6 +69,8 @@
         }
       }
     },
+
+
     {
       "name": "Workflow",
       "type": "object",
@@ -89,25 +106,9 @@
           "options": {
             "preview": "/preview"
           },
-          "properties": {
-            "channel": {
-              "title": "Channel or User",
-              "type": "string",
-              "format": "liquid",
-              "options": {
-                "lines": "single",
-                "preview": false
-              }
-            },
-            "message": {
-              "title": "Message",
-              "type": "string",
-              "format": "liquid",
-              "options": {
-                "preview": true,
-                "help": "[_Slack-specific_ formatting](https://api.slack.com/docs/message-formatting) supported."
-              }
-            }
+          "value": {
+            "title": "Property Value",
+            "type": "string"
           }
         }
       }
@@ -120,6 +121,7 @@
       "format": "trait"
     }
   ],
+  "deployment_settings": [],
   "resources": [],
   "readme": "readme.md",
   "tabs": [
@@ -136,7 +138,7 @@
       "url": "/smart-notifier"
     }
   ],
-  "schedules": [
+  "schedules" : [
     {
       "url": "/status",
       "type": "interval",
