@@ -179,7 +179,8 @@
   "admin": "/auth",
   "tabs": [
     {
-      "title": "Set Up",
+      "title": "Credentials",
+      "setup": true,
       "url": "/auth",
       "size": "small",
       "editable": false
