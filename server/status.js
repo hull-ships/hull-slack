@@ -1,4 +1,5 @@
-//@noflow
+// @noflow
+
 export default function statusCheck(req, res) {
   const { ship, client } = req.hull;
   const { private_settings } = ship;
@@ -19,9 +20,9 @@ export default function statusCheck(req, res) {
 
   if (!token) {
     messages.push(
-      'Credentials are empty, Token isn\'t present, please authorize the app by clicking "Workspace"'
+      'Credentials are empty, Token isn\'t present, please authorize the app by clicking "Credentials & Actions"'
     );
-    status = "error";
+    status = "warning";
     return send();
   }
   if (!team_id || !user_id || !bot_user_id || !bot_access_token) {
