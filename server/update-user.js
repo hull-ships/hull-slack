@@ -40,7 +40,7 @@ const getChanges = (changes, notify_segments) => {
   return { entered, left, messages };
 };
 
-const getEvents = (events, notify_events) => {
+const getEvents = (events, notify_events, user) => {
   const messages = [];
   const triggered = [];
   if (notify_events.length) {
@@ -135,7 +135,7 @@ export default function(
       client.logger.debug("outgoing.user.changes", changeActions);
 
       // Event Triggers
-      const eventActions = getEvents(events, notify_events);
+      const eventActions = getEvents(events, notify_events, user);
       const { triggered } = eventActions;
       client.logger.debug("outgoing.user.events", eventActions);
 

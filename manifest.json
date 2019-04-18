@@ -133,6 +133,17 @@
             "type": "string",
             "format": "event"
           },
+          "synchronized_segments": {
+            "title": "Segments that users must be in to receive these events",
+            "type": "array",
+            "format": "segment",
+            "options": {
+              "standard": {
+                "ALL": "All Users"
+              }
+            },
+            "default": []
+          },
           "channel": {
             "title": "@user or #channel",
             "type": "string",

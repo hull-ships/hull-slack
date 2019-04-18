@@ -10,7 +10,7 @@ If you want your own instance: [![Deploy](https://www.herokucdn.com/deploy/butto
 
 [See Readme here](https://dashboard.hullapp.io/readme?url=https://hull-slack.herokuapp.com)
 
-### Developement setup :
+### Development setup :
 
 ```sh
 git clone git@github.com:hull-ships/hull-slack.git
