@@ -40,20 +40,48 @@ const getChanges = (changes, notify_segments) => {
   return { entered, left, messages };
 };
 
-const getEvents = (events, notify_events, user) => {
+const belongsToSegment = (sync_segments, entitySegmentIds) => {
+  // sync_segments will be undefined if a manifest has not been refreshed
+  if (sync_segments === undefined) {
+    sync_segments = ["ALL"];
+  }
+  return (
+    _.includes(sync_segments, "ALL") ||
+    _.intersection(sync_segments, entitySegmentIds).length > 0
+  );
+};
+
+const getEvents = (
+  events,
+  notify_events,
+  userSegmentIds,
+  accountSegmentIds
+) => {
   const messages = [];
   const triggered = [];
   if (notify_events.length) {
     const event_names = _.map(events, "event");
     const event_hash = _.compact(
       _.uniq(
-        _.map(notify_events, ({ event, channel }) => {
-          if (_.includes(event_names, event)) {
-            triggered.push(channel);
-            return event;
+        _.map(
+          notify_events,
+          ({
+            event,
+            channel,
+            synchronized_segments,
+            synchronized_account_segments,
+          }) => {
+            if (
+              _.includes(event_names, event) &&
+              belongsToSegment(synchronized_segments, userSegmentIds) &&
+              belongsToSegment(synchronized_account_segments, accountSegmentIds)
+            ) {
+              triggered.push(channel);
+              return event;
+            }
+            return undefined;
           }
-          return undefined;
-        })
+        )
       )
     );
     if (triggered.length) {
@@ -94,7 +122,13 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const { user, /* segments = [], */ changes = {}, events = [] } = message;
+      const {
+        user,
+        segments = [],
+        account_segments = [],
+        changes = {},
+        events = [],
+      } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
@@ -134,8 +168,15 @@ export default function(
       const { entered, left } = changeActions;
       client.logger.debug("outgoing.user.changes", changeActions);
 
+      const userSegmentIds = _.map(segments, "id");
+      const accountSegmentIds = _.map(account_segments, "id");
       // Event Triggers
-      const eventActions = getEvents(events, notify_events, user);
+      const eventActions = getEvents(
+        events,
+        notify_events,
+        userSegmentIds,
+        accountSegmentIds
+      );
       const { triggered } = eventActions;
       client.logger.debug("outgoing.user.events", eventActions);
 

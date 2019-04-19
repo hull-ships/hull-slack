@@ -144,6 +144,18 @@
             },
             "default": ["ALL"]
           },
+          "synchronized_account_segments": {
+            "title": "Account Filtered Segments",
+            "description": "Segments that users' accounts must be in to receive these events",
+            "type": "array",
+            "format": "accountSegment",
+            "options": {
+              "standard": {
+                "ALL": "All Accounts"
+              }
+            },
+            "default": ["ALL"]
+          },
           "channel": {
             "title": "@user or #channel",
             "type": "string",
