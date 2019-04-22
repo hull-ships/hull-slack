@@ -5,10 +5,10 @@ import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import getEvents from "./util/get-events";
+import flattenForText from "./util/flatten-for-text";
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
-const flattenForText = (array = []) => _.map(array, e => `"${e}"`).join(", ");
 
 const getChanges = (changes, notify_segments) => {
   // Changes of Segments
@@ -38,29 +38,6 @@ const getChanges = (changes, notify_segments) => {
     });
   }
   return { entered, left, messages };
-};
-
-const getEvents = (events, notify_events) => {
-  const messages = [];
-  const triggered = [];
-  if (notify_events.length) {
-    const event_names = _.map(events, "event");
-    const event_hash = _.compact(
-      _.uniq(
-        _.map(notify_events, ({ event, channel }) => {
-          if (_.includes(event_names, event)) {
-            triggered.push(channel);
-            return event;
-          }
-          return undefined;
-        })
-      )
-    );
-    if (triggered.length) {
-      messages.push(`Performed ${flattenForText(event_hash)}`);
-    }
-  }
-  return { triggered, messages };
 };
 
 const getChannelIds = (teamChannels, channelNames) =>
@@ -94,7 +71,13 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const { user, /* segments = [], */ changes = {}, events = [] } = message;
+      const {
+        user,
+        segments = [],
+        account_segments = [],
+        changes = {},
+        events = [],
+      } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
@@ -134,8 +117,15 @@ export default function(
       const { entered, left } = changeActions;
       client.logger.debug("outgoing.user.changes", changeActions);
 
+      const userSegmentIds = _.map(segments, "id");
+      const accountSegmentIds = _.map(account_segments, "id");
       // Event Triggers
-      const eventActions = getEvents(events, notify_events);
+      const eventActions = getEvents(
+        events,
+        notify_events,
+        userSegmentIds,
+        accountSegmentIds
+      );
       const { triggered } = eventActions;
       client.logger.debug("outgoing.user.events", eventActions);
 
@@ -208,7 +198,7 @@ export default function(
           tellUser(
             `:crying_cat_face: Something bad happened while posting to the channels :${
               err.message
-            }`,
+              }`,
             err
           );
           client.logger.error("outgoing.user.error", {
