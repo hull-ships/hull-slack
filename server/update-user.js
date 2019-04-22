@@ -5,10 +5,10 @@ import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import getEvents from "./util/get-events";
+import flattenForText from "./util/flatten-for-text";
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
-const flattenForText = (array = []) => _.map(array, e => `"${e}"`).join(", ");
 
 const getChanges = (changes, notify_segments) => {
   // Changes of Segments
@@ -38,57 +38,6 @@ const getChanges = (changes, notify_segments) => {
     });
   }
   return { entered, left, messages };
-};
-
-const belongsToSegment = (sync_segments, entitySegmentIds) => {
-  // sync_segments will be undefined if a manifest has not been refreshed
-  if (sync_segments === undefined) {
-    sync_segments = ["ALL"];
-  }
-  return (
-    _.includes(sync_segments, "ALL") ||
-    _.intersection(sync_segments, entitySegmentIds).length > 0
-  );
-};
-
-const getEvents = (
-  events,
-  notify_events,
-  userSegmentIds,
-  accountSegmentIds
-) => {
-  const messages = [];
-  const triggered = [];
-  if (notify_events.length) {
-    const event_names = _.map(events, "event");
-    const event_hash = _.compact(
-      _.uniq(
-        _.map(
-          notify_events,
-          ({
-            event,
-            channel,
-            synchronized_segments,
-            synchronized_account_segments,
-          }) => {
-            if (
-              _.includes(event_names, event) &&
-              belongsToSegment(synchronized_segments, userSegmentIds) &&
-              belongsToSegment(synchronized_account_segments, accountSegmentIds)
-            ) {
-              triggered.push(channel);
-              return event;
-            }
-            return undefined;
-          }
-        )
-      )
-    );
-    if (triggered.length) {
-      messages.push(`Performed ${flattenForText(event_hash)}`);
-    }
-  }
-  return { triggered, messages };
 };
 
 const getChannelIds = (teamChannels, channelNames) =>
@@ -249,7 +198,7 @@ export default function(
           tellUser(
             `:crying_cat_face: Something bad happened while posting to the channels :${
               err.message
-            }`,
+              }`,
             err
           );
           client.logger.error("outgoing.user.error", {
