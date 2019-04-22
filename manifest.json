@@ -126,7 +126,7 @@
       "default": [{ "segment": "", "channel": "" }],
       "items": {
         "type": "object",
-        "required": [ "channel", "segment"],
+        "required": [ "channel", "accountSegment"],
         "properties": {
           "segment": {
             "title": "Segment Name",

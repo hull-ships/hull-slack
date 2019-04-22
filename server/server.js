@@ -5,7 +5,7 @@ import {
   smartNotifierHandler,
   oAuthHandler,
 } from "hull/lib/utils";
-import updateUser from "./update-user";
+import updateEntity from "./update-entity";
 import BotFactory from "./bot-factory";
 import statusHandler from "./status";
 import setupWebserver from "./setup-webserver";
@@ -128,7 +128,8 @@ module.exports = function Server({
         handlers: {
           "ship:update": ({ client, ship }: HullContext) =>
             connectSlack({ hull: client, ship, force: true }),
-          "user:update": updateUser.bind(undefined, connectSlack),
+          "user:update": updateEntity.bind(undefined, connectSlack),
+          "account:update": updateEntity.bind(undefined, connectSlack),
         },
       })
     );
@@ -152,7 +153,8 @@ module.exports = function Server({
             });
             return Promise.resolve({});
           },
-          "user:update": updateUser.bind(undefined, connectSlack),
+          "user:update": updateEntity.bind(undefined, connectSlack),
+          "account:update": updateEntity.bind(undefined, connectSlack),
         },
       })
     );
