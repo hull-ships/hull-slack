@@ -4,6 +4,7 @@ import moment from "moment";
 import humanize from "./humanize";
 // import flags from "./flags";
 import getUserName from "./get-user-name";
+import getDomainName from "./get-domain-name";
 import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
@@ -53,23 +54,35 @@ const FORMATTER = [
   // }
 ];
 
+function getAccountAttachment(account, color, pretext) {
+  const name = getDomainName(account);
+  return getEntityAttachment(account, name, color, pretext);
+}
+
 function getUserAttachment(user, color, pretext) {
   const name = getUserName(user);
+  return getEntityAttachment(user, name, color, pretext);
+}
+
+function getEntityAttachment(entity, name, color, pretext) {
   const fields = _.reduce(
     FORMATTER,
     (ff, formatter) => {
-      const value = _.get(user, formatter.key);
+      const value = _.get(entity, formatter.key);
       if (value === null || value === undefined) return ff;
-      ff.push({ value: formatter.value(value, user), short: formatter.short });
+      ff.push({
+        value: formatter.value(value, entity),
+        short: formatter.short,
+      });
       return ff;
     },
     []
   );
-  let footer = `:eyeglasses: ${moment(user.last_seen_at).format(
+  let footer = `:eyeglasses: ${moment(entity.last_seen_at).format(
     MOMENT_FORMAT
   )}`;
-  if (user.sessions_count)
-    footer = `${footer} :desktop_computer: ${user.sessions_count}`;
+  if (entity.sessions_count)
+    footer = `${footer} :desktop_computer: ${entity.sessions_count}`;
   return {
     mrkdwn_in: ["text", "fields", "pretext"],
     pretext,
@@ -77,21 +90,22 @@ function getUserAttachment(user, color, pretext) {
     color: color(),
     fields,
     footer,
-    thumb_url: user.picture,
+    thumb_url: entity.picture,
   };
 }
 
-function getChangesAttachment(changes, color) {
-  return !_.size(changes.user)
+function getChangesAttachment(changes, color, isUser) {
+  const entityChanges = isUser ? changes.user : changes.account;
+  return !_.size(entityChanges)
     ? {}
     : {
         author_name: ":chart_with_upwards_trend: Changes",
         mrkdwn_in: ["text", "fields", "pretext"],
         color: color(),
-        fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
+        fallback: `Changes: ${_.keys(entityChanges || {}).join(", ")}`,
         text: formatObjToText(
-          _.mapValues(changes.user, v => `${v[0]} → ${v[1]}`)
-        ),
+          _.mapValues(entityChanges, v => `${v[0]} → ${v[1]}`)
+),
       };
 }
 
@@ -127,6 +141,27 @@ function getSegmentAttachments(changes = {}, segments, color) {
     fallback: `Segments: ${segmentString}`,
     color: color(),
     fields: _.map(changes.segments, (segs, action) => {
+      const names = _.map(segs, "name");
+      const emoji = `:${action === "left" ? "outbox" : "inbox"}_tray:`;
+      return {
+        title: `${emoji} ${humanize(action)} segment${
+          names.length > 1 ? "s" : ""
+        }`,
+        value: names.join(", "),
+      };
+    }),
+  };
+}
+
+function getAccountSegmentsAttachments(changes = {}, account_segments, color) {
+  const segmentString = (_.map(account_segments, "name") || []).join(", ");
+
+  return {
+    author_name: ":busts_in_silhouette: Segments",
+    text: segmentString,
+    fallback: `Segments: ${segmentString}`,
+    color: color(),
+    fields: _.map(changes.account_segments, (segs, action) => {
       const names = _.map(segs, "name");
       const emoji = `:${action === "left" ? "outbox" : "inbox"}_tray:`;
       return {
@@ -176,21 +211,31 @@ function getEventsAttachements(events = [], color) {
 module.exports = function buildAttachments({
   hull,
   user = {},
+  account = {},
   segments = [],
+  account_segments = [],
   changes = {},
   events = [],
   pretext = "",
   whitelist = [],
 }) {
+  const isUser = user.id !== undefined;
   const color = colorFactory();
-  const traitsSource = _.size(whitelist)
-    ? getWhitelistedUser({ user, whitelist, hull })
-    : user;
+  const traitsSource =
+    isUser && _.size(whitelist)
+      ? getWhitelistedUser({ user, whitelist, hull })
+      : user;
   return {
     user: getUserAttachment(traitsSource, color, pretext),
+    account: getAccountAttachment(account, color, pretext),
     segments: getSegmentAttachments(changes, segments, color),
+    account_segments: getAccountSegmentsAttachments(
+      changes,
+      account_segments,
+      color
+    ),
     events: getEventsAttachements(events, color),
-    changes: getChangesAttachment(changes, color),
+    changes: getChangesAttachment(changes, color, isUser),
     traits: getTraitsAttachments(traitsSource, color),
   };
 };

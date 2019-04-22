@@ -87,7 +87,7 @@ export default function(
         };
       }
 
-      const msgs = [];
+      const slackMessages = [];
 
       // Change Triggers
       const changeActions =
@@ -111,9 +111,9 @@ export default function(
       client.logger.debug(`outgoing.${targetEntity}.events`, eventActions);
 
       // Build message array
-      msgs.push(...changeActions.messages, ...eventActions.messages);
+      slackMessages.push(...changeActions.messages, ...eventActions.messages);
       client.logger.debug(`outgoing.${targetEntity}.messages`, {
-        messages: msgs,
+        messages: slackMessages,
       });
 
       const currentNotificationChannelNames = getUniqueChannelNames(
@@ -138,7 +138,7 @@ export default function(
         ...message,
         hull,
         actions,
-        message: msgs.join("\n"),
+        message: slackMessages.join("\n"),
         whitelist,
       });
 

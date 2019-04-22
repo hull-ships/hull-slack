@@ -134,7 +134,7 @@
             "format": "accountSegment"
           },
           "channel": {
-            "title": "#channel",
+            "title": "@user or #channel",
             "type": "string",
             "format": "string"
           },

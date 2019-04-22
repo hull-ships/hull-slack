@@ -2,6 +2,7 @@
 import _ from "lodash";
 import buildAttachments from "./build-attachments";
 import getUserName from "./get-user-name";
+import getDomainName from "./get-domain-name";
 
 function urlFor(user = {}, organization) {
   const [namespace, domain, tld] = organization.split(".");
@@ -64,8 +65,10 @@ const getActions = (user, traits, events, actions, group = "") => ({
 module.exports = function userPayload({
   hull,
   user = {},
+  account = {},
   events = [],
   segments = {},
+  account_segments = {},
   changes = [],
   actions = [],
   whitelist = [],
@@ -77,16 +80,23 @@ module.exports = function userPayload({
   const atts = buildAttachments({
     hull,
     user,
+    account,
     segments,
+    account_segments,
     changes,
     events,
     pretext: message,
     whitelist: w,
   });
-  const name = getUserName(user);
+
+  const isUser = user.id !== undefined;
+
+  const name = isUser ? getUserName(user) : getDomainName(account);
 
   // common items;
-  const attachments = _.values(_.pick(atts, "segments", "changes"));
+  const attachments = isUser
+    ? _.values(_.pick(atts, "segments", "changes"))
+    : _.values(_.pick(atts, "account_segments", "changes"));
 
   // "@hull events user@example.com"
   if (group === "events" && events.length) {
@@ -107,7 +117,12 @@ module.exports = function userPayload({
   attachments.unshift(atts.user);
 
   // Add Actions
-  attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+  //TODO: add actions for accounts
+  if (isUser) {
+    attachments.push(
+      getActions(user, atts.traits, atts.events, actions, group)
+    );
+  }
 
   return {
     text: `*<${user_url}|${name}>*`,
