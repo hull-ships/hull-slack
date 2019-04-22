@@ -10,7 +10,7 @@ import flattenForText from "./util/flatten-for-text";
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
 
-const getChanges = (changes, notify_segments) => {
+const getChanges = (changes, notify_segments, notify_account_segments) => {
   // Changes of Segments
   let messages = [];
   const entered = [];
@@ -33,6 +33,22 @@ const getChanges = (changes, notify_segments) => {
         entered.push(channel);
       }
       if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
+        left.push(channel);
+      }
+    });
+
+    _.map(notify_account_segments, notify => {
+      const { segment, channel, enter, leave } = notify;
+      if (
+        enter &&
+        _.includes(_.map(changes.account_segments.entered, "id"), segment)
+      ) {
+        entered.push(channel);
+      }
+      if (
+        leave &&
+        _.includes(_.map(changes.account_segments.left, "id"), segment)
+      ) {
         left.push(channel);
       }
     });
@@ -86,6 +102,7 @@ export default function(
         actions = [],
         notify_events = [],
         notify_segments = [],
+        notify_account_segments = [],
         whitelist = [],
       } = private_settings;
 
@@ -198,7 +215,7 @@ export default function(
           tellUser(
             `:crying_cat_face: Something bad happened while posting to the channels :${
               err.message
-              }`,
+            }`,
             err
           );
           client.logger.error("outgoing.user.error", {

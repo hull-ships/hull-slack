@@ -119,6 +119,39 @@
       }
     },
     {
+      "name": "notify_account_segments",
+      "title": "Notify when Account Segments change",
+      "type": "array",
+      "format": "table",
+      "default": [{ "segment": "", "channel": "" }],
+      "items": {
+        "type": "object",
+        "required": [ "channel", "segment"],
+        "properties": {
+          "segment": {
+            "title": "Segment Name",
+            "type": "string",
+            "format": "accountSegment"
+          },
+          "channel": {
+            "title": "#channel",
+            "type": "string",
+            "format": "string"
+          },
+          "enter": {
+            "title": "Notify on enter",
+            "type": "boolean",
+            "format": "checkbox"
+          },
+          "leave": {
+            "title": "Notify on leave",
+            "type": "boolean",
+            "format": "checkbox"
+          }
+        }
+      }
+    },
+    {
       "name": "notify_events",
       "title": "Notify when events performed",
       "type": "array",
