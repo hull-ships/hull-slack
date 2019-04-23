@@ -15,24 +15,25 @@ const segment_change_events = [
     path: "segments.entered",
   },
   {
-    event: "ENTERED_ACCOUNT_SEGMENT",
-    type: segment_action_type.enter,
-    path: "account_segments.entered",
-  },
-  {
     event: "LEFT_USER_SEGMENT",
     type: segment_action_type.leave,
     path: "segments.left",
   },
-  {
-    event: "LEFT_ACCOUNT_SEGMENT",
-    type: segment_action_type.leave,
-    path: "account_segments.left",
-  },
 ];
 
+const belongsToSegment = (sync_segments, entitySegmentIds) => {
+  // sync_segments will be undefined if a manifest has not been refreshed
+  if (sync_segments === undefined) {
+    sync_segments = ["ALL"];
+  }
+
+  return (
+    _.includes(sync_segments, "ALL") ||
+    _.intersection(sync_segments, entitySegmentIds)
+  );
+};
+
 const getUserChanges = (changes, notify_segments, notify_events) => {
-  // Changes of Segments
   let messages = [];
   const entered = [];
   const left = [];
@@ -58,9 +59,14 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
       }
     });
 
+    // Processing segment changes as events:
     _.map(notify_events, notify => {
-      const { event, synchronized_segments, channel } = notify;
-      //const change_event = _.map()
+      let { event, synchronized_segments, channel } = notify;
+
+      if (synchronized_segments === undefined) {
+        synchronized_segments = ["ALL"];
+      }
+
       const segment_change_event = _.find(segment_change_events, e => {
         return e.event === event;
       });
@@ -71,7 +77,7 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
 
         if (
           segment_changes !== undefined &&
-          _.intersection(_.map(segment_changes, "id"), synchronized_segments)
+          belongsToSegment(synchronized_segments, _.map(segment_changes, "id"))
         ) {
           if (action_type === segment_action_type.enter) {
             entered.push(channel);

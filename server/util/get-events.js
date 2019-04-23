@@ -12,37 +12,23 @@ const belongsToSegment = (sync_segments, entitySegmentIds) => {
   );
 };
 
-const getEvents = (
-  events,
-  notify_events,
-  userSegmentIds,
-  accountSegmentIds
-) => {
+const getEvents = (events, notify_events, userSegmentIds) => {
   const messages = [];
   const triggered = [];
   if (notify_events.length) {
     const event_names = _.map(events, "event");
     const event_hash = _.compact(
       _.uniq(
-        _.map(
-          notify_events,
-          ({
-            event,
-            channel,
-            synchronized_segments,
-            synchronized_account_segments,
-          }) => {
-            if (
-              _.includes(event_names, event) &&
-              belongsToSegment(synchronized_segments, userSegmentIds) &&
-              belongsToSegment(synchronized_account_segments, accountSegmentIds)
-            ) {
-              triggered.push(channel);
-              return event;
-            }
-            return undefined;
+        _.map(notify_events, ({ event, channel, synchronized_segments }) => {
+          if (
+            _.includes(event_names, event) &&
+            belongsToSegment(synchronized_segments, userSegmentIds)
+          ) {
+            triggered.push(channel);
+            return event;
           }
-        )
+          return undefined;
+        })
       )
     );
     if (triggered.length) {

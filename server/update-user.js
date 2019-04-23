@@ -92,15 +92,9 @@ export default function(
       client.logger.debug("outgoing.user.changes", changeActions);
 
       const userSegmentIds = _.map(segments, "id");
-      const accountSegmentIds = _.map(account_segments, "id");
 
       // Event Triggers
-      const eventActions = getEvents(
-        events,
-        notify_events,
-        userSegmentIds,
-        accountSegmentIds
-      );
+      const eventActions = getEvents(events, notify_events, userSegmentIds);
       const { triggered } = eventActions;
       client.logger.debug("outgoing.user.events", eventActions);
 
