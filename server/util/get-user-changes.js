@@ -67,11 +67,11 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
 
       if (segment_change_event !== undefined) {
         const action_type = segment_change_event.type;
-        const segment_change = _.get(changes, segment_change_event.path);
+        const segment_changes = _.get(changes, segment_change_event.path);
 
         if (
-          segment_change !== undefined &&
-          _.intersection(_.map(segment_change, "id"), synchronized_segments)
+          segment_changes !== undefined &&
+          _.intersection(_.map(segment_changes, "id"), synchronized_segments)
         ) {
           if (action_type === segment_action_type.enter) {
             entered.push(channel);
