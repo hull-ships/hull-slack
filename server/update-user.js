@@ -6,39 +6,9 @@ import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import getEvents from "./util/get-events";
-import flattenForText from "./util/flatten-for-text";
+import getUserChanges from "./util/get-user-changes";
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
-const getChanges = (changes, notify_segments) => {
-  // Changes of Segments
-  let messages = [];
-  const entered = [];
-  const left = [];
-
-  if (
-    changes &&
-    changes.segments &&
-    (changes.segments.entered || changes.segments.left)
-  ) {
-    messages = _.map(changes.segments, (values, action) => {
-      const names = _.map(values, "name");
-      const s = names.length > 1 ? "s" : "";
-      return `${humanize(action)} segment${s} ${flattenForText(names)}`;
-    });
-
-    _.map(notify_segments, notify => {
-      const { segment, channel, enter, leave } = notify;
-      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
-        entered.push(channel);
-      }
-      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
-        left.push(channel);
-      }
-    });
-  }
-  return { entered, left, messages };
-};
 
 const getChannelIds = (teamChannels, channelNames) =>
   _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
@@ -110,15 +80,20 @@ export default function(
         };
       }
 
-      const msgs = [];
+      const slackMessages = [];
 
       // Change Triggers
-      const changeActions = getChanges(changes, notify_segments);
+      const changeActions = getUserChanges(
+        changes,
+        notify_segments,
+        notify_events
+      );
       const { entered, left } = changeActions;
       client.logger.debug("outgoing.user.changes", changeActions);
 
       const userSegmentIds = _.map(segments, "id");
       const accountSegmentIds = _.map(account_segments, "id");
+
       // Event Triggers
       const eventActions = getEvents(
         events,
@@ -130,8 +105,10 @@ export default function(
       client.logger.debug("outgoing.user.events", eventActions);
 
       // Build message array
-      msgs.push(...changeActions.messages, ...eventActions.messages);
-      client.logger.debug("outgoing.user.messages", { messages: msgs });
+      slackMessages.push(...changeActions.messages, ...eventActions.messages);
+      client.logger.debug("outgoing.user.messages", {
+        messages: slackMessages,
+      });
 
       const currentNotificationChannelNames = getUniqueChannelNames(
         _.concat(entered, left, triggered)
@@ -155,7 +132,7 @@ export default function(
         ...message,
         hull,
         actions,
-        message: msgs.join("\n"),
+        message: slackMessages.join("\n"),
         whitelist,
       });
 
@@ -198,7 +175,7 @@ export default function(
           tellUser(
             `:crying_cat_face: Something bad happened while posting to the channels :${
               err.message
-              }`,
+            }`,
             err
           );
           client.logger.error("outgoing.user.error", {
