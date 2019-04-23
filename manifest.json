@@ -135,7 +135,7 @@
             "options": {
               "standard": {
                 "ENTERED_USER_SEGMENT": "Entered User Segment",
-                "LEFT_USER_SEGMENT": "Left Using Segment"
+                "LEFT_USER_SEGMENT": "Left User Segment"
               }
             }
           },
