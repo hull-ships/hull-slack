@@ -131,27 +131,22 @@
           "event": {
             "title": "Event Name",
             "type": "string",
-            "format": "event"
+            "format": "event",
+            "options": {
+              "standard": {
+                "ENTERED_USER_SEGMENT": "Entered User Segment",
+                "LEFT_USER_SEGMENT": "Left User Segment"
+              }
+            }
           },
           "synchronized_segments": {
-            "title": "Segments that users must be in to receive these events",
+            "title": "User Filtered Segments",
+            "description": "User segments in which user events must occur in or on",
             "type": "array",
             "format": "segment",
             "options": {
               "standard": {
                 "ALL": "All Users"
-              }
-            },
-            "default": ["ALL"]
-          },
-          "synchronized_account_segments": {
-            "title": "Account Filtered Segments",
-            "description": "Segments that users' accounts must be in to receive these events",
-            "type": "array",
-            "format": "accountSegment",
-            "options": {
-              "standard": {
-                "ALL": "All Accounts"
               }
             },
             "default": ["ALL"]
