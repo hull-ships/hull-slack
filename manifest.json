@@ -139,10 +139,10 @@
               }
             }
           },
-          "synchronized_segments": {
+          "synchronized_segment": {
             "title": "User Filtered Segments",
             "description": "User segments in which user events must occur in or on",
-            "type": "array",
+            "type": "string",
             "format": "segment",
             "options": {
               "standard": {
