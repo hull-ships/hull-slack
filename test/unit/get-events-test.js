@@ -23,7 +23,7 @@ describe("Slack user segment entered test", () => {
     },
   ];
 
-  it("user and account segments match synchronized user and account segments", () => {
+  it("user segments match synchronized user segments", () => {
     const notify_events = [
       {
         event: "Test Event",
@@ -49,30 +49,7 @@ describe("Slack user segment entered test", () => {
     expect(messages[0]).toBe('Performed "Test Event"');
   });
 
-  it("user matches synchronized user segments and account does not match account synchronized segments", () => {
-    const notify_events = [
-      {
-        event: "Test Event",
-        channel: "#testing",
-        synchronized_segments: ["5c460f417b5385471e00002f"],
-      },
-    ];
-
-    const userSegmentIds = [
-      "5c460f417b5385471e00002f",
-      "5c50a5737fdb2fd3bc0000ec",
-    ];
-
-    const response = getEvents(events, notify_events, userSegmentIds);
-
-    const triggered = _.get(response, "triggered");
-    const messages = _.get(response, "messages");
-
-    expect(triggered.length).toBe(0);
-    expect(messages.length).toBe(0);
-  });
-
-  it("User segments do not match synchronized segments, but account segments match synchronized account segments", () => {
+  it("User segments do not match synchronized segments", () => {
     const notify_events = [
       {
         event: "Test Event",
@@ -95,30 +72,7 @@ describe("Slack user segment entered test", () => {
     expect(messages.length).toBe(0);
   });
 
-  it("Neither user nor accounts match synchronized segments", () => {
-    const notify_events = [
-      {
-        event: "Test Event",
-        channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
-      },
-    ];
-
-    const userSegmentIds = [
-      "5c460f417b5385471e00002f",
-      "5c50a5737fdb2fd3bc0000ec",
-    ];
-
-    const response = getEvents(events, notify_events, userSegmentIds);
-
-    const triggered = _.get(response, "triggered");
-    const messages = _.get(response, "messages");
-
-    expect(triggered.length).toBe(0);
-    expect(messages.length).toBe(0);
-  });
-
-  it("No user or account segments are defined on the entities", () => {
+  it("No user segments are defined on the entities", () => {
     const notify_events = [
       {
         event: "Test Event",
