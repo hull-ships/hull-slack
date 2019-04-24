@@ -29,7 +29,7 @@ const belongsToSegment = (sync_segments, entitySegmentIds) => {
 
   return (
     _.includes(sync_segments, "ALL") ||
-    _.intersection(sync_segments, entitySegmentIds)
+    _.intersection(sync_segments, entitySegmentIds).length > 0
   );
 };
 
