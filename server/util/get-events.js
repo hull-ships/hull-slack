@@ -1,15 +1,12 @@
 import _ from "lodash";
 import flattenForText from "../util/flatten-for-text";
 
-const belongsToSegment = (sync_segments, entitySegmentIds) => {
+const belongsToSegment = (sync_segment, entitySegmentIds) => {
   // sync_segments will be undefined if a manifest has not been refreshed
-  if (sync_segments === undefined) {
-    sync_segments = ["ALL"];
+  if (sync_segment === undefined) {
+    sync_segment = "ALL";
   }
-  return (
-    _.includes(sync_segments, "ALL") ||
-    _.intersection(sync_segments, entitySegmentIds).length > 0
-  );
+  return sync_segment === "ALL" || _.includes(entitySegmentIds, sync_segment);
 };
 
 const getEvents = (events, notify_events, userSegmentIds) => {
@@ -19,10 +16,10 @@ const getEvents = (events, notify_events, userSegmentIds) => {
     const event_names = _.map(events, "event");
     const event_hash = _.compact(
       _.uniq(
-        _.map(notify_events, ({ event, channel, synchronized_segments }) => {
+        _.map(notify_events, ({ event, channel, synchronized_segment }) => {
           if (
             _.includes(event_names, event) &&
-            belongsToSegment(synchronized_segments, userSegmentIds)
+            belongsToSegment(synchronized_segment, userSegmentIds)
           ) {
             triggered.push(channel);
             return event;

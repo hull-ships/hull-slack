@@ -21,16 +21,13 @@ const segment_change_events = [
   },
 ];
 
-const belongsToSegment = (sync_segments, entitySegmentIds) => {
-  // sync_segments will be undefined if a manifest has not been refreshed
-  if (sync_segments === undefined) {
-    sync_segments = ["ALL"];
+const belongsToSegment = (sync_segment, entitySegmentIds) => {
+  // sync_segment will be undefined if a manifest has not been refreshed
+  if (sync_segment === undefined) {
+    sync_segment = "ALL";
   }
 
-  return (
-    _.includes(sync_segments, "ALL") ||
-    _.intersection(sync_segments, entitySegmentIds).length > 0
-  );
+  return sync_segment === "ALL" || _.includes(entitySegmentIds, sync_segment);
 };
 
 const getUserChanges = (changes, notify_segments, notify_events) => {
@@ -61,10 +58,10 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
 
     // Processing segment changes as events:
     _.map(notify_events, notify => {
-      let { event, synchronized_segments, channel } = notify;
+      let { event, synchronized_segment, channel } = notify;
 
-      if (synchronized_segments === undefined) {
-        synchronized_segments = ["ALL"];
+      if (synchronized_segment === undefined) {
+        synchronized_segment = "ALL";
       }
 
       const segment_change_event = _.find(segment_change_events, e => {
@@ -77,7 +74,7 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
 
         if (
           segment_changes !== undefined &&
-          belongsToSegment(synchronized_segments, _.map(segment_changes, "id"))
+          belongsToSegment(synchronized_segment, _.map(segment_changes, "id"))
         ) {
           if (action_type === segment_action_type.enter) {
             entered.push(channel);

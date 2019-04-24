@@ -28,7 +28,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["5c460f417b5385471e00002f"],
+        synchronized_segment: "5c460f417b5385471e00002f",
       },
     ];
 
@@ -54,7 +54,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
+        synchronized_segment: "synchronizedUserSegment",
       },
     ];
 
@@ -77,7 +77,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
+        synchronized_segment: "synchronizedUserSegment",
       },
     ];
 
@@ -97,7 +97,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["ALL"],
+        synchronized_segment: "ALL",
       },
     ];
 
@@ -123,7 +123,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: undefined,
+        synchronized_segment: undefined,
       },
     ];
 
@@ -149,7 +149,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: [],
+        synchronized_segment: "",
       },
     ];
 
