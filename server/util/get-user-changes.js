@@ -30,7 +30,7 @@ const belongsToSegment = (sync_segment, entitySegmentIds) => {
   return sync_segment === "ALL" || _.includes(entitySegmentIds, sync_segment);
 };
 
-const getUserChanges = (changes, notify_segments, notify_events) => {
+const getUserChanges = (changes, notify_events) => {
   let messages = [];
   const entered = [];
   const left = [];
@@ -44,16 +44,6 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
       const names = _.map(values, "name");
       const s = names.length > 1 ? "s" : "";
       return `${humanize(action)} segment${s} ${flattenForText(names)}`;
-    });
-
-    _.map(notify_segments, notify => {
-      const { segment, channel, enter, leave } = notify;
-      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
-        entered.push(channel);
-      }
-      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
-        left.push(channel);
-      }
     });
 
     // Processing segment changes as events:

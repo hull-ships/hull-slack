@@ -8,13 +8,6 @@ describe("Slack user segment entered test", () => {
     "5c50a5737fdb2fd3bc0000ec",
   ];
 
-  const notify_segments = [
-    {
-      segment: "",
-      channel: "",
-    },
-  ];
-
   const notify_events = [
     {
       event: "ENTERED_USER_SEGMENT",
@@ -73,7 +66,7 @@ describe("Slack user segment entered test", () => {
       account_segments: {},
     };
 
-    const response = getUserChanges(changes, notify_segments, notify_events);
+    const response = getUserChanges(changes, notify_events);
 
     const entered = _.get(response, "entered");
     const left = _.get(response, "left");
@@ -107,7 +100,7 @@ describe("Slack user segment entered test", () => {
       account_segments: {},
     };
 
-    const response = getUserChanges(changes, notify_segments, notify_events);
+    const response = getUserChanges(changes, notify_events);
 
     const entered = _.get(response, "entered");
     const left = _.get(response, "left");
@@ -139,7 +132,7 @@ describe("Slack user segment entered test", () => {
       account_segments: {},
     };
 
-    const response = getUserChanges(changes, notify_segments, notify_events);
+    const response = getUserChanges(changes, notify_events);
 
     const entered = _.get(response, "entered");
     const left = _.get(response, "left");
@@ -173,7 +166,7 @@ describe("Slack user segment entered test", () => {
       account_segments: {},
     };
 
-    const response = getUserChanges(changes, notify_segments, notify_events);
+    const response = getUserChanges(changes, notify_events);
 
     const entered = _.get(response, "entered");
     const left = _.get(response, "left");
@@ -207,7 +200,6 @@ describe("Slack user segment entered test", () => {
 
     const response = getUserChanges(
       changes,
-      notify_segments,
       notify_events_undefined_segments
     );
 
@@ -245,7 +237,6 @@ describe("Slack user segment entered test", () => {
 
     const response = getUserChanges(
       changes,
-      notify_segments,
       notify_events_undefined_segments
     );
 
@@ -283,7 +274,6 @@ describe("Slack user segment entered test", () => {
 
     const response = getUserChanges(
       changes,
-      notify_segments,
       notify_events_undefined_segments
     );
 
@@ -321,7 +311,6 @@ describe("Slack user segment entered test", () => {
 
     const response = getUserChanges(
       changes,
-      notify_segments,
       notify_events_all_segments
     );
 
@@ -359,7 +348,6 @@ describe("Slack user segment entered test", () => {
 
     const response = getUserChanges(
       changes,
-      notify_segments,
       notify_events_all_segments
     );
 

@@ -14,7 +14,6 @@ export default function statusCheck(req, res) {
     team_id,
     user_id,
     bot: { bot_user_id, bot_access_token } = {},
-    notify_segments = [],
     notify_events = [],
   } = private_settings;
 
@@ -33,7 +32,7 @@ export default function statusCheck(req, res) {
     return send();
   }
 
-  if (!notify_segments.length && !notify_events.length) {
+  if (!notify_events.length) {
     messages.push(
       "No segments or events are set. No notifications will be sent"
     );

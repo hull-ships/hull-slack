@@ -44,7 +44,6 @@ export default function(
       const {
         user,
         segments = [],
-        account_segments = [],
         changes = {},
         events = [],
       } = message;
@@ -55,7 +54,6 @@ export default function(
         user_id = "",
         actions = [],
         notify_events = [],
-        notify_segments = [],
         whitelist = [],
       } = private_settings;
 
@@ -85,7 +83,6 @@ export default function(
       // Change Triggers
       const changeActions = getUserChanges(
         changes,
-        notify_segments,
         notify_events
       );
       const { entered, left } = changeActions;
