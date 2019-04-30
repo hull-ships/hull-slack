@@ -9,7 +9,6 @@
     "oneColumn",
     "smart-notifier"
   ],
-  "settings": [],
   "private_settings": [
     {
       "name": "token",
@@ -69,21 +68,12 @@
         }
       }
     },
-
-
     {
       "name": "whitelist",
       "title": "Attributes to send (none sends everything)",
       "type": "array",
       "default": [],
       "format": "trait"
-    },
-
-    {
-      "name": "notify_header",
-      "title": "Notifications",
-      "type": "string",
-      "format": "title"
     },
     {
       "name": "notify_events",
@@ -156,6 +146,29 @@
           }
         }
       }
+    }
+  ],
+  "settings_sections": [
+    {
+      "title": "White List",
+      "description": "Attributes to send (none sends everything)",
+      "properties": [
+        "private_settings.whitelist"
+      ]
+    },
+    {
+      "title": "Notify Events",
+      "description": "Receive Notifications On Events",
+      "properties": [
+        "private_settings.notify_events"
+      ]
+    },
+    {
+      "title": "Actions",
+      "properties": [
+        "private_settings.button_header",
+        "private_settings.actions"
+      ]
     }
   ],
   "deployment_settings": [],
