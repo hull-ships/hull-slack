@@ -23,13 +23,12 @@ describe("Slack user segment entered test", () => {
     },
   ];
 
-  it("user and account segments match synchronized user and account segments", () => {
+  it("user segments match synchronized user segments", () => {
     const notify_events = [
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["5c460f417b5385471e00002f"],
-        synchronized_account_segments: ["5cabb21273eb3f17f60001c2"],
+        synchronized_segment: "5c460f417b5385471e00002f",
       },
     ];
 
@@ -38,14 +37,7 @@ describe("Slack user segment entered test", () => {
       "5c50a5737fdb2fd3bc0000ec",
     ];
 
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
@@ -57,13 +49,12 @@ describe("Slack user segment entered test", () => {
     expect(messages[0]).toBe('Performed "Test Event"');
   });
 
-  it("user matches synchronized user segments and account does not match account synchronized segments", () => {
+  it("User segments do not match synchronized segments", () => {
     const notify_events = [
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["5c460f417b5385471e00002f"],
-        synchronized_account_segments: ["synchronizedAccountSegment"],
+        synchronized_segment: "synchronizedUserSegment",
       },
     ];
 
@@ -72,14 +63,7 @@ describe("Slack user segment entered test", () => {
       "5c50a5737fdb2fd3bc0000ec",
     ];
 
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
@@ -88,88 +72,18 @@ describe("Slack user segment entered test", () => {
     expect(messages.length).toBe(0);
   });
 
-  it("User segments do not match synchronized segments, but account segments match synchronized account segments", () => {
+  it("No user segments are defined on the entities", () => {
     const notify_events = [
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
-        synchronized_account_segments: ["5cabb21273eb3f17f60001c2"],
-      },
-    ];
-
-    const userSegmentIds = [
-      "5c460f417b5385471e00002f",
-      "5c50a5737fdb2fd3bc0000ec",
-    ];
-
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
-
-    const triggered = _.get(response, "triggered");
-    const messages = _.get(response, "messages");
-
-    expect(triggered.length).toBe(0);
-    expect(messages.length).toBe(0);
-  });
-
-  it("Neither user nor accounts match synchronized segments", () => {
-    const notify_events = [
-      {
-        event: "Test Event",
-        channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
-        synchronized_account_segments: ["synchronizedAccountSegment"],
-      },
-    ];
-
-    const userSegmentIds = [
-      "5c460f417b5385471e00002f",
-      "5c50a5737fdb2fd3bc0000ec",
-    ];
-
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
-
-    const triggered = _.get(response, "triggered");
-    const messages = _.get(response, "messages");
-
-    expect(triggered.length).toBe(0);
-    expect(messages.length).toBe(0);
-  });
-
-  it("No user or account segments are defined on the entities", () => {
-    const notify_events = [
-      {
-        event: "Test Event",
-        channel: "#testing",
-        synchronized_segments: ["synchronizedUserSegment"],
-        synchronized_account_segments: ["synchronizedAccountSegment"],
+        synchronized_segment: "synchronizedUserSegment",
       },
     ];
 
     const userSegmentIds = [];
 
-    const accountSegmentIds = [];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
@@ -183,8 +97,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: ["ALL"],
-        synchronized_account_segments: ["ALL"],
+        synchronized_segment: "ALL",
       },
     ];
 
@@ -193,14 +106,7 @@ describe("Slack user segment entered test", () => {
       "5c50a5737fdb2fd3bc0000ec",
     ];
 
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
@@ -217,8 +123,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: undefined,
-        synchronized_account_segments: undefined,
+        synchronized_segment: undefined,
       },
     ];
 
@@ -227,14 +132,7 @@ describe("Slack user segment entered test", () => {
       "5c50a5737fdb2fd3bc0000ec",
     ];
 
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
@@ -251,8 +149,7 @@ describe("Slack user segment entered test", () => {
       {
         event: "Test Event",
         channel: "#testing",
-        synchronized_segments: [],
-        synchronized_account_segments: [],
+        synchronized_segment: "",
       },
     ];
 
@@ -261,14 +158,7 @@ describe("Slack user segment entered test", () => {
       "5c50a5737fdb2fd3bc0000ec",
     ];
 
-    const accountSegmentIds = ["5cabb21273eb3f17f60001c2"];
-
-    const response = getEvents(
-      events,
-      notify_events,
-      userSegmentIds,
-      accountSegmentIds
-    );
+    const response = getEvents(events, notify_events, userSegmentIds);
 
     const triggered = _.get(response, "triggered");
     const messages = _.get(response, "messages");
