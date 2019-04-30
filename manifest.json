@@ -70,13 +70,14 @@
     },
     {
       "name": "whitelist",
+      "title": "Add Attributes to Send in Notification",
       "type": "array",
       "default": [],
       "format": "trait"
     },
     {
       "name": "notify_events",
-      "title": "Notify when events performed",
+      "title": "Add Notification Triggers",
       "type": "array",
       "format": "table",
       "default": [
@@ -94,6 +95,7 @@
         "properties": {
           "event": {
             "title": "Event Name",
+            "description": "Event which to trigger a notification",
             "type": "string",
             "format": "event",
             "options": {
@@ -104,7 +106,7 @@
             }
           },
           "synchronized_segment": {
-            "title": "User Filtered Segments",
+            "title": "Applicable User Segments",
             "description": "User segments in which user events must occur in or on",
             "type": "string",
             "format": "segment",
@@ -117,6 +119,7 @@
           },
           "channel": {
             "title": "@user or #channel",
+            "description": "Channel or user to notify on trigger",
             "type": "string",
             "format": "string"
           }
@@ -125,7 +128,7 @@
     },
     {
       "name": "actions",
-      "title": "Add Action Buttons to update User attributes on click",
+      "title": "Add User Update Action Buttons",
       "default": [
         {
           "label": "",
@@ -157,8 +160,8 @@
   ],
   "settings_sections": [
     {
-      "title": "Notify Slack on the following events",
-      "description": "Choose the scenarios where you want to receive Slack notifications.  Pick the channels which are notified.  Please refer to the documentation for more detailed instructions",
+      "title": "Slack Notifiction Triggers",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. Entered/Left user segment events apply for the selected segments, where as for other event types, the user must be IN these segments for the notifications to fire",
       "properties": [
         "private_settings.notify_events"
       ]
