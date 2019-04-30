@@ -9,7 +9,6 @@
     "oneColumn",
     "smart-notifier"
   ],
-  "settings": [],
   "private_settings": [
     {
       "name": "token",
@@ -69,8 +68,6 @@
         }
       }
     },
-
-
     {
       "name": "whitelist",
       "title": "Attributes to send (none sends everything)",
@@ -78,7 +75,6 @@
       "default": [],
       "format": "trait"
     },
-
     {
       "name": "notify_header",
       "title": "Notifications",
@@ -116,7 +112,7 @@
                 "ALL": "All Users"
               }
             },
-            "default": "ALL"
+            "default": ["ALL"]
           },
           "channel": {
             "title": "@user or #channel",
@@ -156,6 +152,35 @@
           }
         }
       }
+    }
+  ],
+  "settings_sections": [
+    {
+      "title": "White List",
+      "description": "Attributes to send (none sends everything)",
+      "properties": [
+        "private_settings.whitelist"
+      ]
+    },
+    {
+      "title": "Notifications",
+      "properties": [
+        "private_settings.notify_header"
+      ]
+    },
+    {
+      "title": "Notify Events",
+      "description": "Receive Notifications On Events",
+      "properties": [
+        "private_settings.notify_events"
+      ]
+    },
+    {
+      "title": "Actions",
+      "properties": [
+        "private_settings.button_header",
+        "private_settings.actions"
+      ]
     }
   ],
   "deployment_settings": [],
