@@ -11,7 +11,15 @@ This Connector adds a Bot (@hull) to your Slack Team. The Bot can:
 
 #### Data
 
-The Bot can return either all available data for users or a set of whitelisted properties picked from their profile. In the settings tab, if you leave the box blank then all properties will be returned.
+The Bot can return either all available data for users or a set of whitelisted properties picked from their profile. 
+In the settings tab, if you leave the box blank then all properties will be returned.
+
+The Bot can send messages on an event occurrence. There are two types of events that can be triggered - 
+those occurring on the user segment and those occurring in the user segment. Events on a user segment include a user 
+entering or leaving a segment. For these the events, the field 'User Filtered Segment' is used to define the segment 
+that the user either moves into for the event "Entered User Segment" or the user moves out of for the event "Left User Segment". 
+Events in a user segment are all other events. For these events, the user must be in the defined 'User Filtered Segment' 
+segment in order for the message to be sent by the bot. All other segments will be ignored. 
 
 In Slack, you can toggle between User Attributes and their latest events by clicking the buttons at the footer of each user profile.
 

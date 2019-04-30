@@ -2,14 +2,13 @@
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "picture": "picture.png",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "tags": [
     "incoming",
     "outgoing",
     "oneColumn",
     "smart-notifier"
   ],
-  "settings": [],
   "private_settings": [
     {
       "name": "token",
@@ -69,72 +68,58 @@
         }
       }
     },
-
-
     {
       "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
+      "title": "Add Attributes to Send in Notification",
       "type": "array",
       "default": [],
       "format": "trait"
     },
-
-    {
-      "name": "notify_header",
-      "title": "Notifications",
-      "type": "string",
-      "format": "title"
-    },
-    {
-      "name": "notify_segments",
-      "title": "Notify when Segments change",
-      "type": "array",
-      "format": "table",
-      "default": [{ "segment": "", "channel": "" }],
-      "items": {
-        "type": "object",
-        "required": [ "channel", "segment"],
-        "properties": {
-          "segment": {
-            "title": "Segment Name",
-            "type": "string",
-            "format": "segment"
-          },
-          "channel": {
-            "title": "@user or #channel",
-            "type": "string",
-            "format": "string"
-          },
-          "enter": {
-            "title": "Notify on enter",
-            "type": "boolean",
-            "format": "checkbox"
-          },
-          "leave": {
-            "title": "Notify on leave",
-            "type": "boolean",
-            "format": "checkbox"
-          }
-        }
-      }
-    },
     {
       "name": "notify_events",
-      "title": "Notify when events performed",
+      "title": "Add Notification Triggers",
       "type": "array",
       "format": "table",
-      "default": [{ "event": "", "channel": "" }],
+      "default": [
+        {
+          "event": "",
+          "channel": ""
+        }
+      ],
       "items": {
         "type": "object",
-        "required": ["channel", "event"],
+        "required": [
+          "channel",
+          "event"
+        ],
         "properties": {
           "event": {
             "title": "Event Name",
+            "description": "Event which to trigger a notification",
             "type": "string",
-            "format": "event"
+            "format": "event",
+            "options": {
+              "standard": {
+                "ENTERED_USER_SEGMENT": "Entered User Segment",
+                "LEFT_USER_SEGMENT": "Left User Segment"
+              }
+            }
+          },
+          "synchronized_segment": {
+            "title": "Applicable User Segments",
+            "description": "User segments in which user events must occur in or on",
+            "type": "string",
+            "format": "segment",
+            "options": {
+              "standard": {
+                "ALL": "All Users"
+              }
+            },
+            "default": "ALL"
           },
           "channel": {
             "title": "@user or #channel",
+            "description": "Channel or user to notify on trigger",
             "type": "string",
             "format": "string"
           }
@@ -142,15 +127,15 @@
       }
     },
     {
-      "name": "button_header",
-      "title": "Actions",
-      "type": "string",
-      "format": "title"
-    },
-    {
       "name": "actions",
-      "title": "Add Action Buttons to update User attributes on click",
-      "default": [{ "label": "", "property": "", "value": "" }],
+      "title": "Add User Update Action Buttons",
+      "default": [
+        {
+          "label": "",
+          "property": "",
+          "value": ""
+        }
+      ],
       "type": "array",
       "format": "table",
       "items": {
@@ -173,6 +158,29 @@
       }
     }
   ],
+  "settings_sections": [
+    {
+      "title": "Slack Notification Triggers",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
+      "properties": [
+        "private_settings.notify_events"
+      ]
+    },
+    {
+      "title": "Attribute White List",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "properties": [
+        "private_settings.whitelist"
+      ]
+    },
+    {
+      "title": "Action Buttons",
+      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
+      "properties": [
+        "private_settings.actions"
+      ]
+    }
+  ],
   "deployment_settings": [],
   "resources": [],
   "readme": "readme.md",
@@ -192,7 +200,7 @@
       "url": "/smart-notify"
     }
   ],
-  "schedules" : [
+  "schedules": [
     {
       "url": "/status",
       "type": "interval",

@@ -5,63 +5,10 @@ import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
+import getEvents from "./util/get-events";
+import getUserChanges from "./util/get-user-changes";
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
-const flattenForText = (array = []) => _.map(array, e => `"${e}"`).join(", ");
-
-const getChanges = (changes, notify_segments) => {
-  // Changes of Segments
-  let messages = [];
-  const entered = [];
-  const left = [];
-
-  if (
-    changes &&
-    changes.segments &&
-    (changes.segments.entered || changes.segments.left)
-  ) {
-    messages = _.map(changes.segments, (values, action) => {
-      const names = _.map(values, "name");
-      const s = names.length > 1 ? "s" : "";
-      return `${humanize(action)} segment${s} ${flattenForText(names)}`;
-    });
-
-    _.map(notify_segments, notify => {
-      const { segment, channel, enter, leave } = notify;
-      if (enter && _.includes(_.map(changes.segments.entered, "id"), segment)) {
-        entered.push(channel);
-      }
-      if (leave && _.includes(_.map(changes.segments.left, "id"), segment)) {
-        left.push(channel);
-      }
-    });
-  }
-  return { entered, left, messages };
-};
-
-const getEvents = (events, notify_events) => {
-  const messages = [];
-  const triggered = [];
-  if (notify_events.length) {
-    const event_names = _.map(events, "event");
-    const event_hash = _.compact(
-      _.uniq(
-        _.map(notify_events, ({ event, channel }) => {
-          if (_.includes(event_names, event)) {
-            triggered.push(channel);
-            return event;
-          }
-          return undefined;
-        })
-      )
-    );
-    if (triggered.length) {
-      messages.push(`Performed ${flattenForText(event_hash)}`);
-    }
-  }
-  return { triggered, messages };
-};
 
 const getChannelIds = (teamChannels, channelNames) =>
   _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
@@ -94,7 +41,13 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const { user, /* segments = [], */ changes = {}, events = [] } = message;
+      const {
+        user,
+        segments = [],
+        account_segments = [],
+        changes = {},
+        events = [],
+      } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
@@ -127,21 +80,29 @@ export default function(
         };
       }
 
-      const msgs = [];
+      const slackMessages = [];
 
       // Change Triggers
-      const changeActions = getChanges(changes, notify_segments);
+      const changeActions = getUserChanges(
+        changes,
+        notify_segments,
+        notify_events
+      );
       const { entered, left } = changeActions;
       client.logger.debug("outgoing.user.changes", changeActions);
 
+      const userSegmentIds = _.map(segments, "id");
+
       // Event Triggers
-      const eventActions = getEvents(events, notify_events);
+      const eventActions = getEvents(events, notify_events, userSegmentIds);
       const { triggered } = eventActions;
       client.logger.debug("outgoing.user.events", eventActions);
 
       // Build message array
-      msgs.push(...changeActions.messages, ...eventActions.messages);
-      client.logger.debug("outgoing.user.messages", { messages: msgs });
+      slackMessages.push(...changeActions.messages, ...eventActions.messages);
+      client.logger.debug("outgoing.user.messages", {
+        messages: slackMessages,
+      });
 
       const currentNotificationChannelNames = getUniqueChannelNames(
         _.concat(entered, left, triggered)
@@ -165,7 +126,7 @@ export default function(
         ...message,
         hull,
         actions,
-        message: msgs.join("\n"),
+        message: slackMessages.join("\n"),
         whitelist,
       });
 
