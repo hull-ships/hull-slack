@@ -76,12 +76,6 @@
       "format": "trait"
     },
     {
-      "name": "notify_header",
-      "title": "Notifications",
-      "type": "string",
-      "format": "title"
-    },
-    {
       "name": "notify_events",
       "title": "Notify when events performed",
       "type": "array",
@@ -160,12 +154,6 @@
       "description": "Attributes to send (none sends everything)",
       "properties": [
         "private_settings.whitelist"
-      ]
-    },
-    {
-      "title": "Notifications",
-      "properties": [
-        "private_settings.notify_header"
       ]
     },
     {
