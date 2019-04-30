@@ -70,7 +70,6 @@
     },
     {
       "name": "whitelist",
-      "title": "Attributes to send (none sends everything)",
       "type": "array",
       "default": [],
       "format": "trait"
@@ -80,10 +79,18 @@
       "title": "Notify when events performed",
       "type": "array",
       "format": "table",
-      "default": [{ "event": "", "channel": "" }],
+      "default": [
+        {
+          "event": "",
+          "channel": ""
+        }
+      ],
       "items": {
         "type": "object",
-        "required": ["channel", "event"],
+        "required": [
+          "channel",
+          "event"
+        ],
         "properties": {
           "event": {
             "title": "Event Name",
@@ -117,15 +124,15 @@
       }
     },
     {
-      "name": "button_header",
-      "title": "Actions",
-      "type": "string",
-      "format": "title"
-    },
-    {
       "name": "actions",
       "title": "Add Action Buttons to update User attributes on click",
-      "default": [{ "label": "", "property": "", "value": "" }],
+      "default": [
+        {
+          "label": "",
+          "property": "",
+          "value": ""
+        }
+      ],
       "type": "array",
       "format": "table",
       "items": {
@@ -150,23 +157,23 @@
   ],
   "settings_sections": [
     {
-      "title": "White List",
-      "description": "Attributes to send (none sends everything)",
-      "properties": [
-        "private_settings.whitelist"
-      ]
-    },
-    {
-      "title": "Notify Events",
-      "description": "Receive Notifications On Events",
+      "title": "Notify Slack on the following events",
+      "description": "Choose the scenarios where you want to receive Slack notifications.  Pick the channels which are notified.  Please refer to the documentation for more detailed instructions",
       "properties": [
         "private_settings.notify_events"
       ]
     },
     {
-      "title": "Actions",
+      "title": "Attribute White List",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and the attribute changes are in any case",
       "properties": [
-        "private_settings.button_header",
+        "private_settings.whitelist"
+      ]
+    },
+    {
+      "title": "Action Buttons",
+      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you wanted to mark a \"Viewed\" attribute on a user, you could specify the attribute and the value to set when the button is clicked",
+      "properties": [
         "private_settings.actions"
       ]
     }
@@ -190,7 +197,7 @@
       "url": "/smart-notify"
     }
   ],
-  "schedules" : [
+  "schedules": [
     {
       "url": "/status",
       "type": "interval",
