@@ -112,7 +112,7 @@
                 "ALL": "All Users"
               }
             },
-            "default": ["ALL"]
+            "default": "ALL"
           },
           "channel": {
             "title": "@user or #channel",
