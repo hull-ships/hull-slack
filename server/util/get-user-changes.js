@@ -60,10 +60,6 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
     _.map(notify_events, notify => {
       let { event, synchronized_segment, channel } = notify;
 
-      if (synchronized_segment === undefined) {
-        synchronized_segment = "ALL";
-      }
-
       const segment_change_event = _.find(segment_change_events, e => {
         return e.event === event;
       });
