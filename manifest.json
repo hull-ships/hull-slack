@@ -160,7 +160,7 @@
   ],
   "settings_sections": [
     {
-      "title": "Slack Notifiction Triggers",
+      "title": "Slack Notification Triggers",
       "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
       "properties": [
         "private_settings.notify_events"
@@ -175,7 +175,7 @@
     },
     {
       "title": "Action Buttons",
-      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you wanted to mark a \"Viewed\" attribute on a user, you could specify the attribute and the value to set when the button is clicked",
+      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
       "properties": [
         "private_settings.actions"
       ]
