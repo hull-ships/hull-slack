@@ -133,6 +133,18 @@
             "type": "string",
             "format": "event"
           },
+          "synchronized_segment": {
+            "title": "User Filtered Segments",
+            "description": "User segments in which user events must occur in or on",
+            "type": "string",
+            "format": "segment",
+            "options": {
+              "standard": {
+                "ALL": "All Users"
+              }
+            },
+            "default": "ALL"
+          },
           "channel": {
             "title": "@user or #channel",
             "type": "string",
