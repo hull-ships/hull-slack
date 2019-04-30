@@ -161,14 +161,14 @@
   "settings_sections": [
     {
       "title": "Slack Notifiction Triggers",
-      "description": "Choose the scenarios where you would like to receive Slack notifications. Entered/Left user segment events apply for the selected segments, where as for other event types, the user must be IN these segments for the notifications to fire",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segments, whereas for other event types, the user must be IN the segment for the notification to trigger",
       "properties": [
         "private_settings.notify_events"
       ]
     },
     {
       "title": "Attribute White List",
-      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and the attribute changes are in any case",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
       "properties": [
         "private_settings.whitelist"
       ]
