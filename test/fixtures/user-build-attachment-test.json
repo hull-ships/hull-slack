@@ -1,0 +1,124 @@
+{
+  "configuration": {
+    "id": "5ac74fe8745cc3e861000004",
+    "organization": "224bbaa3.hullbeta.io",
+    "secret": "d894cf870a91eb15080856df5da8004c"
+  },
+  "channel": "user:update",
+  "message": {
+    "user": {
+      "traits_outreach/id": 184823,
+      "username": "andyh565",
+      "id": "5cc8c32f03f8929f9e000725",
+      "email": "andy@hull.com",
+      "name": "Andy Hull",
+      "traits_outreach/created_by_webhook": true,
+      "anonymous_ids": [
+        "outreach:184823"
+      ],
+      "domain": "hull.com",
+      "last_name": "Hull",
+      "indexed_at": "2019-05-02T17:14:34+00:00",
+      "first_name": "Andy",
+      "traits_outreach/custom1": "custom1-value",
+      "traits_outreach/custom2": "custom2-value",
+      "created_at": "2019-04-30T21:50:39Z",
+      "is_approved": false,
+      "segment_ids": [
+        "5ccaeeec4c52025cca005ef1"
+      ]
+    },
+    "changes": {
+      "is_new": false,
+      "user": {
+        "name": [
+          "Old Name",
+          "New Name"
+        ]
+      },
+      "account": {},
+      "segments": {
+        "entered": [
+          {
+            "id": "5cc98a004c5202e276001ac0",
+            "name": "UserSegment1",
+            "updated_at": "2019-05-02T17:13:28Z",
+            "type": "users_segment",
+            "created_at": "2019-05-01T11:58:56Z"
+          }
+        ]
+      },
+      "account_segments": {}
+    },
+    "account": {},
+    "segments": [
+      {
+        "id": "5cc98a004c5202e276001ac0",
+        "name": "UserSegment1",
+        "updated_at": "2019-05-02T17:13:28Z",
+        "type": "users_segment",
+        "created_at": "2019-05-01T11:58:56Z"
+      },
+      {
+        "id": "5ccaeeec4c52025cca005ef1",
+        "name": "UserSegment2",
+        "updated_at": "2019-05-02T13:21:48Z",
+        "type": "users_segment",
+        "created_at": "2019-05-02T13:21:48Z"
+      }
+    ],
+    "events": [],
+    "account_segments": [],
+    "message_id": "cdc8ddfa05056c0d7317db7bf66e1730012aa357",
+    "matchesFilter": true
+  },
+  "notification_id": "26c4c5ab-37ee-482b-a0de-2e28e2f8672b",
+  "connector": {
+    "id": "5cc9ec977dd61d9b68002ee8",
+    "settings": {},
+    "manifest": {
+      "name": "Slack",
+      "version": "0.0.6",
+      "subscriptions": [
+        {
+          "url": "/smart-notifier"
+        }
+      ],
+      "tags": [
+        "incoming",
+        "outgoing",
+        "oneColumn",
+        "smart-notifier"
+      ]
+    },
+    "type": "ship",
+    "name": "",
+    "private_settings": {
+      "bot": {
+        "bot_user_id": "",
+        "bot_access_token": ""
+      },
+      "actions": [
+        {
+          "label": "",
+          "property": "",
+          "value": ""
+        }
+      ],
+      "incoming_webhook": {},
+      "token": "",
+      "user_id": "",
+      "team_id": "",
+      "whitelist": [
+        "traits_outreach/custom1",
+        "traits_outreach/custom2"
+      ],
+      "account_whitelist": [],
+      "notify_events": [],
+      "notify_account_segments": []
+    },
+    "source_url": "",
+    "manifest_url": ""
+  },
+  "slackMessage": "Entered segment \"UserSegment1\""
+}

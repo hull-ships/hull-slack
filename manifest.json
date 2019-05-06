@@ -2,7 +2,7 @@
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "picture": "picture.png",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "tags": [
     "incoming",
     "outgoing",
@@ -156,28 +156,100 @@
           }
         }
       }
+    },
+    {
+      "name": "account_whitelist",
+      "title": "Add Account Attributes to Send in Notification",
+      "type": "array",
+      "default": [],
+      "format": "trait"
+    },
+    {
+      "name": "notify_account_segments",
+      "title": "Add Account Notification Triggers",
+      "type": "array",
+      "format": "table",
+      "default": [
+        {
+          "event": "",
+          "channel": ""
+        }
+      ],
+      "items": {
+        "type": "object",
+        "required": [
+          "channel",
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "title": "Event Name",
+            "description": "Event which to trigger a notification",
+            "type": "string",
+            "format": "event",
+            "options": {
+              "standard": {
+                "ENTERED_USER_SEGMENT": "Entered Account Segment",
+                "LEFT_USER_SEGMENT": "Left Account Segment"
+              }
+            }
+          },
+          "synchronized_segment": {
+            "title": "Applicable Account Segments",
+            "description": "Account segments in which account events must occur in or on",
+            "type": "string",
+            "format": "accountSegment",
+            "options": {
+              "standard": {
+                "ALL": "All Accounts"
+              }
+            },
+            "default": "ALL"
+          },
+          "channel": {
+            "title": "@user or #channel",
+            "description": "Channel or user to notify on trigger",
+            "type": "string",
+            "format": "string"
+          }
+        }
+      }
     }
   ],
   "settings_sections": [
     {
-      "title": "Slack Notification Triggers",
+      "title": "User Slack Notification Triggers",
       "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
       "properties": [
         "private_settings.notify_events"
       ]
     },
     {
-      "title": "Attribute White List",
+      "title": "User Attribute White List",
       "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
       "properties": [
         "private_settings.whitelist"
       ]
     },
     {
-      "title": "Action Buttons",
+      "title": "User Action Buttons",
       "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
       "properties": [
         "private_settings.actions"
+      ]
+    },
+    {
+      "title": "Account Slack Notification Triggers",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left Account Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
+      "properties": [
+        "private_settings.notify_account_segments"
+      ]
+    },
+    {
+      "title": "Account Attribute White List",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "properties": [
+        "private_settings.account_whitelist"
       ]
     }
   ],
