@@ -1,5 +1,5 @@
 import _ from "lodash";
-import flattenForText from "../util/flatten-for-text";
+import objectUtils from "./object-utils";
 
 const belongsToSegment = (sync_segment, entitySegmentIds) => {
   // sync_segments will be undefined if a manifest has not been refreshed
@@ -29,7 +29,7 @@ const getEvents = (events, notify_events, userSegmentIds) => {
       )
     );
     if (triggered.length) {
-      messages.push(`Performed ${flattenForText(event_hash)}`);
+      messages.push(`Performed ${objectUtils.flattenForText(event_hash)}`);
     }
   }
   return { triggered, messages };

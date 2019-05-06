@@ -6,6 +6,7 @@ import {
   oAuthHandler,
 } from "hull/lib/utils";
 import updateUser from "./update-user";
+import updateAccount from "./update-account";
 import BotFactory from "./bot-factory";
 import statusHandler from "./status";
 import setupWebserver from "./setup-webserver";
@@ -129,6 +130,7 @@ module.exports = function Server({
           "ship:update": ({ client, ship }: HullContext) =>
             connectSlack({ hull: client, ship, force: true }),
           "user:update": updateUser.bind(undefined, connectSlack),
+          "account:update": updateAccount.bind(undefined, connectSlack),
         },
       })
     );
@@ -153,6 +155,7 @@ module.exports = function Server({
             return Promise.resolve({});
           },
           "user:update": updateUser.bind(undefined, connectSlack),
+          "account:update": updateAccount.bind(undefined, connectSlack),
         },
       })
     );

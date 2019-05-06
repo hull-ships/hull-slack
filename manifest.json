@@ -70,7 +70,7 @@
     },
     {
       "name": "whitelist",
-      "title": "Add Attributes to Send in Notification",
+      "title": "Add User Attributes to Send in Notification",
       "type": "array",
       "default": [],
       "format": "trait"
@@ -156,29 +156,64 @@
           }
         }
       }
-    }
-  ],
-  "settings_sections": [
-    {
-      "title": "Slack Notification Triggers",
-      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
-      "properties": [
-        "private_settings.notify_events"
-      ]
     },
     {
-      "title": "Attribute White List",
-      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
-      "properties": [
-        "private_settings.whitelist"
-      ]
+      "name": "account_whitelist",
+      "title": "Add Account Attributes to Send in Notification",
+      "type": "array",
+      "default": [],
+      "format": "trait"
     },
     {
-      "title": "Action Buttons",
-      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
-      "properties": [
-        "private_settings.actions"
-      ]
+      "name": "notify_account_segments",
+      "title": "Add Account Notification Triggers",
+      "type": "array",
+      "format": "table",
+      "default": [
+        {
+          "event": "",
+          "channel": ""
+        }
+      ],
+      "items": {
+        "type": "object",
+        "required": [
+          "channel",
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "title": "Event Name",
+            "description": "Event which to trigger a notification",
+            "type": "string",
+            "format": "event",
+            "options": {
+              "standard": {
+                "ENTERED_USER_SEGMENT": "Entered User Segment",
+                "LEFT_USER_SEGMENT": "Left User Segment"
+              }
+            }
+          },
+          "synchronized_segment": {
+            "title": "Applicable User Segments",
+            "description": "User segments in which user events must occur in or on",
+            "type": "string",
+            "format": "accountSegment",
+            "options": {
+              "standard": {
+                "ALL": "All Users"
+              }
+            },
+            "default": "ALL"
+          },
+          "channel": {
+            "title": "@user or #channel",
+            "description": "Channel or user to notify on trigger",
+            "type": "string",
+            "format": "string"
+          }
+        }
+      }
     }
   ],
   "deployment_settings": [],
