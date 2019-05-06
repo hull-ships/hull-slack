@@ -2,7 +2,7 @@
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "picture": "picture.png",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "tags": [
     "incoming",
     "outgoing",
@@ -70,7 +70,7 @@
     },
     {
       "name": "whitelist",
-      "title": "Add User Attributes to Send in Notification",
+      "title": "Add Attributes to Send in Notification",
       "type": "array",
       "default": [],
       "format": "trait"
@@ -214,6 +214,43 @@
           }
         }
       }
+    }
+  ],
+  "settings_sections": [
+    {
+      "title": "User Slack Notification Triggers",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left User Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
+      "properties": [
+        "private_settings.notify_events"
+      ]
+    },
+    {
+      "title": "User Attribute White List",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "properties": [
+        "private_settings.whitelist"
+      ]
+    },
+    {
+      "title": "User Action Buttons",
+      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
+      "properties": [
+        "private_settings.actions"
+      ]
+    },
+    {
+      "title": "Account Slack Notification Triggers",
+      "description": "Choose the scenarios where you would like to receive Slack notifications. \"Entered/Left Account Segment\" events apply to the selected segment, whereas for other event types, the user must be IN the segment for the notification to trigger",
+      "properties": [
+        "private_settings.notify_account_segments"
+      ]
+    },
+    {
+      "title": "Account Attribute White List",
+      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "properties": [
+        "private_settings.account_whitelist"
+      ]
     }
   ],
   "deployment_settings": [],
