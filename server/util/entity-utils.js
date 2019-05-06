@@ -39,9 +39,23 @@ const processResponses = (hull, responses, targetEntity) =>
     });
   });
 
+function cast(v) {
+  if (_.isString(v)) {
+    // Boolean
+    let V = v.toLowerCase();
+    if (V === "true" || V === "false") return V === "true";
+
+    // Number
+    V = Number(v);
+    if (!_.isNaN(V)) return V;
+  }
+  return v;
+}
+
 module.exports = {
   getUserName,
   getDomainName,
   getChannelIds,
   processResponses,
+  cast,
 };

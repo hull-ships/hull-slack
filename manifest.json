@@ -189,19 +189,19 @@
             "format": "event",
             "options": {
               "standard": {
-                "ENTERED_USER_SEGMENT": "Entered User Segment",
-                "LEFT_USER_SEGMENT": "Left User Segment"
+                "ENTERED_USER_SEGMENT": "Entered Account Segment",
+                "LEFT_USER_SEGMENT": "Left Account Segment"
               }
             }
           },
           "synchronized_segment": {
-            "title": "Applicable User Segments",
-            "description": "User segments in which user events must occur in or on",
+            "title": "Applicable Account Segments",
+            "description": "Account segments in which account events must occur in or on",
             "type": "string",
             "format": "accountSegment",
             "options": {
               "standard": {
-                "ALL": "All Users"
+                "ALL": "All Accounts"
               }
             },
             "default": "ALL"

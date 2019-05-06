@@ -10,19 +10,6 @@ function urlFor(account = {}, organization) {
   }`;
 }
 
-function cast(v) {
-  if (_.isString(v)) {
-    // Boolean
-    let V = v.toLowerCase();
-    if (V === "true" || V === "false") return V === "true";
-
-    // Number
-    V = Number(v);
-    if (!_.isNaN(V)) return V;
-  }
-  return v;
-}
-
 const getActions = (account, traits, actions, group = "") => ({
   title: `Actions for ${account.domain}`,
   fallback: "Can't show message actions",
@@ -38,7 +25,7 @@ const getActions = (account, traits, actions, group = "") => ({
           return {
             name: "trait",
             value: JSON.stringify({
-              [a.property.replace(/^account\./, "")]: cast(a.value),
+              [a.property.replace(/^account\./, "")]: entityUtils.cast(a.value),
             }),
             text: a.label,
             type: "button",
