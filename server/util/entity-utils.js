@@ -2,6 +2,12 @@
 
 import _ from "lodash";
 
+function urlFor({ user = {}, account = {}, organization, entity = "user" }) {
+  const id = user.id || account.id;
+  const [namespace, domain, tld] = organization.split(".");
+  return `https://dashboard.${domain}.${tld}/${namespace}/${entity}s/${id}`;
+}
+
 function getUserName(user = {}) {
   return (
     user.name ||
@@ -52,10 +58,37 @@ function cast(v) {
   return v;
 }
 
+function getAttachments(atts, group, targetEntity) {
+  // common items;
+  const attachments = _.values(_.pick(atts, "segments", "changes"));
+
+  // "@hull events user@example.com"
+  if (group === "events" && events.length) {
+    attachments.push(...atts.events);
+  } else if (group && group !== "traits") {
+    // "@hull user@example.com intercom" -> return only Intercom group;
+    const t = _.filter(
+      atts.traits,
+      traitGroup => traitGroup.fallback.toLowerCase() === group.toLowerCase()
+    );
+    attachments.push(...t);
+  } else {
+    // "@hull user@example.com full|traits"
+    attachments.push(...atts.traits);
+    // No whitelist: Default payload for attachement;
+    // if (!w.length)
+  }
+  attachments.unshift(atts[targetEntity]);
+
+  return attachments;
+}
+
 module.exports = {
   getUserName,
   getDomainName,
   getChannelIds,
   processResponses,
   cast,
+  getAttachments,
+  urlFor,
 };

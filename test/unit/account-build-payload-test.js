@@ -70,6 +70,5 @@ describe("Build user attachment to send to slack", () => {
 
     expect(_.get(payload, "text")).toBe(_.get(expectedPayload, "text"));
     expect(_.get(payload, "text")).toBe(_.get(expectedPayload, "text"));
-    console.log("");
   });
 });
