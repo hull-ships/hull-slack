@@ -1,6 +1,5 @@
 import buildAttachments from "../../server/lib/build-attachments";
 import _ from "lodash";
-const MiniHull = require("minihull");
 const ClientMock = require("../mocks/client-mock");
 import accountPayload from "../../server/lib/account-payload";
 const slackFixture = require("../fixtures/account-build-payload-test");

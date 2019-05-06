@@ -23,7 +23,7 @@ function cast(v) {
   return v;
 }
 
-const getActions = (account, traits, events, actions, group = "") => ({
+const getActions = (account, traits, actions, group = "") => ({
   title: `Actions for ${account.domain}`,
   fallback: "Can't show message actions",
   attachment_type: "default",
@@ -38,7 +38,7 @@ const getActions = (account, traits, events, actions, group = "") => ({
           return {
             name: "trait",
             value: JSON.stringify({
-              [a.property.replace(/^traits_/, "")]: cast(a.value),
+              [a.property.replace(/^account\./, "")]: cast(a.value),
             }),
             text: a.label,
             type: "button",

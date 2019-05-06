@@ -31,7 +31,8 @@ describe("Build user attachment to send to slack", () => {
     const segmentFieldValue = _.get(segmentField, "value");
     const segmentText = _.get(atts, "segments.text");
     const segmentAuthorName = _.get(atts, "segments.author_name");
-    const attchChanges = _.get(atts, "changes");
+    const attchChangesAuthorName = _.get(atts, "changes.author_name");
+    const attchChangesText = _.get(atts, "changes.text");
     const attchEvents = _.get(atts, "events");
 
     expect(userPretext).toBe('Entered segment "UserSegment1"');
@@ -42,7 +43,8 @@ describe("Build user attachment to send to slack", () => {
     expect(segmentFieldValue).toBe("UserSegment1");
     expect(segmentText).toBe("UserSegment1, UserSegment2");
     expect(segmentAuthorName).toBe(":busts_in_silhouette: Segments");
-    expect(_.keys(attchChanges).length).toBe(0);
+    expect(attchChangesAuthorName).toBe(":chart_with_upwards_trend: Changes");
+    expect(attchChangesText).toBe("*Name*: Old Name → New Name");
     expect(_.keys(attchEvents).length).toBe(0);
     expect(_.keys(userFields).length).toBe(1);
     expect(userFields[0].value).toBe(":love_letter: andy@hull.com");

@@ -5,7 +5,6 @@ import humanize from "./humanize";
 // import flags from "./flags";
 import entityUtils from "../util/entity-utils";
 import format from "./format-value";
-import type { HullUserClient, User } from "../types";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
 
@@ -96,16 +95,14 @@ function getEntityAttachment({
 }
 
 function getChangesAttachment(changes, color) {
-  return !_.size(changes.user)
+  return !_.size(changes)
     ? {}
     : {
         author_name: ":chart_with_upwards_trend: Changes",
         mrkdwn_in: ["text", "fields", "pretext"],
         color: color(),
-        fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
-        text: formatObjToText(
-          _.mapValues(changes.user, v => `${v[0]} → ${v[1]}`)
-        ),
+        fallback: `Changes: ${_.keys(changes || {}).join(", ")}`,
+        text: formatObjToText(_.mapValues(changes, v => `${v[0]} → ${v[1]}`)),
       };
 }
 
@@ -238,12 +235,12 @@ module.exports = function buildAttachments({
   let attachments = {};
 
   const color = colorFactory();
-  let entityAttachment = {};
-  let entity_segments_attachments = {};
-  let entity_changes_attachments = {};
-  let entity_traits_attachments = {};
-  let entity_events_attachments = {};
-  //if (targetEntity === "user") {
+  let entityAttachment;
+  let entity_segments_attachments;
+  let entity_changes_attachments;
+  let entity_traits_attachments;
+  let entity_events_attachments;
+
   const traits = _.size(entity_whitelist)
     ? getWhitelistedEntity({ entity, entity_whitelist })
     : entity;
@@ -262,24 +259,12 @@ module.exports = function buildAttachments({
     color
   );
 
-  entity_changes_attachments = getChangesAttachment(entity_changes, color);
+  entity_changes_attachments = getChangesAttachment(
+    entity_changes[targetEntity],
+    color
+  );
   entity_traits_attachments = getTraitsAttachments(traits, color);
   entity_events_attachments = getEventsAttachments(entity_events, color);
-  /*} else if (targetEntity === "account") {
-    const traitsSource = _.size(whitelist)
-      ? getWhitelistedEntity({ account, account_whitelist })
-      : account;
-
-    entityAttachment = getEntityAttachment(traitsSource, color, pretext);
-    entity_segments_attachments = getSegmentAttachments(
-      entity_changes,
-      entity_segments,
-      color
-    );
-    entity_changes_attachments = getChangesAttachment(entity_changes, color);
-    entity_traits_attachments = getTraitsAttachments(traitsSource, color);
-    //entity_events_attachments = getEventsAttachements(events, color);
-  }*/
 
   attachments[targetEntity] = entityAttachment;
   attachments["segments"] = entity_segments_attachments;

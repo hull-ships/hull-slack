@@ -1,38 +1,15 @@
 // @flow
 import _ from "lodash";
 import userPayload from "./lib/user-payload";
-import humanize from "./lib/humanize";
 import setupChannels from "./lib/setup-channels";
 import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import getEvents from "./util/get-events";
 import getUserChanges from "./util/get-user-changes";
+const entityUtils = require("./util/entity-utils");
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
 
-const getChannelIds = (teamChannels, channelNames) =>
-  _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
-
-const getLoggableMessages = responses =>
-  _.groupBy(_.compact(responses), "action");
-
-const reduceActionUsers = actions =>
-  _.reduce(
-    actions,
-    (m, v) => {
-      m[v.user_id] = v.message;
-      return m;
-    },
-    {}
-  );
-
-const processResponses = (hull, responses) =>
-  _.map(getLoggableMessages(responses), (actions, name) => {
-    hull.logger.info(`outgoing.user.${name}`, {
-      user_ids: _.map(actions, "user_id"),
-      data: reduceActionUsers(actions),
-    });
-  });
 
 export default function(
   connectSlack: Object => any,
@@ -44,7 +21,6 @@ export default function(
       const {
         user,
         segments = [],
-        account_segments = [],
         changes = {},
         events = [],
       } = message;
@@ -153,11 +129,11 @@ export default function(
         channels,
       })
         .then(({ teamChannels, teamMembers }) => {
-          const channel_ids = getChannelIds(
+          const channel_ids = entityUtils.getChannelIds(
             teamChannels,
             currentNotificationChannelNames
           );
-          const member_ids = getChannelIds(
+          const member_ids = entityUtils.getChannelIds(
             teamMembers,
             _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))
           );
@@ -186,6 +162,6 @@ export default function(
         in: 1,
       });
     }
-    processResponses(hull, responses);
+    entityUtils.processResponses(hull, responses, "user");
   });
 }

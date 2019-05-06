@@ -30,7 +30,12 @@
     },
     "changes": {
       "is_new": false,
-      "user": {},
+      "user": {
+        "name": [
+          "Old Name",
+          "New Name"
+        ]
+      },
       "account": {},
       "segments": {
         "entered": [

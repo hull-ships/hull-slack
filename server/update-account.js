@@ -4,32 +4,9 @@ import accountPayload from "./lib/account-payload";
 import setupChannels from "./lib/setup-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
 import getAccountChanges from "./util/get-account-changes";
+const entityUtils = require("./util/entity-utils");
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
-const getChannelIds = (teamChannels, channelNames) =>
-  _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
-
-const getLoggableMessages = responses =>
-  _.groupBy(_.compact(responses), "action");
-
-const reduceAction = actions =>
-  _.reduce(
-    actions,
-    (m, v) => {
-      m[v.account_id] = v.message;
-      return m;
-    },
-    {}
-  );
-
-const processResponses = (hull, responses) =>
-  _.map(getLoggableMessages(responses), (actions, name) => {
-    hull.logger.info(`outgoing.account.${name}`, {
-      account_ids: _.map(actions, "account_id"),
-      data: reduceAction(actions),
-    });
-  });
 
 export default function(
   connectSlack: Object => any,
@@ -38,7 +15,7 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const { account = {}, account_segments = [], changes = {} } = message;
+      const { account = {}, changes = {} } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
@@ -131,11 +108,11 @@ export default function(
         channels,
       })
         .then(({ teamChannels, teamMembers }) => {
-          const channel_ids = getChannelIds(
+          const channel_ids = entityUtils.getChannelIds(
             teamChannels,
             currentNotificationChannelNames
           );
-          const member_ids = getChannelIds(
+          const member_ids = entityUtils.getChannelIds(
             teamMembers,
             _.map(currentNotificationChannelNames, c => c.replace(/^@/, ""))
           );
@@ -164,6 +141,6 @@ export default function(
         in: 1,
       });
     }
-    processResponses(hull, responses);
+    entityUtils.processResponses(hull, responses, "account");
   });
 }

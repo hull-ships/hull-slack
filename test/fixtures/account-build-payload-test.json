@@ -9,7 +9,12 @@
     "user": {},
     "changes": {
       "is_new": false,
-      "account": {},
+      "account": {
+        "name": [
+          "Old Name",
+          "New Name"
+        ]
+      },
       "account_segments": {
         "entered": [
           {
