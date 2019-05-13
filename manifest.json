@@ -189,8 +189,8 @@
             "format": "select",
             "options": {
               "standard": {
-                "ENTERED_USER_SEGMENT": "Entered Account Segment",
-                "LEFT_USER_SEGMENT": "Left Account Segment"
+                "ENTERED_ACCOUNT_SEGMENT": "Entered Account Segment",
+                "LEFT_ACCOUNT_SEGMENT": "Left Account Segment"
               }
             }
           },

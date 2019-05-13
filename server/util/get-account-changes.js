@@ -11,12 +11,12 @@ const segment_action_type = {
 
 const segment_change_events = [
   {
-    event: "ENTERED_USER_SEGMENT",
+    event: "ENTERED_ACCOUNT_SEGMENT",
     action: segment_action_type.entered,
     path: "account_segments.entered",
   },
   {
-    event: "LEFT_USER_SEGMENT",
+    event: "LEFT_ACCOUNT_SEGMENT",
     action: segment_action_type.left,
     path: "account_segments.left",
   },

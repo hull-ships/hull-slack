@@ -4,7 +4,7 @@ const ClientMock = require("../mocks/client-mock");
 import accountPayload from "../../server/lib/account-payload";
 const slackFixture = require("../fixtures/account-build-payload-test");
 
-describe("Build user attachment to send to slack", () => {
+describe("Build account attachment to send to slack", () => {
   const message = slackFixture.message;
   const slackMessage = slackFixture.slackMessage;
   const account_whitelist =
