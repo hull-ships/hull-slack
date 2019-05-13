@@ -2,7 +2,7 @@ import buildAttachments from "../../server/lib/build-attachments";
 import _ from "lodash";
 const slackFixture = require("../fixtures/account-build-attachment-test");
 
-describe("Build user attachment to send to slack", () => {
+describe("Build account attachment to send to slack", () => {
   const account = slackFixture.message.account;
   const segments = slackFixture.message.account_segments;
   const changes = slackFixture.message.changes;
