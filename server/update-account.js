@@ -1,15 +1,12 @@
 // @flow
 import _ from "lodash";
-import userPayload from "./lib/user-payload";
+import accountPayload from "./lib/account-payload";
 import setupChannels from "./lib/setup-channels";
-import getNotifyChannels from "./lib/get-notify-channels";
 import getUniqueChannelNames from "./lib/get-unique-channel-names";
-import getEvents from "./util/get-events";
-import getUserChanges from "./util/get-user-changes";
+import getAccountChanges from "./util/get-account-changes";
 const entityUtils = require("./util/entity-utils");
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
-
 
 export default function(
   connectSlack: Object => any,
@@ -18,96 +15,78 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const {
-        user,
-        segments = [],
-        changes = {},
-        events = [],
-      } = message;
+      const { account = {}, changes = {} } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
         token = "",
         user_id = "",
-        actions = [],
-        notify_events = [],
-        notify_segments = [],
-        whitelist = [],
+        account_actions = [],
+        notify_account_segments = [],
+        account_whitelist = [],
       } = private_settings;
 
-      if (!hull || !user.id || !token) {
+      if (!hull || !account.id || !token) {
         return {
           action: "skip",
-          user_id: user.id,
+          account_id: account.id,
           message: `Missing credentials, current token value: ${token}`,
         };
       }
 
-      const client = hull.asUser(user);
+      const client = hull.asAccount(account);
 
-      const channels = getUniqueChannelNames(getNotifyChannels(ship));
+      let channels = _.map(notify_account_segments, "channel");
+      channels = getUniqueChannelNames(channels);
 
       // Early return if no channel names configured
       if (!channels.length) {
         return {
           action: "skip",
-          user_id: user.id,
-          message: "No channels matching to post user",
+          user_id: message.id,
+          message: "No channels matching to post account",
         };
       }
 
       const slackMessages = [];
 
-      // Change Triggers
-      const changeActions = getUserChanges(
-        changes,
-        notify_segments,
-        notify_events
-      );
+      const changeActions = getAccountChanges(changes, notify_account_segments);
       const { entered, left } = changeActions;
-      client.logger.debug("outgoing.user.changes", changeActions);
+      client.logger.debug("outgoing.account.changes", changeActions);
 
-      const userSegmentIds = _.map(segments, "id");
-
-      // Event Triggers
-      const eventActions = getEvents(events, notify_events, userSegmentIds);
-      const { triggered } = eventActions;
-      client.logger.debug("outgoing.user.events", eventActions);
-
-      // Build message array
-      slackMessages.push(...changeActions.messages, ...eventActions.messages);
-      client.logger.debug("outgoing.user.messages", {
+      slackMessages.push(...changeActions.messages);
+      client.logger.debug("outgoing.account.messages", {
         messages: slackMessages,
       });
 
       const currentNotificationChannelNames = getUniqueChannelNames(
-        _.concat(entered, left, triggered)
+        _.concat(entered, left)
       );
 
-      // Early return if no marching cnannel
+      // Early return if no marching channel
       client.logger.debug(
-        "outgoing.user.channels",
+        "outgoing.account.channels",
         currentNotificationChannelNames
       );
       if (!currentNotificationChannelNames.length) {
         return {
           action: "skip",
-          user_id: user.id,
+          user_id: account.id,
           message: "No matching channels",
         };
       }
 
       // Build entire Notification payload
-      const payload = userPayload({
+      const payload = accountPayload({
         ...message,
         hull,
-        actions,
+        account_actions,
         message: slackMessages.join("\n"),
-        whitelist,
+        account_whitelist,
       });
 
       const post = p => channel => {
-        client.logger.info("outgoing.user.success", {
+        client.logger.info("outgoing.account.success", {
           text: p.text,
           channel,
         });
@@ -116,11 +95,11 @@ export default function(
       };
 
       const tellUser = (msg, error) => {
-        client.logger.info("outgoing.user.error", { error, message: msg });
+        client.logger.info("outgoing.account.error", { error, message: msg });
         sayInPrivate(bot, user_id, msg);
       };
 
-      metric.increment("ship.outgoing.users");
+      metric.increment("ship.outgoing.accounts");
 
       return setupChannels({
         hull,
@@ -148,7 +127,7 @@ export default function(
             }`,
             err
           );
-          client.logger.error("outgoing.user.error", {
+          client.logger.error("outgoing.account.error", {
             error: err.message,
           });
           return null;
@@ -162,6 +141,6 @@ export default function(
         in: 1,
       });
     }
-    entityUtils.processResponses(hull, responses, "user");
+    entityUtils.processResponses(hull, responses, "account");
   });
 }

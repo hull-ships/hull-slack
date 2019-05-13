@@ -3,7 +3,7 @@ import _ from "lodash";
 import moment from "moment";
 import humanize from "./humanize";
 // import flags from "./flags";
-import getUserName from "./get-user-name";
+import entityUtils from "../util/entity-utils";
 import format from "./format-value";
 
 const MOMENT_FORMAT = "MMMM Do YYYY, h:mm:ss a";
@@ -53,23 +53,36 @@ const FORMATTER = [
   // }
 ];
 
-function getUserAttachment(user, color, pretext) {
-  const name = getUserName(user);
+function getEntityAttachment({
+  traits = {},
+  entity = {},
+  color,
+  pretext,
+  targetEntity,
+}) {
+  const name =
+    targetEntity === "user"
+      ? entityUtils.getUserName(entity)
+      : entityUtils.getDomainName(entity);
+
   const fields = _.reduce(
     FORMATTER,
     (ff, formatter) => {
-      const value = _.get(user, formatter.key);
+      const value = _.get(entity, formatter.key);
       if (value === null || value === undefined) return ff;
-      ff.push({ value: formatter.value(value, user), short: formatter.short });
+      ff.push({
+        value: formatter.value(value, entity),
+        short: formatter.short,
+      });
       return ff;
     },
     []
   );
-  let footer = `:eyeglasses: ${moment(user.last_seen_at).format(
+  let footer = `:eyeglasses: ${moment(entity.last_seen_at).format(
     MOMENT_FORMAT
   )}`;
-  if (user.sessions_count)
-    footer = `${footer} :desktop_computer: ${user.sessions_count}`;
+  if (entity.sessions_count)
+    footer = `${footer} :desktop_computer: ${entity.sessions_count}`;
   return {
     mrkdwn_in: ["text", "fields", "pretext"],
     pretext,
@@ -77,27 +90,25 @@ function getUserAttachment(user, color, pretext) {
     color: color(),
     fields,
     footer,
-    thumb_url: user.picture,
+    thumb_url: entity.picture,
   };
 }
 
 function getChangesAttachment(changes, color) {
-  return !_.size(changes.user)
+  return !_.size(changes)
     ? {}
     : {
         author_name: ":chart_with_upwards_trend: Changes",
         mrkdwn_in: ["text", "fields", "pretext"],
         color: color(),
-        fallback: `Changes: ${_.keys(changes.user || {}).join(", ")}`,
-        text: formatObjToText(
-          _.mapValues(changes.user, v => `${v[0]} → ${v[1]}`)
-        ),
+        fallback: `Changes: ${_.keys(changes || {}).join(", ")}`,
+        text: formatObjToText(_.mapValues(changes, v => `${v[0]} → ${v[1]}`)),
       };
 }
 
-function getTraitsAttachments(user, color) {
+function getTraitsAttachments(traits, color) {
   return _.reduce(
-    _.pickBy(user, _.isPlainObject),
+    _.pickBy(traits, _.isPlainObject),
     (atts, value, key) => {
       if (_.isObject(value)) {
         atts.push({
@@ -114,19 +125,57 @@ function getTraitsAttachments(user, color) {
   );
 }
 
-function getWhitelistedUser({ user = {}, whitelist = [], hull }) {
-  const whitelistedUser = _.pick(user, whitelist);
-  return hull.utils.traits.group(whitelistedUser);
+function cleanAttributeName(attribute) {
+  if (attribute.match(/^account\./)) {
+    attribute = attribute.replace("account.", "");
+  }
+
+  return attribute;
 }
 
-function getSegmentAttachments(changes = {}, segments, color) {
-  const segmentString = (_.map(segments, "name") || []).join(", ");
+function group(entity) {
+  return _.reduce(
+    entity,
+    (grouped, value, key) => {
+      let dest = key;
+      if (key.match(/^traits_/)) {
+        if (key.match(/\//)) {
+          dest = key.replace(/^traits_/, "");
+        } else {
+          dest = key.replace(/^traits_/, "traits/");
+        }
+      }
+      return _.setWith(grouped, dest.split("/"), value, Object);
+    },
+    {}
+  );
+}
+
+function getWhitelistedEntity({ entity = {}, entity_whitelist = [] }) {
+  entity_whitelist = _.reduce(
+    entity_whitelist,
+    (cleanList, value, key) => {
+      cleanList.push(cleanAttributeName(value));
+      return cleanList;
+    },
+    []
+  );
+  let whitelistedEntity = _.pick(entity, entity_whitelist);
+  return group(whitelistedEntity);
+}
+
+function getSegmentAttachments(
+  entity_segment_changes = {},
+  entity_segments,
+  color
+) {
+  const segmentString = (_.map(entity_segments, "name") || []).join(", ");
   return {
     author_name: ":busts_in_silhouette: Segments",
     text: segmentString,
     fallback: `Segments: ${segmentString}`,
     color: color(),
-    fields: _.map(changes.segments, (segs, action) => {
+    fields: _.map(entity_segment_changes, (segs, action) => {
       const names = _.map(segs, "name");
       const emoji = `:${action === "left" ? "outbox" : "inbox"}_tray:`;
       return {
@@ -139,7 +188,7 @@ function getSegmentAttachments(changes = {}, segments, color) {
   };
 }
 
-function getEventsAttachements(events = [], color) {
+function getEventsAttachments(events = [], color) {
   if (!events.length) return {};
   return _.map(events, e => {
     try {
@@ -174,23 +223,54 @@ function getEventsAttachements(events = [], color) {
 }
 
 module.exports = function buildAttachments({
-  hull,
-  user = {},
-  segments = [],
-  changes = {},
-  events = [],
+  entity = {},
+  entity_segments = [],
+  entity_changes = {},
+  entity_segment_changes = {},
+  entity_events = [],
   pretext = "",
-  whitelist = [],
+  entity_whitelist = [],
+  targetEntity,
 }) {
+  let attachments = {};
+
   const color = colorFactory();
-  const traitsSource = _.size(whitelist)
-    ? getWhitelistedUser({ user, whitelist, hull })
-    : user;
-  return {
-    user: getUserAttachment(traitsSource, color, pretext),
-    segments: getSegmentAttachments(changes, segments, color),
-    events: getEventsAttachements(events, color),
-    changes: getChangesAttachment(changes, color),
-    traits: getTraitsAttachments(traitsSource, color),
-  };
+  let entityAttachment;
+  let entity_segments_attachments;
+  let entity_changes_attachments;
+  let entity_traits_attachments;
+  let entity_events_attachments;
+
+  const traits = _.size(entity_whitelist)
+    ? getWhitelistedEntity({ entity, entity_whitelist })
+    : entity;
+
+  entityAttachment = getEntityAttachment({
+    traits,
+    entity,
+    color,
+    pretext,
+    targetEntity,
+  });
+
+  entity_segments_attachments = getSegmentAttachments(
+    entity_segment_changes,
+    entity_segments,
+    color
+  );
+
+  entity_changes_attachments = getChangesAttachment(
+    entity_changes[targetEntity],
+    color
+  );
+  entity_traits_attachments = getTraitsAttachments(traits, color);
+  entity_events_attachments = getEventsAttachments(entity_events, color);
+
+  attachments[targetEntity] = entityAttachment;
+  attachments["segments"] = entity_segments_attachments;
+  attachments["events"] = entity_events_attachments;
+  attachments["changes"] = entity_changes_attachments;
+  attachments["traits"] = entity_traits_attachments;
+
+  return attachments;
 };

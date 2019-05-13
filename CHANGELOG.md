@@ -1,5 +1,9 @@
 # CHANGELOG
 
+
+## 0.0.8
+- adding account notification support for slack
+
 ## 0.0.7
 - Updated to the new settings UI, added inline descriptions
 - Consolidated "Entered/Left" segment components with event triggers

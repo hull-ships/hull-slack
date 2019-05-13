@@ -1,7 +1,7 @@
 // @flow
 import _ from "lodash";
 import humanize from "../lib/humanize";
-import flattenForText from "./flatten-for-text";
+import objectUtils from "./object-utils";
 
 const segment_action_type = {
   enter: "enter",
@@ -43,7 +43,7 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
     messages = _.map(changes.segments, (values, action) => {
       const names = _.map(values, "name");
       const s = names.length > 1 ? "s" : "";
-      return `${humanize(action)} segment${s} ${flattenForText(names)}`;
+      return `${humanize(action)} segment${s} ${objectUtils.flattenForText(names)}`;
     });
 
     _.map(notify_segments, notify => {
