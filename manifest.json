@@ -2,7 +2,7 @@
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "picture": "picture.png",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "tags": [
     "incoming",
     "outgoing",
@@ -162,7 +162,7 @@
       "title": "Add Account Attributes to Send in Notification",
       "type": "array",
       "default": [],
-      "format": "trait"
+      "format": "accountTrait"
     },
     {
       "name": "notify_account_segments",

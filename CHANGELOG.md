@@ -1,5 +1,14 @@
 # CHANGELOG
 
+
+## 0.0.8
+- adding account notification support for slack
+
+## 0.0.7
+- Updated to the new settings UI, added inline descriptions
+- Consolidated "Entered/Left" segment components with event triggers
+- Added ability send notifications only if users are in particular segments
+
 ## 0.0.6
 - prevent malicious flatmap-stream@0.1.1 dep from installing
 
