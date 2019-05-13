@@ -186,7 +186,7 @@
             "title": "Event Name",
             "description": "Event which to trigger a notification",
             "type": "string",
-            "format": "event",
+            "format": "select",
             "options": {
               "standard": {
                 "ENTERED_USER_SEGMENT": "Entered Account Segment",
