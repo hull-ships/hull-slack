@@ -162,7 +162,7 @@
       "title": "Add Account Attributes to Send in Notification",
       "type": "array",
       "default": [],
-      "format": "trait"
+      "format": "accountTrait"
     },
     {
       "name": "notify_account_segments",
