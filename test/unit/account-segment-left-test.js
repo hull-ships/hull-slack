@@ -1,7 +1,7 @@
 import getAccountChanges from "../../server/util/get-account-changes";
 import _ from "lodash";
 
-describe("Slack user segment entered test", () => {
+describe("Slack account segment left test", () => {
   // segments the user is currently in
   const userSegmentIds = [
     "5c460f417b5385471e00002f",
@@ -10,22 +10,22 @@ describe("Slack user segment entered test", () => {
 
   const notify_account_segments = [
     {
-      event: "ENTERED_USER_SEGMENT",
+      event: "ENTERED_ACCOUNT_SEGMENT",
       channel: "#testing-entered-segment1",
       synchronized_segment: "segment1",
     },
     {
-      event: "ENTERED_USER_SEGMENT",
+      event: "ENTERED_ACCOUNT_SEGMENT",
       channel: "#testing-entered-segment3",
       synchronized_segment: "segment3",
     },
     {
-      event: "LEFT_USER_SEGMENT",
+      event: "LEFT_ACCOUNT_SEGMENT",
       channel: "#testing-left-segment-1",
       synchronized_segment: "segment1",
     },
     {
-      event: "LEFT_USER_SEGMENT",
+      event: "LEFT_ACCOUNT_SEGMENT",
       channel: "#testing-left-segment-3",
       synchronized_segment: "segment3",
     },
