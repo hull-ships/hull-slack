@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.0.8
+- adding account notification support for slack
+
 ## 0.0.6
 - prevent malicious flatmap-stream@0.1.1 dep from installing
 
