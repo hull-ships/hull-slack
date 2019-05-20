@@ -50,7 +50,9 @@
       },
       "account_segments": {}
     },
-    "account": {},
+    "account": {
+      "outreach/account_name": "some account"
+    },
     "segments": [
       {
         "id": "5cc98a004c5202e276001ac0",
@@ -111,7 +113,8 @@
       "team_id": "",
       "whitelist": [
         "traits_outreach/custom1",
-        "traits_outreach/custom2"
+        "traits_outreach/custom2",
+        "account.outreach/account_name"
       ],
       "account_whitelist": [],
       "notify_events": [],
