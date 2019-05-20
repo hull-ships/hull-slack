@@ -152,10 +152,20 @@ function group(entity) {
 }
 
 function getWhitelistedEntity({ entity = {}, entity_whitelist = [] }) {
+
+  // if account variable exists on entity, do not remove the account prefix
+  const removeAccountPrefix = entity.account ? false : true;
+
   entity_whitelist = _.reduce(
     entity_whitelist,
     (cleanList, value, key) => {
-      cleanList.push(cleanAttributeName(value));
+
+      let cleanValue = value;
+      if (removeAccountPrefix) {
+        cleanValue = cleanAttributeName(value);
+      }
+      cleanList.push(cleanValue);
+
       return cleanList;
     },
     []
