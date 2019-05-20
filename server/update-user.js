@@ -97,6 +97,7 @@ export default function(
         };
       }
 
+      message.user.account = message.account;
       // Build entire Notification payload
       const payload = userPayload({
         ...message,
