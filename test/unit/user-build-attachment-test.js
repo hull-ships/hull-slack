@@ -11,6 +11,7 @@ describe("Build user attachment to send to slack", () => {
   const whitelist = slackFixture.connector.private_settings.whitelist;
 
   it("build user attachment", () => {
+    user.account = slackFixture.message.account;
     const atts = buildAttachments({
       entity: user,
       entity_segments: segments,
@@ -26,6 +27,9 @@ describe("Build user attachment to send to slack", () => {
     const userFields = _.get(atts, "user.fields");
     const traits = _.get(atts, "traits")[0];
     const traitsText = _.get(traits, "text");
+    const accountTraits = _.get(atts, "traits")[1];
+    const accountTraitsText = _.get(accountTraits, "text");
+
     const segmentField = _.get(atts, "segments.fields")[0];
     const segmentFieldTitle = _.get(segmentField, "title");
     const segmentFieldValue = _.get(segmentField, "value");
@@ -38,6 +42,9 @@ describe("Build user attachment to send to slack", () => {
     expect(userPretext).toBe('Entered segment "UserSegment1"');
     expect(traitsText).toBe(
       "*Custom1*: custom1-value\n*Custom2*: custom2-value"
+    );
+    expect(accountTraitsText).toBe(
+        "*Outreach/account name*: some account"
     );
     expect(segmentFieldTitle).toBe(":inbox_tray: Entered segment");
     expect(segmentFieldValue).toBe("UserSegment1");
