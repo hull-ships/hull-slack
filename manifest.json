@@ -76,6 +76,20 @@
       "format": "trait"
     },
     {
+      "name": "send_changes_on_user",
+      "title": "Send All User Attribute Changes",
+      "description": "Send before and after values for all user attribute changes",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "send_segments_on_user",
+      "title": "Send All User Segments",
+      "description": "Send all of the segments that the user is a part",
+      "type": "boolean",
+      "default": true
+    },
+    {
       "name": "notify_events",
       "title": "Add Notification Triggers",
       "type": "array",
@@ -127,42 +141,25 @@
       }
     },
     {
-      "name": "actions",
-      "title": "Add User Update Action Buttons",
-      "default": [
-        {
-          "label": "",
-          "property": "",
-          "value": ""
-        }
-      ],
-      "type": "array",
-      "format": "table",
-      "items": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "title": "Button Label",
-            "type": "string"
-          },
-          "property": {
-            "title": "Property name",
-            "type": "string",
-            "format": "trait"
-          },
-          "value": {
-            "title": "Property Value",
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
       "name": "account_whitelist",
       "title": "Add Account Attributes to Send in Notification",
       "type": "array",
       "default": [],
       "format": "accountTrait"
+    },
+    {
+      "name": "send_changes_on_account",
+      "title": "Send All Account Attribute Changes",
+      "description": "Send before and after values for all account attribute changes",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "send_segments_on_account",
+      "title": "Send All Account Segments",
+      "description": "Send all of the segments that the account is a part",
+      "type": "boolean",
+      "default": true
     },
     {
       "name": "notify_account_segments",
@@ -225,17 +222,12 @@
       ]
     },
     {
-      "title": "User Attribute White List",
-      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "title": "User Notification White List",
+      "description": "Choose the attributes that you want to send in the slack notification.",
       "properties": [
-        "private_settings.whitelist"
-      ]
-    },
-    {
-      "title": "User Action Buttons",
-      "description": "Along with the notification data, you may create action buttons which update user attributes in a single click.  For example, if you want to mark a lead in a notification as \"Contacted\", you could add a button for your team to click once the action has been performed",
-      "properties": [
-        "private_settings.actions"
+        "private_settings.whitelist",
+        "private_settings.send_changes_on_user",
+        "private_settings.send_segments_on_user"
       ]
     },
     {
@@ -247,9 +239,11 @@
     },
     {
       "title": "Account Attribute White List",
-      "description": "Choose the attributes that you want to send in the slack notification.  If no attributes are chosen, all are sent by default.  The segments and attribute changes are sent in all cases",
+      "description": "Choose the attributes that you want to send in the slack notification.",
       "properties": [
-        "private_settings.account_whitelist"
+        "private_settings.account_whitelist",
+        "private_settings.send_changes_on_account",
+        "private_settings.send_segments_on_account"
       ]
     }
   ],

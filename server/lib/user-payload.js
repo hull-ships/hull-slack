@@ -53,6 +53,7 @@ module.exports = function userPayload({
   whitelist = [],
   message = "",
   group = "",
+  options = {},
 }) {
   const targetEntity = "user";
   const user_url = entityUtils.urlFor({
@@ -68,10 +69,11 @@ module.exports = function userPayload({
     pretext: message,
     entity_whitelist: w,
     targetEntity: targetEntity,
+    options,
   });
 
   const attachments = entityUtils.getAttachments(atts, group, targetEntity);
-  attachments.push(getActions(user, atts.traits, atts.events, actions, group));
+  // attachments.push(getActions(user, atts.traits, atts.events, actions, group));
 
   const name = entityUtils.getUserName(user);
 
