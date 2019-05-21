@@ -49,5 +49,23 @@ describe("Build account attachment to send to slack", () => {
     expect(attchChangesText).toBe("*Name*: Old Name → New Name");
     expect(_.keys(attchEvents).length).toBe(0);
     expect(_.keys(accountFields).length).toBe(0);
+
+  });
+
+  it("test with segments and changes turned off", () => {
+    const atts = buildAttachments({
+      entity: account,
+      entity_segments: segments,
+      entity_changes: changes,
+      entity_segment_changes: changes.account_segments,
+      entity_events: events,
+      pretext: message,
+      entity_whitelist: whitelist,
+      targetEntity: "account",
+      options: { sendSegments: false, sendChanges: false },
+    });
+
+    expect(_.get(atts, "changes", null)).toBe(null);
+    expect(_.get(atts, "segments", null)).toBe(null);
   });
 });

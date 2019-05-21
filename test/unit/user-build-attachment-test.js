@@ -56,4 +56,23 @@ describe("Build user attachment to send to slack", () => {
     expect(_.keys(userFields).length).toBe(1);
     expect(userFields[0].value).toBe(":love_letter: andy@hull.com");
   });
+
+  it("test with segments and changes turned off", () => {
+    user.account = slackFixture.message.account;
+    const atts = buildAttachments({
+      entity: user,
+      entity_segments: segments,
+      entity_changes: changes,
+      entity_segment_changes: changes.segments,
+      entity_events: events,
+      pretext: message,
+      entity_whitelist: whitelist,
+      targetEntity: "user",
+      options: { sendSegments: false, sendChanges: false },
+    });
+
+    expect(_.get(atts, "changes", null)).toBe(null);
+    expect(_.get(atts, "segments", null)).toBe(null);
+
+  });
 });
