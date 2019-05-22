@@ -25,7 +25,7 @@
     "build": "npm run clean && npm run build:server",
     "build:server": "./node_modules/.bin/babel server -d lib",
     "start": "node ./lib",
-    "start:dev": "./node_modules/.bin/nodemon -V -w server -x ./node_modules/.bin/babel-node -- server --inspect",
+    "start:dev": "./node_modules/.bin/nodemon -V -w server -x ./node_modules/.bin/babel-node -- server",
     "ngrok": "ngrok http 8082 --region eu --subdomain hull-slack",
     "test": "npm run test:lint && npm run test:modules",
     "test:lint": "./node_modules/.bin/eslint server",
