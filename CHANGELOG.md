@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.9
+- added ability to toggle changes and segment attachments in slack notifications
 
 ## 0.0.8
 - adding account notification support for slack
