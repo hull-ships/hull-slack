@@ -10,6 +10,7 @@ module.exports = function accountPayload({
   account_whitelist = [],
   message = "",
   group = "",
+  options = {},
 }) {
   const targetEntity = "account";
   const account_url = entityUtils.urlFor({
@@ -25,6 +26,7 @@ module.exports = function accountPayload({
     pretext: message,
     entity_whitelist: w,
     targetEntity: targetEntity,
+    options,
   });
 
   const attachments = entityUtils.getAttachments(atts, group, targetEntity);

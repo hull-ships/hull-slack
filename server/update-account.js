@@ -76,6 +76,16 @@ export default function(
         };
       }
 
+      const options = {};
+
+      if (private_settings.send_changes_on_account === false) {
+        options.sendChanges = false;
+      }
+
+      if (private_settings.send_segments_on_account === false) {
+        options.sendSegments = false;
+      }
+
       // Build entire Notification payload
       const payload = accountPayload({
         ...message,
@@ -83,6 +93,7 @@ export default function(
         account_actions,
         message: slackMessages.join("\n"),
         account_whitelist,
+        options,
       });
 
       const post = p => channel => {

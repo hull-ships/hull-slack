@@ -241,6 +241,7 @@ module.exports = function buildAttachments({
   pretext = "",
   entity_whitelist = [],
   targetEntity,
+  options = {},
 }) {
   let attachments = {};
 
@@ -277,9 +278,15 @@ module.exports = function buildAttachments({
   entity_events_attachments = getEventsAttachments(entity_events, color);
 
   attachments[targetEntity] = entityAttachment;
-  attachments["segments"] = entity_segments_attachments;
+  if (options.sendSegments !== false) {
+    attachments["segments"] = entity_segments_attachments;
+  }
+
   attachments["events"] = entity_events_attachments;
-  attachments["changes"] = entity_changes_attachments;
+
+  if (options.sendChanges !== false) {
+    attachments["changes"] = entity_changes_attachments;
+  }
   attachments["traits"] = entity_traits_attachments;
 
   return attachments;
