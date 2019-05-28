@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.1.0
+## 0.0.10
 - fix wording for account entering/leaving segments
 
 ## 0.0.9
