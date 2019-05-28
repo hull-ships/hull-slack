@@ -2,7 +2,7 @@
   "name": "Slack",
   "description": "Notify a Slack Channel whenever a User enters or leaves a Segment",
   "picture": "picture.png",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "tags": [
     "incoming",
     "outgoing",
@@ -201,7 +201,7 @@
             "format": "accountSegment",
             "options": {
               "standard": {
-                "ALL": "All Accounts"
+                "ALL": "All Segments"
               }
             },
             "default": "ALL"
