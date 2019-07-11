@@ -8,31 +8,10 @@ function urlFor({ user = {}, account = {}, organization, entity = "user" }) {
   return `https://dashboard.${domain}.${tld}/${namespace}/${entity}s/${id}`;
 }
 
-function getUserName(user = {}) {
-  if (!_.isNil(user.name)) {
-    return user.name;
-  }
-
-  if (!_.isNil(user.email)) {
-    return user.email;
-  }
-
-  if (!_.isNil(user.first_name) || !_.isNil(user.last_name)) {
-    let name = "";
-    if (!_.isNil(user.first_name)) {
-      name = user.first_name;
-    }
-
-    if (!_.isNil(user.last_name)) {
-      if (!_.isNil(user.first_name)) {
-        name += " ";
-      }
-      name += user.last_name;
-    }
-    return name;
-  }
-
-  return "Unnamed User";
+function getUserName({ name, email, first_name, last_name } = {}) {
+  return (
+    name || email || [first_name, last_name].join(" ").trim() || "Unnamed User"
+  );
 }
 
 function getDomainName(account = {}) {
