@@ -9,12 +9,30 @@ function urlFor({ user = {}, account = {}, organization, entity = "user" }) {
 }
 
 function getUserName(user = {}) {
-  return (
-    user.name ||
-    user.email ||
-    [user.first_name, " ", user.last_name].join(" ") ||
-    "Unnamed User"
-  );
+  if (!_.isNil(user.name)) {
+    return user.name;
+  }
+
+  if (!_.isNil(user.email)) {
+    return user.email;
+  }
+
+  if (!_.isNil(user.first_name) || !_.isNil(user.last_name)) {
+    let name = "";
+    if (!_.isNil(user.first_name)) {
+      name = user.first_name;
+    }
+
+    if (!_.isNil(user.last_name)) {
+      if (!_.isNil(user.first_name)) {
+        name += " ";
+      }
+      name += user.last_name;
+    }
+    return name;
+  }
+
+  return "Unnamed User";
 }
 
 function getDomainName(account = {}) {
