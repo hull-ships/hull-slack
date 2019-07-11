@@ -8,12 +8,9 @@ function urlFor({ user = {}, account = {}, organization, entity = "user" }) {
   return `https://dashboard.${domain}.${tld}/${namespace}/${entity}s/${id}`;
 }
 
-function getUserName(user = {}) {
+function getUserName({ name, email, first_name, last_name } = {}) {
   return (
-    user.name ||
-    user.email ||
-    [user.first_name, " ", user.last_name].join(" ") ||
-    "Unnamed User"
+    name || email || [first_name, last_name].join(" ").trim() || "Unnamed User"
   );
 }
 
