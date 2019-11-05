@@ -79,7 +79,7 @@
     "jwt-simple": "^0.5.1",
     "lodash": "^4.17.13",
     "minimist": "^1.2.0",
-    "moment": "^2.17.1",
+    "moment": "^2.19.3",
     "node-slack": "0.0.7",
     "passport": "^0.4.0",
     "passport-slack": "0.0.7",
