@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.0.10
+- fix wording for account entering/leaving segments
+
+## 0.0.9
+- added ability to toggle changes and segment attachments in slack notifications
 
 ## 0.0.8
 - adding account notification support for slack
