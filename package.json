@@ -78,7 +78,7 @@
     "hull": "0.13.10",
     "jwt-simple": "^0.5.1",
     "lodash": "^4.17.13",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "moment": "^2.19.3",
     "node-slack": "0.0.7",
     "passport": "^0.4.0",
