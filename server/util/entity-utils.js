@@ -19,7 +19,10 @@ function getDomainName(account = {}) {
 }
 
 const getChannelIds = (teamChannels, channelNames) =>
-  _.map(_.filter(teamChannels, t => _.includes(channelNames, t.name)), "id");
+  _.map(
+    _.filter(teamChannels, t => _.includes(channelNames, t.name)),
+    "id"
+  );
 
 const getLoggableMessages = responses =>
   _.groupBy(_.compact(responses), "action");

@@ -10,7 +10,6 @@ const entityUtils = require("./util/entity-utils");
 import { sayInPrivate } from "./bot";
 import type { HullContext, ConnectSlackParams } from "./types";
 
-
 export default function(
   connectSlack: Object => any,
   { client: hull, ship, metric, smartNotifierResponse }: HullContext,
@@ -18,12 +17,7 @@ export default function(
 ): Promise<any> {
   return Promise.all(
     _.map(messages, (message = {}) => {
-      const {
-        user,
-        segments = [],
-        changes = {},
-        events = [],
-      } = message;
+      const { user, segments = [], changes = {}, events = [] } = message;
       const bot = connectSlack(({ hull, ship }: ConnectSlackParams));
       const { private_settings = {} } = ship;
       const {
@@ -155,9 +149,7 @@ export default function(
         })
         .catch(err => {
           tellUser(
-            `:crying_cat_face: Something bad happened while posting to the channels :${
-              err.message
-            }`,
+            `:crying_cat_face: Something bad happened while posting to the channels :${err.message}`,
             err
           );
           client.logger.error("outgoing.user.error", {

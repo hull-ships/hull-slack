@@ -133,9 +133,7 @@ export default function(
         })
         .catch(err => {
           tellUser(
-            `:crying_cat_face: Something bad happened while posting to the channels :${
-              err.message
-            }`,
+            `:crying_cat_face: Something bad happened while posting to the channels :${err.message}`,
             err
           );
           client.logger.error("outgoing.account.error", {

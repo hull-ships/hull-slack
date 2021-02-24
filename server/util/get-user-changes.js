@@ -43,7 +43,9 @@ const getUserChanges = (changes, notify_segments, notify_events) => {
     messages = _.map(changes.segments, (values, action) => {
       const names = _.map(values, "name");
       const s = names.length > 1 ? "s" : "";
-      return `${humanize(action)} segment${s} ${objectUtils.flattenForText(names)}`;
+      return `${humanize(action)} segment${s} ${objectUtils.flattenForText(
+        names
+      )}`;
     });
 
     _.map(notify_segments, notify => {
