@@ -8,10 +8,13 @@ function inviteBot(bot, token, channels) {
   return Promise.all(
     _.map(channels, channel => {
       return new Promise((resolve, reject) => {
-        bot.api.channels.invite({ token, channel: channel.id, user }, err => {
-          if (err) return reject(err);
-          return resolve(channel.id);
-        });
+        bot.api.conversations.invite(
+          { token, channel: channel.id, users: user },
+          err => {
+            if (err) return reject(err);
+            return resolve(channel.id);
+          }
+        );
       });
     })
   );
@@ -73,7 +76,7 @@ export default function({ hull, bot, app_token, channels }) {
 
       return createChannels(bot, app_token, channelsToCreate)
         .then(
-          () => getTeamChannels(bot, true),
+          () => getTeamChannels(false)(bot),
           err =>
             hull.logger.error("bot.setup.error", {
               object: "channel",
